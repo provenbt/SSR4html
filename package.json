@@ -1,0 +1,118 @@
+{
+  "name": "tag-manager",
+  "displayName": "tag-manager",
+  "description": "tag-manager",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.69.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:tag-manager.searchTag",
+    "onCommand:tag-manager.changeAttribute",
+    "onCommand:tag-manager.wrapTag",
+    "onCommand:tag-manager.removeTag",
+    "onCommand:tag-manager.searchPanelTag",
+    "onCommand:tag-manager.searchTagAll",
+    "onCommand:tag-manager.replaceTagAll"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "tag-manager.searchTag",
+        "title": "Structural Search in Current File"
+      },
+      {
+        "command": "tag-manager.changeAttribute",
+        "title": "Change Attribute"
+      },
+      {
+        "command": "tag-manager.wrapTag",
+        "title": "Wrap Tag"
+      },
+      {
+        "command": "tag-manager.removeTag",
+        "title": "Remove Upper Tag"
+      },
+      {
+        "command": "tag-manager.searchPanelTag",
+        "title": "Structural Search and Replace Panel"
+      },
+      {
+        "command": "tag-manager.searchTagAll",
+        "title": "Structural Search in All Files"
+      },
+      {
+        "command": "tag-manager.replaceTagAll",
+        "title": "Structural Replace in All Files"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "tag-manager.searchPanelTag",
+        "key": "ctrl+1"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "tag-manager.wrapTag",
+          "group": "1_modification"
+        },
+        {
+          "command": "tag-manager.removeTag",
+          "group": "1_modification"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "panel": [
+        {
+          "id": "structural-search",
+          "title": "Structural Search",
+          "icon": "./resources/search_icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "structural-search",
+          "name": "Structural Search",
+          "icon": "./resources/search_icon.svg",
+          "contextualTitle": "Structural Search"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.2.0",
+    "@types/mocha": "^9.1.1",
+    "@types/node": "16.x",
+    "@types/shelljs": "^0.8.11",
+    "@types/vscode": "^1.69.0",
+    "@typescript-eslint/eslint-plugin": "^5.31.0",
+    "@typescript-eslint/parser": "^5.31.0",
+    "@vscode/test-electron": "^2.1.5",
+    "eslint": "^8.20.0",
+    "glob": "^8.0.3",
+    "mocha": "^10.0.0",
+    "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "@vscode/webview-ui-toolkit": "^1.0.0",
+    "jsdom": "^20.0.0",
+    "shelljs": "^0.8.5"
+  }
+}

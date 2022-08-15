@@ -28,28 +28,22 @@ function activate(context) {
         });
     });
     let disposableReplaceTagAll = vscode.commands.registerCommand('tag-manager.replaceTagAll', (searchText, replaceText) => {
-        let files = [];
         vscode.workspace.findFiles('**/*.{html,js}', '**/node_modules/**').then(files => {
-            let edit = new vscode.WorkspaceEdit();
-            let position = new vscode.Position(0, 0);
             const jsdom = require("jsdom");
-            files.forEach(async (file, index) => {
+            files.forEach(async (file) => {
                 const rawContent = await vscode.workspace.fs.readFile(file);
                 const htmlText = new TextDecoder().decode(rawContent);
                 const dom = new jsdom.JSDOM(htmlText);
-                if (dom !== null && dom.window !== null && dom.window.document !== null) {
-                    const results = dom.window.document.querySelectorAll(searchText);
-                    if (results !== null) {
-                        results.forEach(async (result) => {
-                            console.log(result.textContent);
-                        });
-                    }
-                }
-                files[index] = file;
+                let results = dom.window.document.querySelectorAll(searchText);
+                results?.forEach(result => {
+                    result.className = replaceText;
+                });
+                vscode.workspace.fs.writeFile(file, new TextEncoder().encode(dom.serialize()));
+                vscode.commands.executeCommand("search.action.refreshSearchResults");
             });
         });
     });
-    const editor = vscode.window.activeTextEditor;
+    //const editor = vscode.window.activeTextEditor;
     /* let disposableSearchTag = vscode.commands.registerCommand('tag-manager.searchTag', async (searchText) => {
         if (editor === undefined || editor.document === undefined){
             return ;

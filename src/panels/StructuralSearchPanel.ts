@@ -41,12 +41,15 @@ export class StructuralSearchPanel {
   private _setWebviewMessageListener(webview: vscode.Webview) {
     webview.onDidReceiveMessage(
       (message: any) => {
-        const command = message.command;
-        const text = message.text;
-       
+        const {command, search, replace} = message;
+
         switch (command) {
           case "searchTagAll":
-            vscode.commands.executeCommand("tag-manager.searchTagAll",text);
+            vscode.commands.executeCommand("tag-manager.searchTagAll", search);
+            break;
+          
+          case "replaceTagAll":
+            vscode.commands.executeCommand("tag-manager.replaceTagAll", search, replace);
             break;
         }
       },
@@ -110,10 +113,10 @@ export class StructuralSearchPanel {
 
             <div id = "replacementForm" class = "form-group row" style = "display:none;">
               <span style = "vertical-align: middle;">
-                <vscode-text-area id = "replacementText" autofocus cols="90" rows="1">Replace</vscode-text-area>
+                <vscode-text-area id = "replacementBox" autofocus cols="90" rows="1">Replace</vscode-text-area>
               </span>
               <span style = "padding-left: 10px;">
-                <vscode-button style = "text-align: center; font-size: 16px;width: 75px;height: 25px;" appearance="primary">Replace</vscode-button>
+                <vscode-button id = "replaceBtn" style = "text-align: center; font-size: 16px;width: 75px;height: 25px;" appearance="primary">Replace</vscode-button>
               </span>
             </div>
 
@@ -122,11 +125,11 @@ export class StructuralSearchPanel {
                 if (that.value !== "unselected") {
                   document.getElementById("replacementForm").style.display = "inline";
                   if(that.value === "wrapTag"){
-                    document.getElementById("replacementText").placeholder = "tag name - [attribute='value'](?), Eg. div - class='form-group'";
+                    document.getElementById("replacementBox").placeholder = "tag name - [attribute='value'](?), Eg. div - class='form-group'";
                   }else if(that.value === "modifyTag"){
-                    document.getElementById("replacementText").placeholder = "tag name - [attribute='value'](?), Eg. button - type='primary' - style ='width: auto;'";
+                    document.getElementById("replacementBox").placeholder = "tag name - [attribute='value'](?), Eg. button - type='primary' - style ='width: auto;'";
                   }else if(that.value === "removeTag"){
-                    document.getElementById("replacementText").placeholder = "remove command, Eg. remove";
+                    document.getElementById("replacementBox").placeholder = "remove command, Eg. remove";
                   } else {
                     console.log("this selection is not possible");
                     document.getElementById("replacementForm").style.display = "none";

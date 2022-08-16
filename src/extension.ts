@@ -1,5 +1,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
+import { ECDH } from 'crypto';
 import * as vscode from 'vscode';
 import {StructuralSearchPanel} from './panels/StructuralSearchPanel';
 import { convertToRegex } from './utilities/convertToRegexp';
@@ -36,6 +37,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 		vscode.workspace.findFiles('**/*.{html}','**/node_modules/**').then(files => {	
 			const jsdom = require("jsdom");
+			const pretty = require('pretty');
 
 			files.forEach( async (file) => {
 				const rawContent = await vscode.workspace.fs.readFile(file);
@@ -49,13 +51,12 @@ export function activate(context: vscode.ExtensionContext) {
 					result.className = replaceText;
 				});
 
-				vscode.workspace.fs.writeFile(file, new TextEncoder().encode(dom.serialize()));
+				vscode.workspace.fs.writeFile(file, new TextEncoder().encode(pretty(dom.serialize(), {ocd: true})));
 			});
 		});
 		vscode.commands.executeCommand("search.action.refreshSearchResults");
 	});
 
-	//const editor = vscode.window.activeTextEditor;
 		
  	/* let disposableSearchTag = vscode.commands.registerCommand('tag-manager.searchTag', async (searchText) => {
 		if (editor === undefined || editor.document === undefined){

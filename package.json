@@ -67,25 +67,6 @@
           "group": "1_modification"
         }
       ]
-    },
-    "viewsContainers": {
-      "panel": [
-        {
-          "id": "structural-search",
-          "title": "Structural Search",
-          "icon": "./resources/search_icon.svg"
-        }
-      ]
-    },
-    "views": {
-      "explorer": [
-        {
-          "id": "structural-search",
-          "name": "Structural Search",
-          "icon": "./resources/search_icon.svg",
-          "contextualTitle": "Structural Search"
-        }
-      ]
     }
   },
   "scripts": {

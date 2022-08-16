@@ -26,14 +26,15 @@ export function activate(context: vscode.ExtensionContext) {
 			query: convertToRegex(searchText),
 			filesToInclude: files,
 			triggerSearch: true,
-			isRegex: true
+			isRegex: true,
+			matchWholeWord: true
 		  }); 
 
 	});
 
 	let disposableReplaceTagAll = vscode.commands.registerCommand('tag-manager.replaceTagAll', (searchText,replaceText) => {
 
-		vscode.workspace.findFiles('**/*.{html,js}','**/node_modules/**').then(files => {	
+		vscode.workspace.findFiles('**/*.{html}','**/node_modules/**').then(files => {	
 			const jsdom = require("jsdom");
 
 			files.forEach( async (file) => {
@@ -49,9 +50,9 @@ export function activate(context: vscode.ExtensionContext) {
 				});
 
 				vscode.workspace.fs.writeFile(file, new TextEncoder().encode(dom.serialize()));
-				vscode.commands.executeCommand("search.action.refreshSearchResults");
 			});
 		});
+		vscode.commands.executeCommand("search.action.refreshSearchResults");
 	});
 
 	//const editor = vscode.window.activeTextEditor;

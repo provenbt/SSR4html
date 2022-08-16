@@ -1,19 +1,28 @@
 export function convertToRegex(expression : string) : String {
     const queries : String [] | null= expression.replaceAll(' ','').split(',');
+    
     let regex = [];
-    let index = 0;
+    try {
+        let index = 0;
+        for(let query of queries){
+            const command = `s2r ${query}`;
 
-    for(let query of queries){
-        const command = `s2r ${query}`;
-        try {
             const {execSync} = require("child_process");
             regex[index] = execSync(command).toString().trim().replaceAll("class=","class\\s*=\\s*").replaceAll("id=","id\\s*=\\s*");
-        } catch (error) {
-            console.log(error);
-        }
-        index++;
-    }
+            
+            if (regex[index] === "" || regex[index].startsWith("(?<")){
+                throw new Error("Look behind assertion is detected");
+            }
 
-    regex[0] = regex.join('|');
-    return (regex[0]); 
+            index++;
+        }
+    } catch (error) {
+        regex = [];
+        console.log(error);
+    }
+    
+    let finalRegex = regex.length ? regex.join('|') : "Mistaken Css Selector Command";
+    finalRegex = finalRegex.replace(`${queries[0].split('.')[0]}`,`(?<!\\w)${queries[0].split('.')[0]}(?!\\w)`);
+
+    return finalRegex; 
 }

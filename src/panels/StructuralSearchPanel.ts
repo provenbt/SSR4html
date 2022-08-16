@@ -15,9 +15,9 @@ export class StructuralSearchPanel {
 
   public static render(extensionUri: vscode.Uri) {
     if (StructuralSearchPanel.currentPanel) {
-      StructuralSearchPanel.currentPanel._panel.reveal(vscode.ViewColumn.One);
+      StructuralSearchPanel.currentPanel._panel.reveal(vscode.ViewColumn.Beside);
     } else {
-      const panel = vscode.window.createWebviewPanel("tag-manager", "Structural Search and Replace", vscode.ViewColumn.One, {
+      const panel = vscode.window.createWebviewPanel("webview", "Structural Search and Replace", vscode.ViewColumn.Beside, {
         enableScripts: true,
       });
 
@@ -84,7 +84,7 @@ export class StructuralSearchPanel {
           <form class = "btn-group" style = "padding-left: 5px;">
             <div class = "form-group row" style = "display:inline">
               <span style = "vertical-align: middle;">
-                <vscode-text-area id = "searchBox" autofocus cols="90" rows="1" placeholder="<$tag$ text1 $attribute$ text2 = $value$ text3/>">Search</vscode-text-area>
+                <vscode-text-area id = "searchBox" autofocus cols="35" rows="1" placeholder="basic CSS selector commands">Search</vscode-text-area>
               </span>
               <span style = "padding-left: 10px;">
                 <vscode-button id = "searchBtn" style = "text-align: center;font-size: 16px;width: 75px;height: 25px;" appearance="primary">Search</vscode-button>
@@ -95,7 +95,6 @@ export class StructuralSearchPanel {
               <fieldset style = "width:50%;">
                 <legend>Search Options</legend>
                 <vscode-checkbox>Search in all files of the project</vscode-checkbox>
-                <vscode-checkbox style = "padding-left: 10px">Match whole word</vscode-checkbox>
               </fieldset>
             </div>
 
@@ -113,7 +112,7 @@ export class StructuralSearchPanel {
 
             <div id = "replacementForm" class = "form-group row" style = "display:none;">
               <span style = "vertical-align: middle;">
-                <vscode-text-area id = "replacementBox" autofocus cols="90" rows="1">Replace</vscode-text-area>
+                <vscode-text-area id = "replacementBox" autofocus cols="35" rows="1">Replace</vscode-text-area>
               </span>
               <span style = "padding-left: 10px;">
                 <vscode-button id = "replaceBtn" style = "text-align: center; font-size: 16px;width: 75px;height: 25px;" appearance="primary">Replace</vscode-button>
@@ -125,9 +124,9 @@ export class StructuralSearchPanel {
                 if (that.value !== "unselected") {
                   document.getElementById("replacementForm").style.display = "inline";
                   if(that.value === "wrapTag"){
-                    document.getElementById("replacementBox").placeholder = "tag name - [attribute='value'](?), Eg. div - class='form-group'";
+                    document.getElementById("replacementBox").placeholder = "replacement text";
                   }else if(that.value === "modifyTag"){
-                    document.getElementById("replacementBox").placeholder = "tag name - [attribute='value'](?), Eg. button - type='primary' - style ='width: auto;'";
+                    document.getElementById("replacementBox").placeholder = "replacement text";
                   }else if(that.value === "removeTag"){
                     document.getElementById("replacementBox").placeholder = "remove command, Eg. remove";
                   } else {

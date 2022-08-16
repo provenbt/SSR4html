@@ -24,11 +24,12 @@ function activate(context) {
             query: (0, convertToRegexp_1.convertToRegex)(searchText),
             filesToInclude: files,
             triggerSearch: true,
-            isRegex: true
+            isRegex: true,
+            matchWholeWord: true
         });
     });
     let disposableReplaceTagAll = vscode.commands.registerCommand('tag-manager.replaceTagAll', (searchText, replaceText) => {
-        vscode.workspace.findFiles('**/*.{html,js}', '**/node_modules/**').then(files => {
+        vscode.workspace.findFiles('**/*.{html}', '**/node_modules/**').then(files => {
             const jsdom = require("jsdom");
             files.forEach(async (file) => {
                 const rawContent = await vscode.workspace.fs.readFile(file);
@@ -39,9 +40,9 @@ function activate(context) {
                     result.className = replaceText;
                 });
                 vscode.workspace.fs.writeFile(file, new TextEncoder().encode(dom.serialize()));
-                vscode.commands.executeCommand("search.action.refreshSearchResults");
             });
         });
+        vscode.commands.executeCommand("search.action.refreshSearchResults");
     });
     //const editor = vscode.window.activeTextEditor;
     /* let disposableSearchTag = vscode.commands.registerCommand('tag-manager.searchTag', async (searchText) => {

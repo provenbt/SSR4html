@@ -1,6 +1,5 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import { ECDH } from 'crypto';
 import * as vscode from 'vscode';
 import {StructuralSearchPanel} from './panels/StructuralSearchPanel';
 import { convertToRegex } from './utilities/convertToRegexp';
@@ -13,8 +12,8 @@ export function activate(context: vscode.ExtensionContext) {
 		StructuralSearchPanel.render(context.extensionUri);
 	});
 
+	let files : vscode.Uri [] = [];
 	let disposableSearchTagAll = vscode.commands.registerCommand('tag-manager.searchTagAll', (searchText) => {
-		let files : vscode.Uri [] = [];
 		
 		vscode.workspace.findFiles('**/*.{html,js}','**/node_modules/**').then(files => {
 			files.forEach( async (file,index) => {
@@ -22,6 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
 			});
 
 		});
+
 		vscode.commands.executeCommand("workbench.action.findInFiles", {
 			// Fill-in selected text to query
 			query: convertToRegex(searchText),
@@ -33,13 +33,13 @@ export function activate(context: vscode.ExtensionContext) {
 
 	});
 
-	let disposableReplaceTagAll = vscode.commands.registerCommand('tag-manager.replaceTagAll', (searchText,replaceText) => {
+	let disposableReplaceTagAll = vscode.commands.registerCommand('tag-manager.replaceTagAll', (searchText, replaceText) => {
 
-		vscode.workspace.findFiles('**/*.{html}','**/node_modules/**').then(files => {	
+		vscode.workspace.findFiles('**/*.{html}','**/node_modules/**').then(async files => {	
 			const jsdom = require("jsdom");
 			const pretty = require('pretty');
 
-			files.forEach( async (file) => {
+			files.forEach( async file => {
 				const rawContent = await vscode.workspace.fs.readFile(file);
     			const htmlText = new TextDecoder().decode(rawContent);
 
@@ -53,8 +53,11 @@ export function activate(context: vscode.ExtensionContext) {
 
 				vscode.workspace.fs.writeFile(file, new TextEncoder().encode(pretty(dom.serialize(), {ocd: true})));
 			});
+	
+			vscode.commands.executeCommand("search.action.clearSearchResults").then(() => {
+				vscode.commands.executeCommand("workbench.action.closeSidebar");
+			});
 		});
-		vscode.commands.executeCommand("search.action.refreshSearchResults");
 	});
 
 		

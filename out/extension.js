@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
+// The module 'vscode' contains the VS Code extensibility API
+// Import the module and reference it with the alias vscode in your code below
 const vscode = require("vscode");
 const StructuralSearchPanel_1 = require("./panels/StructuralSearchPanel");
 const convertToRegexp_1 = require("./utilities/convertToRegexp");
@@ -10,8 +12,8 @@ function activate(context) {
     let disposableSearchPanel = vscode.commands.registerCommand('tag-manager.searchPanelTag', () => {
         StructuralSearchPanel_1.StructuralSearchPanel.render(context.extensionUri);
     });
+    let files = [];
     let disposableSearchTagAll = vscode.commands.registerCommand('tag-manager.searchTagAll', (searchText) => {
-        let files = [];
         vscode.workspace.findFiles('**/*.{html,js}', '**/node_modules/**').then(files => {
             files.forEach(async (file, index) => {
                 files[index] = file;
@@ -27,7 +29,7 @@ function activate(context) {
         });
     });
     let disposableReplaceTagAll = vscode.commands.registerCommand('tag-manager.replaceTagAll', (searchText, replaceText) => {
-        vscode.workspace.findFiles('**/*.{html}', '**/node_modules/**').then(files => {
+        vscode.workspace.findFiles('**/*.{html}', '**/node_modules/**').then(async (files) => {
             const jsdom = require("jsdom");
             const pretty = require('pretty');
             files.forEach(async (file) => {
@@ -40,8 +42,10 @@ function activate(context) {
                 });
                 vscode.workspace.fs.writeFile(file, new TextEncoder().encode(pretty(dom.serialize(), { ocd: true })));
             });
+            vscode.commands.executeCommand("search.action.clearSearchResults").then(() => {
+                vscode.commands.executeCommand("workbench.action.closeSidebar");
+            });
         });
-        vscode.commands.executeCommand("search.action.refreshSearchResults");
     });
     /* let disposableSearchTag = vscode.commands.registerCommand('tag-manager.searchTag', async (searchText) => {
         if (editor === undefined || editor.document === undefined){

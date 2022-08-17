@@ -36,7 +36,7 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.workspace.findFiles('**/*.{html}','**/node_modules/**').then(async files => {	
 			const jsdom = require("jsdom");
 			const pretty = require('pretty');
-			
+
 			files.forEach( async file => {
 				const rawContent = await vscode.workspace.fs.readFile(file);
     			const htmlText = new TextDecoder().decode(rawContent);

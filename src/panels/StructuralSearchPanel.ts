@@ -5,14 +5,12 @@ export class StructuralSearchPanel {
   public static currentPanel: StructuralSearchPanel | undefined;
   private readonly _panel: vscode.WebviewPanel;
   private _disposables: vscode.Disposable[] = [];
-  private pendingFileChange: boolean;
 
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
     this._panel = panel;
     this._panel.onDidDispose(this.dispose, null, this._disposables);
     this._panel.webview.html = this._getWebviewContent(this._panel.webview, extensionUri);
     this._setWebviewMessageListener(this._panel.webview);
-    this.pendingFileChange = false;
   }
 
   public static render(extensionUri: vscode.Uri) {
@@ -40,18 +38,10 @@ export class StructuralSearchPanel {
     }
   }
 
-  private _setPendingFileChange(pendingFileChange : boolean) : void{
-    this.pendingFileChange = pendingFileChange;
-  }
-
-  private _getPendingFileChange() : boolean {
-    return this.pendingFileChange;
-  }
-
   private _setWebviewMessageListener(webview: vscode.Webview) {
     webview.onDidReceiveMessage(
       (message: any) => {
-        const { command, search, replace, pendingFileChange } = message;
+        const { command, search, replace } = message;
 
         switch (command) {
           case "searchTagAll":
@@ -59,7 +49,6 @@ export class StructuralSearchPanel {
             break;
 
           case "replaceTagAll":
-            this._setPendingFileChange(pendingFileChange);
             vscode.commands.executeCommand("tag-manager.replaceTagAll", search, replace);
             break;
         }

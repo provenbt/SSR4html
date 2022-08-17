@@ -21,7 +21,7 @@ export function convertToRegex(expression : string) : String {
         console.log(error);
     }
     
-    let finalRegex = regex.length ? regex.join('|') : "Mistaken Css Selector Command";
+    let finalRegex = regex.length ? regex.join('|') : "Invalid Css Selector Command";
     finalRegex = finalRegex.replace(`${queries[0].split('.')[0]}`,`(?<!\\w)${queries[0].split('.')[0]}(?!\\w)`);
 
     return finalRegex; 

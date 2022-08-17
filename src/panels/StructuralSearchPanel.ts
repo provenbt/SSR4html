@@ -5,12 +5,14 @@ export class StructuralSearchPanel {
   public static currentPanel: StructuralSearchPanel | undefined;
   private readonly _panel: vscode.WebviewPanel;
   private _disposables: vscode.Disposable[] = [];
+  private pendingFileChange: boolean;
 
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
     this._panel = panel;
     this._panel.onDidDispose(this.dispose, null, this._disposables);
     this._panel.webview.html = this._getWebviewContent(this._panel.webview, extensionUri);
     this._setWebviewMessageListener(this._panel.webview);
+    this.pendingFileChange = false;
   }
 
   public static render(extensionUri: vscode.Uri) {
@@ -38,17 +40,26 @@ export class StructuralSearchPanel {
     }
   }
 
+  private _setPendingFileChange(pendingFileChange : boolean) : void{
+    this.pendingFileChange = pendingFileChange;
+  }
+
+  private _getPendingFileChange() : boolean {
+    return this.pendingFileChange;
+  }
+
   private _setWebviewMessageListener(webview: vscode.Webview) {
     webview.onDidReceiveMessage(
       (message: any) => {
-        const {command, search, replace} = message;
+        const { command, search, replace, pendingFileChange } = message;
 
         switch (command) {
           case "searchTagAll":
             vscode.commands.executeCommand("tag-manager.searchTagAll", search);
             break;
-          
+
           case "replaceTagAll":
+            this._setPendingFileChange(pendingFileChange);
             vscode.commands.executeCommand("tag-manager.replaceTagAll", search, replace);
             break;
         }
@@ -67,7 +78,7 @@ export class StructuralSearchPanel {
       "toolkit.js" // A toolkit.min.js file is also available
     ]);
 
-    const mainUri = getUri(webview, extensionUri, ["src","webview-ui","main.js"]);
+    const mainUri = getUri(webview, extensionUri, ["src", "webview-ui", "main.js"]);
 
     return /*html*/ `
       <!DOCTYPE html>
@@ -81,6 +92,7 @@ export class StructuralSearchPanel {
         </head>
         <body>
           <h3>Structural Search and Replace</h3>
+          <div style = "width:auto">
           <form class = "btn-group" style = "padding-left: 5px;">
             <div class = "form-group row" style = "display:inline">
               <span style = "vertical-align: middle;">
@@ -140,6 +152,7 @@ export class StructuralSearchPanel {
               }
             </script>
           </form>
+          </div>
         </body>
       </html>
     `;

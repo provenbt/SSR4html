@@ -4,8 +4,6 @@ import * as vscode from 'vscode';
 import {StructuralSearchPanel} from './panels/StructuralSearchPanel';
 import { convertToRegex } from './utilities/convertToRegexp';
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
 	let disposableSearchPanel = vscode.commands.registerCommand('tag-manager.searchPanelTag', () => {
@@ -38,7 +36,7 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.workspace.findFiles('**/*.{html}','**/node_modules/**').then(async files => {	
 			const jsdom = require("jsdom");
 			const pretty = require('pretty');
-
+			
 			files.forEach( async file => {
 				const rawContent = await vscode.workspace.fs.readFile(file);
     			const htmlText = new TextDecoder().decode(rawContent);
@@ -50,16 +48,19 @@ export function activate(context: vscode.ExtensionContext) {
 				results?.forEach(result => {
 					result.className = replaceText;
 				});
+				
+				await vscode.workspace.fs.writeFile(file, new TextEncoder().encode(pretty(dom.serialize(), {ocd: true})));
+			});
+			
+			vscode.commands.executeCommand("search.action.clearSearchResults").then(()=>{
+				vscode.commands.executeCommand("workbench.action.closeSidebar").then(() => {
+					const text = `Replacement is successfull`;
+					vscode.window.showInformationMessage(text);
+				});
+			});
 
-				vscode.workspace.fs.writeFile(file, new TextEncoder().encode(pretty(dom.serialize(), {ocd: true})));
-			});
-	
-			vscode.commands.executeCommand("search.action.clearSearchResults").then(() => {
-				vscode.commands.executeCommand("workbench.action.closeSidebar");
-			});
 		});
 	});
-
 		
  	/* let disposableSearchTag = vscode.commands.registerCommand('tag-manager.searchTag', async (searchText) => {
 		if (editor === undefined || editor.document === undefined){

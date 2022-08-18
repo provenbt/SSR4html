@@ -1,5 +1,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
+import { treeItemTemplate } from '@microsoft/fast-foundation';
 import * as vscode from 'vscode';
 import {StructuralSearchPanel} from './panels/StructuralSearchPanel';
 import { convertToRegex } from './utilities/convertToRegexp';
@@ -26,17 +27,17 @@ export function activate(context: vscode.ExtensionContext) {
 			filesToInclude: files,
 			triggerSearch: true,
 			isRegex: true,
-			matchWholeWord: true
+			matchWholeWord: true,
+			replace: '',
 		  }); 
-
 	});
 
-	let disposableReplaceTagAll = vscode.commands.registerCommand('tag-manager.replaceTagAll', (searchText, replaceText) => {
+	let disposableReplaceTagAll = vscode.commands.registerCommand('tag-manager.replaceTagAll', (searchText, replaceText, choice) => {
+		let text = "Replacement could not performed successfully";
 
 		vscode.workspace.findFiles('**/*.{html}','**/node_modules/**').then(async files => {	
 			const jsdom = require("jsdom");
 			const pretty = require('pretty');
-
 			files.forEach( async file => {
 				const rawContent = await vscode.workspace.fs.readFile(file);
     			const htmlText = new TextDecoder().decode(rawContent);
@@ -44,9 +45,27 @@ export function activate(context: vscode.ExtensionContext) {
 				const dom = new jsdom.JSDOM(htmlText);
 				
 				let results: any[] | null = dom.window.document.querySelectorAll(searchText);
-
+			
 				results?.forEach(result => {
-					result.className = replaceText;
+					switch (choice) {
+						case "setClass":
+							result.className = replaceText.trim();
+							break;
+						case "setAttribute":
+							const attributeValuePair = replaceText.split('=');
+							result.setAttribute(attributeValuePair[0].trim().replaceAll(' ',''), attributeValuePair[1].trim().replaceAll(' ', '-'));
+							break;
+						case "changeTag":
+							const newTagName = replaceText.trim().replaceAll(' ','');
+							//TODO
+							break;
+						case "removeTag":
+							result.remove();
+							break;
+						case "removeAttribute":
+							result.removeAttribute(replaceText.trim());
+							break;
+					  }
 				});
 				
 				await vscode.workspace.fs.writeFile(file, new TextEncoder().encode(pretty(dom.serialize(), {ocd: true})));
@@ -54,7 +73,7 @@ export function activate(context: vscode.ExtensionContext) {
 			
 			vscode.commands.executeCommand("search.action.clearSearchResults").then(()=>{
 				vscode.commands.executeCommand("workbench.action.closeSidebar").then(() => {
-					const text = `Replacement is successfull`;
+					text = `Replacement process for "${replaceText}" is successful`;
 					vscode.window.showInformationMessage(text);
 				});
 			});

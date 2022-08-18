@@ -41,7 +41,7 @@ export class StructuralSearchPanel {
   private _setWebviewMessageListener(webview: vscode.Webview) {
     webview.onDidReceiveMessage(
       (message: any) => {
-        const { command, search, replace } = message;
+        const { command, search, replace, choice } = message;
 
         switch (command) {
           case "searchTagAll":
@@ -49,7 +49,7 @@ export class StructuralSearchPanel {
             break;
 
           case "replaceTagAll":
-            vscode.commands.executeCommand("tag-manager.replaceTagAll", search, replace);
+            vscode.commands.executeCommand("tag-manager.replaceTagAll", search, replace, choice);
             break;
         }
       },
@@ -102,11 +102,13 @@ export class StructuralSearchPanel {
             <div class = "form-group row" style = "padding-top:12px;padding-bottom:12px;">
               <vscode-tag style = "padding-bottom: 2px;">Replacement Options</vscode-tag>
               <div style = "padding-left: 5px;">
-                <vscode-dropdown onchange = "showReplacementForm(this)" position="below" style = "width: 120px;text-align-last: center;">
+                <vscode-dropdown id = "selection" onchange = "showReplacementForm(this)" position="below" style = "width: 120px;text-align-last: center;">
                   <vscode-option value = "unselected">Unselected</vscode-option>
-                  <vscode-option id = "WT" value = "wrapTag">Wrap Tag</vscode-option>
-                  <vscode-option id = "MT" value = "modifyTag">Modify Tag</vscode-option>
-                  <vscode-option id = "RT" value = "removeTag">Remove Tag</vscode-option>
+                  <vscode-option value = "setClass">Set Class</vscode-option>
+                  <vscode-option value = "setAttribute">Set Attribute</vscode-option>
+                  <vscode-option value = "changeTag">Change Tag</vscode-option>
+                  <vscode-option value = "removeTag">Remove Tag</vscode-option>
+                  <vscode-option value = "removeAttribute">Remove Attribute</vscode-option>
                 </vscode-dropdown>
               </div>
             </div>
@@ -122,21 +124,28 @@ export class StructuralSearchPanel {
 
             <script>
               function showReplacementForm(that) {
+                const replacementForm = document.getElementById("replacementForm");
+                const replacementBox = document.getElementById("replacementBox");
+                replacementBox.value = "";
                 if (that.value !== "unselected") {
-                  document.getElementById("replacementForm").style.display = "inline";
-                  if(that.value === "wrapTag"){
-                    document.getElementById("replacementBox").placeholder = "replacement text";
-                  }else if(that.value === "modifyTag"){
-                    document.getElementById("replacementBox").placeholder = "replacement text";
-                  }else if(that.value === "removeTag"){
-                    document.getElementById("replacementBox").placeholder = "remove command, Eg. remove";
-                  } else {
+                  replacementForm.style.display = "inline";
+                  if(that.value === "setClass"){
+                    replacementBox.placeholder = "class name";
+                  }else if(that.value === "setAttribute"){
+                    replacementBox.placeholder = "attribute name = value";
+                  }else if(that.value === "changeTag"){
+                    replacementBox.placeholder = "new tag name";
+                  }else if (that.value === "removeTag"){
+                    replacementBox.placeholder = "tag name";
+                  }else if(that.value === "removeAttribute"){
+                    replacementBox.placeholder = "attribute name";
+                  }else {
                     console.log("this selection is not possible");
-                    document.getElementById("replacementForm").style.display = "none";
+                    replacementForm.style.display = "none";
                   }
                 } 
                 else {
-                  document.getElementById("replacementForm").style.display = "none";
+                  replacementForm.style.display = "none";
                 }
               }
             </script>

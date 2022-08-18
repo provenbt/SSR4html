@@ -21,10 +21,12 @@ function onClickSearchBtn() {
 function onClickReplaceButton(){
   const searchText = document.getElementById("searchBox").value;
   const replacementText = document.getElementById("replacementBox").value;
+  const choice = document.getElementById("selection").value;
 
   vscode.postMessage({
     command: "replaceTagAll",
     search: searchText,
-    replace: replacementText
+    replace: replacementText,
+    choice: choice
   });
 }

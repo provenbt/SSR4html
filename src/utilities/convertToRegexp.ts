@@ -1,5 +1,5 @@
 export function convertToRegex(expression : string) : String {
-    const queries : String [] | null= expression.split(',');
+    const queries : String [] | null= expression.replaceAll(' ','').split(',');
     let regex = [];
     try {
         let index = 0;
@@ -9,7 +9,7 @@ export function convertToRegex(expression : string) : String {
             const command = `s2r "${query}`;
 
             const {execSync} = require("child_process");
-            regex[index] = execSync(command).toString().trim().replaceAll("class=","class\\s*=\\s*").replaceAll("id=","id\\s*=\\s*");
+            regex[index] = execSync(command).toString().trim().replaceAll("class=","class\\s*=\\s*").replaceAll("id=","id\\s*=\\s*").replaceAll("\\:","[:]");
 
             if (regex[index] === "" || regex[index].startsWith("(?<")){
                 throw new Error("Look behind assertion is detected");

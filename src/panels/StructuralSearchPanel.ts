@@ -136,7 +136,7 @@ export class StructuralSearchPanel {
                   }else if(that.value === "changeTag"){
                     replacementBox.placeholder = "new tag name";
                   }else if (that.value === "removeTag"){
-                    replacementBox.placeholder = "tag name";
+                    replacementBox.placeholder = "click replace if you are sure";
                   }else if(that.value === "removeAttribute"){
                     replacementBox.placeholder = "attribute name";
                   }else {

@@ -15,7 +15,7 @@ export function convertToRegex(searchText : string) : String {
             const {execSync} = require("child_process");
             regex[index] = execSync(command).toString().trim().replace("class=","class\\s*=\\s*").
             replace("id=","id\\s*=\\s*").replaceAll("\\:","[:]").replace(`${attribute}=`,`${attribute}\\s*=\\s*`).
-            replaceAll(`(${attribute})`, `[^A-Za-z0-9](${attribute})[^A-Za-z0-9]`);
+            replace(`(${attribute})`, `(${attribute}\\s*=\\s*)`);
 
            if (regex[index] === "" || regex[index].startsWith("(?<")){
                 throw new Error("Invalid regular expression detected");

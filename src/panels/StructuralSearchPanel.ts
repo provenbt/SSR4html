@@ -3,7 +3,7 @@ import { getUri } from "../utilities/getUri";
 
 export class StructuralSearchPanel {
   public static currentPanel: StructuralSearchPanel | undefined;
-  private readonly _panel: vscode.WebviewPanel;
+  public readonly _panel: vscode.WebviewPanel;
   private _disposables: vscode.Disposable[] = [];
 
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {

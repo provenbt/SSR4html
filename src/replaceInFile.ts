@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-export function replaceInAllFiles(results: any[], choice: string, replaceText: string, file: any, dom: any):string {
+export function replaceInFile(results: any[], choice: string, replaceText: string, file: any, dom: any) {
     const pretty = require('pretty');
     let processResult = "Success";
 

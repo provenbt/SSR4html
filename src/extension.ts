@@ -1,10 +1,9 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import { Context } from 'mocha';
 import * as vscode from 'vscode';
 import { getQuerySelectorResults } from './getQuerySelectorResults';
 import {StructuralSearchPanel} from './panels/StructuralSearchPanel';
-import { replaceInAllFiles } from './replaceInFiles';
+import { replaceInFile } from './replaceInFile';
 import { convertToRegex } from './utilities/convertToRegexp';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -35,12 +34,12 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	let disposableReplaceTagAll = vscode.commands.registerCommand('tag-manager.replaceTagAll', (searchText, replaceText, choice) => {
-		let processResult : string;
+		let processResult: string;
 		let infoMessage : string = "Nothing found to replace";
 
 		vscode.workspace.findFiles('**/*.{html}','**/node_modules/**').then(async files => {	
 			const jsdom = require("jsdom");
-
+			
 			files.forEach( async file => {
 				const rawContent = await vscode.workspace.fs.readFile(file);
     			const htmlText = new TextDecoder().decode(rawContent);
@@ -49,8 +48,8 @@ export function activate(context: vscode.ExtensionContext) {
 				let {results} = getQuerySelectorResults(dom, searchText);
 				
 				if (results !== null && results.length > 0){
-					processResult = replaceInAllFiles(results, choice, replaceText, file, dom);
-
+					processResult = replaceInFile(results, choice, replaceText, file, dom);
+					
 					if (processResult === "WFerror"){
 						infoMessage = "Replacement process could not performed successfully";
 						throw new Error("Write File Error");
@@ -65,12 +64,6 @@ export function activate(context: vscode.ExtensionContext) {
 					}
 					else {
 						infoMessage = `Replacement process for "${replaceText}" is successful`;
-				
-						vscode.workspace.onDidChangeTextDocument(event => {
-							for(let contentChange of event.contentChanges){
-								console.log(contentChange.text);
-							}
-						});
 					}
 				}
 			});
@@ -83,6 +76,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 		});
 	});
+
 		
  	/* let disposableSearchTag = vscode.commands.registerCommand('tag-manager.searchTag', async (searchText) => {
 		if (editor === undefined || editor.document === undefined){

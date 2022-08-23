@@ -1,18 +1,24 @@
-export function convertToRegex(expression : string) : String {
-    const queries : String [] | null= expression.replaceAll(' ','').split(',');
+export function convertToRegex(searchText : string) : String {
+    const queries : String [] | null= searchText.split(',');
     let regex = [];
+
     try {
         let index = 0;
         for(let query of queries){
-            
-            query = query.replaceAll(`"`,`"""`);
-            const command = `s2r "${query}`;
+
+            const attribute = query.replace('~','').slice(query.indexOf('[')+1, query.lastIndexOf('=')).
+            replace('=','').replaceAll(' ', '');
+
+            query = query.replaceAll(' ','').replaceAll(`"`,`"""`);
+            const command = `s2r "${query}"`;
 
             const {execSync} = require("child_process");
-            regex[index] = execSync(command).toString().trim().replaceAll("class=","class\\s*=\\s*").replaceAll("id=","id\\s*=\\s*").replaceAll("\\:","[:]");
+            regex[index] = execSync(command).toString().trim().replace("class=","class\\s*=\\s*").
+            replace("id=","id\\s*=\\s*").replaceAll("\\:","[:]").replace(`${attribute}=`,`${attribute}\\s*=\\s*`).
+            replaceAll(`(${attribute})`, `[^A-Za-z0-9](${attribute})[^A-Za-z0-9]`);
 
-            if (regex[index] === "" || regex[index].startsWith("(?<")){
-                throw new Error("Look behind assertion is detected");
+           if (regex[index] === "" || regex[index].startsWith("(?<")){
+                throw new Error("Invalid regular expression detected");
             }
 
             index++;
@@ -23,9 +29,6 @@ export function convertToRegex(expression : string) : String {
     }
     
     let finalRegex = regex.length ? regex.join('|') : "Invalid Css Selector Command";
-    if(queries[0][0] !== '.'){
-        finalRegex = finalRegex.replace(`${queries[0].split('.')[0]}`,`(?<!\\w)${queries[0].split('.')[0]}(?!\\w)`);
-    }
 
     return finalRegex; 
 }

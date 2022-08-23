@@ -11,7 +11,7 @@ export function replaceInAllFiles(results: any[], choice: string, replaceText: s
                 break;
             case "setAttribute":
                 try {
-                    const re = /[A-Za-z0-9]+\s*=\s*[A-Za-z0-9]+/g;
+                    const re = /[A-Za-z]+\s*=\s*[A-Za-z0-9]+/g;
                     if (replaceText.match(re) === null){
                         throw new Error("Attribute format is not acceptable");
                     }
@@ -23,19 +23,29 @@ export function replaceInAllFiles(results: any[], choice: string, replaceText: s
                 }
                 break;
             case "changeTag":
-                const newTagName = replaceText.trim().replaceAll(' ','');
-                //TODO
+                try {
+                    const newTagName = replaceText.trim().replaceAll(' ','');
+                    const re = /[A-Za-z]+/g;
+                    if (newTagName.match(re) === null){
+                        throw new Error("Invalid tag format");
+                    }
+                    //TODO
+                } catch (error) {
+                    console.log(error);
+                    processResult = "CTerror";
+                }
                 break;
             case "removeTag":
                 result.remove();
                 break;
             case "removeAttribute":
                 try {
-                    const re = /[A-Za-z0-9]+/g;
-                    if (replaceText.trim().match(re) === null){
+                    const re = /^[A-Za-z]+$/g;
+                    replaceText = replaceText.trim().replaceAll(' ', '');
+                    if (replaceText.match(re) === null){
                         throw new Error("Missing attribute name");
                     }
-                    result.removeAttribute(replaceText.trim());
+                    result.removeAttribute(replaceText);
                 } catch (error) {
                     console.log(error);
                     processResult = "RAerror";

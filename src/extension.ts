@@ -33,11 +33,11 @@ export function activate(context: vscode.ExtensionContext) {
 		  }); 
 	});
 
-	let disposableReplaceTagAll = vscode.commands.registerCommand('tag-manager.replaceTagAll', (searchText, replaceText, choice) => {
+	let disposableReplaceTagAll = vscode.commands.registerCommand('tag-manager.replaceTagAll',async (searchText, replaceText, choice) => {
 		let processResult: string;
-		let infoMessage : string = "Nothing found to replace";
+		let searchMessage : string;
 
-		vscode.workspace.findFiles('**/*.{html}','**/node_modules/**').then(async files => {	
+		await vscode.workspace.findFiles('**/*.{html}','**/node_modules/**').then(async files => {	
 			const jsdom = require("jsdom");
 			
 			files.forEach( async file => {
@@ -45,35 +45,31 @@ export function activate(context: vscode.ExtensionContext) {
     			const htmlText = new TextDecoder().decode(rawContent);
 				
 				const dom = new jsdom.JSDOM(htmlText);
-				let {results} = getQuerySelectorResults(dom, searchText);
+				const {results, searchResult} = getQuerySelectorResults(dom, searchText);
 				
 				if (results !== null && results.length > 0){
 					processResult = replaceInFile(results, choice, replaceText, file, dom);
-					
-					if (processResult === "WFerror"){
-						infoMessage = "Replacement process could not performed successfully";
-						throw new Error("Write File Error");
+
+					if (processResult !== "Success"){
+						throw new Error("Replacement Error");
 					}
-					else if (processResult === "SAerror"){
-						infoMessage = "Provided attribute format is not acceptable";
-						throw new Error("Set Attribute Error");
-					}
-					else if (processResult === "RAerror"){
-						infoMessage = "Provide a valid attribute name to remove ";
-						throw new Error("Remove Attribute Error");
-					}
-					else {
-						infoMessage = `Replacement process for "${replaceText}" is successful`;
-					}
+				}
+				else {
+					searchMessage = searchResult;
 				}
 			});
 			
 			vscode.commands.executeCommand("search.action.clearSearchResults").then(()=>{
-				vscode.commands.executeCommand("workbench.action.closeSidebar").then(() => {
-					vscode.window.showInformationMessage(infoMessage);
+				vscode.commands.executeCommand("workbench.action.closeSidebar").then(()=>{
+					if (processResult === undefined){
+						vscode.window.showErrorMessage(searchMessage);
+					} else if (processResult === "Success"){
+						vscode.window.showInformationMessage(`Replacement process for "${searchText}" is successful`);
+					}else {
+						vscode.window.showErrorMessage(processResult);
+					}
 				});
 			});
-
 		});
 	});
 

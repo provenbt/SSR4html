@@ -7,19 +7,28 @@ export function replaceInFile(results: any[], choice: string, replaceText: strin
     results.forEach((result : any)=> {
         switch (choice) {
             case "setClass":
-                result.className = replaceText.trim();
+                try {
+                    const re = /[A-Za-z]+.*/g;
+                    if (replaceText.match(re) === null){
+                        throw new Error("Invalid class name format");
+                    }
+                    result.className = replaceText.trim();  
+                } catch (error: any) {
+                    console.log(error);
+                    processResult = error.message;
+                }
                 break;
             case "setAttribute":
                 try {
                     const re = /[A-Za-z]+\s*=\s*[A-Za-z0-9]+/g;
                     if (replaceText.match(re) === null){
-                        throw new Error("Attribute format is not acceptable");
+                        throw new Error("Invalid attribute-value format");
                     }
                     const attributeValuePair = replaceText.replaceAll(/"|'/g, '').split('=');
                     result.setAttribute(attributeValuePair[0].trim().replaceAll(' ',''), attributeValuePair[1].trim().replaceAll(' ', '-'));
-                } catch (error) {
+                } catch (error: any) {
                     console.log(error);
-                    processResult = "SAerror";
+                    processResult = error.message;
                 }
                 break;
             case "changeTag":
@@ -30,9 +39,9 @@ export function replaceInFile(results: any[], choice: string, replaceText: strin
                         throw new Error("Invalid tag format");
                     }
                     //TODO
-                } catch (error) {
+                } catch (error: any) {
                     console.log(error);
-                    processResult = "CTerror";
+                    processResult = error.message;
                 }
                 break;
             case "removeTag":
@@ -43,12 +52,12 @@ export function replaceInFile(results: any[], choice: string, replaceText: strin
                     const re = /^[A-Za-z]+$/g;
                     replaceText = replaceText.trim().replaceAll(' ', '');
                     if (replaceText.match(re) === null){
-                        throw new Error("Missing attribute name");
+                        throw new Error("Invalid attribute name format");
                     }
                     result.removeAttribute(replaceText);
-                } catch (error) {
+                } catch (error: any) {
                     console.log(error);
-                    processResult = "RAerror";
+                    processResult = error.message;
                 }
                 break;
           }
@@ -56,9 +65,9 @@ export function replaceInFile(results: any[], choice: string, replaceText: strin
 
     try {
         vscode.workspace.fs.writeFile(file, new TextEncoder().encode(pretty(dom.serialize(), {ocd: true})));
-    } catch (error) {
+    } catch (error: any) {
         console.log(error);
-        processResult = "WFerror";
+        processResult = error.message;
     }
 
     return processResult;

@@ -53,7 +53,7 @@ export class StructuralSearchPanel {
             break;
 
           case "revertChanges":
-            vscode.commands.executeCommand("tag-manager.revertChanges", replace);
+            vscode.commands.executeCommand("tag-manager.revertChanges", search, replace);
             break;
         }
       },
@@ -89,7 +89,7 @@ export class StructuralSearchPanel {
           <form class = "btn-group" style = "padding-left: 5px;">
             <div class = "form-group row" style = "display:inline">
               <span style = "vertical-align: middle;">
-                <vscode-text-area id = "searchBox" autofocus cols="35" rows="1" placeholder="basic CSS selector commands">Search</vscode-text-area>
+                <vscode-text-area id = "searchBox" autofocus cols="40" rows="1" placeholder="basic CSS selector commands">Search</vscode-text-area>
               </span>
               <div>
                 <vscode-button id = "searchBtn" appearance="primary">Search</vscode-button>
@@ -99,7 +99,7 @@ export class StructuralSearchPanel {
             <div class = "form-group row" style = "padding-top:12px;padding-bottom:12px;">
               <fieldset style = "width:50%;">
                 <legend>Search Options</legend>
-                <vscode-checkbox>Search in all files of the project</vscode-checkbox>
+                <vscode-checkbox>Search in all files</vscode-checkbox>
               </fieldset>
             </div>
 
@@ -119,7 +119,7 @@ export class StructuralSearchPanel {
 
             <div id = "replacementForm" class = "form-group row" style = "display:none;">
               <span style = "vertical-align: middle;">
-                <vscode-text-area id = "replacementBox" autofocus cols="35" rows="1">Replace</vscode-text-area>
+                <vscode-text-area id = "replacementBox" autofocus cols="40" rows="1">Replace</vscode-text-area>
               </span>
               <div>
                 <vscode-button id = "replaceBtn" appearance="primary">Replace</vscode-button>

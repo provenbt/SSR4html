@@ -52,19 +52,20 @@ export function activate(context: vscode.ExtensionContext) {
 				
 				if (results !== null && results.length > 0){
 					processResult = replaceInFile(results, choice, replaceText, file, dom);
-					rawContents.push(rawContent);
-					fileList.push(file);
-					
+
 					if (processResult !== "Success"){
 						throw new Error("Replacement Error");
 					}
+					
+					rawContents.push(rawContent);
+					fileList.push(file);
 				}
 				else {
 					searchMessage = searchResult;
 				}
 			});
 			
-			await vscode.commands.executeCommand("search.action.clearSearchResults").then(()=>{
+			vscode.commands.executeCommand("search.action.clearSearchResults").then(()=>{
 				vscode.commands.executeCommand("workbench.action.closeSidebar").then(()=>{
 					if (processResult === undefined){
 						vscode.window.showErrorMessage(searchMessage);
@@ -78,13 +79,14 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	});
 
-	let disposableRevertChanges = vscode.commands.registerCommand('tag-manager.revertChanges', (replaceText) => {
+	let disposableRevertChanges = vscode.commands.registerCommand('tag-manager.revertChanges', async (searchText,replaceText) => {
 		if (rawContents.length > 0 && fileList.length > 0){
 			for(let index=0; index < fileList.length; index++){
-				vscode.workspace.fs.writeFile(fileList[index], rawContents[index]);
+				await vscode.workspace.fs.writeFile(fileList[index], rawContents[index]);
 			}
 			vscode.window.showInformationMessage(`Rollback process for ${replaceText} is successfull`);
 			rawContents.length = 0; fileList.length = 0;
+			vscode.commands.executeCommand("tag-manager.searchTagAll", searchText);
 		}
 		else {
 			vscode.window.showErrorMessage("Nothing found to revert");

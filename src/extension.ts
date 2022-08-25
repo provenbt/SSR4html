@@ -33,11 +33,14 @@ export function activate(context: vscode.ExtensionContext) {
 		  }); 
 	});
 
+	const rawContents : Uint8Array[] = [];
+	const fileList: vscode.Uri[] = [];
+
 	let disposableReplaceTagAll = vscode.commands.registerCommand('tag-manager.replaceTagAll',async (searchText, replaceText, choice) => {
 		let processResult: string;
 		let searchMessage : string;
 
-		await vscode.workspace.findFiles('**/*.{html}','**/node_modules/**').then(async files => {	
+		vscode.workspace.findFiles('**/*.{html}','**/node_modules/**').then(async files => {	
 			const jsdom = require("jsdom");
 			
 			files.forEach( async file => {
@@ -49,7 +52,9 @@ export function activate(context: vscode.ExtensionContext) {
 				
 				if (results !== null && results.length > 0){
 					processResult = replaceInFile(results, choice, replaceText, file, dom);
-
+					rawContents.push(rawContent);
+					fileList.push(file);
+					
 					if (processResult !== "Success"){
 						throw new Error("Replacement Error");
 					}
@@ -59,7 +64,7 @@ export function activate(context: vscode.ExtensionContext) {
 				}
 			});
 			
-			vscode.commands.executeCommand("search.action.clearSearchResults").then(()=>{
+			await vscode.commands.executeCommand("search.action.clearSearchResults").then(()=>{
 				vscode.commands.executeCommand("workbench.action.closeSidebar").then(()=>{
 					if (processResult === undefined){
 						vscode.window.showErrorMessage(searchMessage);
@@ -71,6 +76,19 @@ export function activate(context: vscode.ExtensionContext) {
 				});
 			});
 		});
+	});
+
+	let disposableRevertChanges = vscode.commands.registerCommand('tag-manager.revertChanges', (replaceText) => {
+		if (rawContents.length > 0 && fileList.length > 0){
+			for(let index=0; index < fileList.length; index++){
+				vscode.workspace.fs.writeFile(fileList[index], rawContents[index]);
+			}
+			vscode.window.showInformationMessage(`Rollback process for ${replaceText} is successfull`);
+			rawContents.length = 0; fileList.length = 0;
+		}
+		else {
+			vscode.window.showErrorMessage("Nothing found to revert");
+		}
 	});
 
 		
@@ -90,7 +108,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(disposableSearchPanel);
 	context.subscriptions.push(disposableSearchTagAll);
 	context.subscriptions.push(disposableReplaceTagAll);
-	
+	context.subscriptions.push(disposableRevertChanges);
 	//context.subscriptions.push(disposableSearchTag);
 
 /*	let disposableChangeAttribute = vscode.commands.registerCommand('tag-manager.changeAttribute', async () => {

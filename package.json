@@ -16,7 +16,8 @@
     "onCommand:tag-manager.removeTag",
     "onCommand:tag-manager.searchPanelTag",
     "onCommand:tag-manager.searchTagAll",
-    "onCommand:tag-manager.replaceTagAll"
+    "onCommand:tag-manager.replaceTagAll",
+    "onCommand:tag-manager.revertChanges"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -48,6 +49,10 @@
       {
         "command": "tag-manager.replaceTagAll",
         "title": "Structural Replace in All Files"
+      },
+      {
+        "command": "tag-manager.revertChanges",
+        "title": "Revert Changes"
       }
     ],
     "keybindings": [

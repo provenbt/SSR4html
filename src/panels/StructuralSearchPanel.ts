@@ -51,6 +51,10 @@ export class StructuralSearchPanel {
           case "replaceTagAll":
             vscode.commands.executeCommand("tag-manager.replaceTagAll", search, replace, choice);
             break;
+
+          case "revertChanges":
+            vscode.commands.executeCommand("tag-manager.revertChanges", replace);
+            break;
         }
       },
       undefined,
@@ -87,9 +91,9 @@ export class StructuralSearchPanel {
               <span style = "vertical-align: middle;">
                 <vscode-text-area id = "searchBox" autofocus cols="35" rows="1" placeholder="basic CSS selector commands">Search</vscode-text-area>
               </span>
-              <span style = "padding-left: 10px;">
-                <vscode-button id = "searchBtn" style = "text-align: center;font-size: 16px;width: 75px;height: 25px;" appearance="primary">Search</vscode-button>
-              </span>
+              <div>
+                <vscode-button id = "searchBtn" appearance="primary">Search</vscode-button>
+              </div>
             </div>
 
             <div class = "form-group row" style = "padding-top:12px;padding-bottom:12px;">
@@ -117,9 +121,10 @@ export class StructuralSearchPanel {
               <span style = "vertical-align: middle;">
                 <vscode-text-area id = "replacementBox" autofocus cols="35" rows="1">Replace</vscode-text-area>
               </span>
-              <span style = "padding-left: 10px;">
-                <vscode-button id = "replaceBtn" style = "text-align: center; font-size: 16px;width: 75px;height: 25px;" appearance="primary">Replace</vscode-button>
-              </span>
+              <div>
+                <vscode-button id = "replaceBtn" appearance="primary">Replace</vscode-button>
+                <vscode-button id = "revertBtn" appearance="secondary">Revert</vscode-button>
+              </div>
             </div>
 
             <script>

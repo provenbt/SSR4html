@@ -3,11 +3,14 @@ const vscode = acquireVsCodeApi();
 window.addEventListener("load", main);
 
 function main() {
-  const searchInputArea = document.getElementById("searchBtn");
-  searchInputArea.addEventListener("click", onClickSearchBtn);
+  const searchButton = document.getElementById("searchBtn");
+  searchButton.addEventListener("click", onClickSearchBtn);
 
-  const replacementInputArea = document.getElementById("replaceBtn");
-  replacementInputArea.addEventListener("click", onClickReplaceButton);
+  const replaceButton = document.getElementById("replaceBtn");
+  replaceButton.addEventListener("click", onClickReplaceButton);
+
+  const revertButton = document.getElementById("revertBtn");
+  revertButton.addEventListener("click", onClickRevertButton);
 }
 
 function onClickSearchBtn() {
@@ -28,5 +31,14 @@ function onClickReplaceButton(){
     search: searchText,
     replace: replacementText,
     choice: choice
+  });
+}
+
+function onClickRevertButton(){
+  const replacementText = document.getElementById("replacementBox").value;
+
+  vscode.postMessage({
+    command: "revertChanges",
+    replace: replacementText,
   });
 }

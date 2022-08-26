@@ -12,25 +12,19 @@ export function activate(context: vscode.ExtensionContext) {
 		StructuralSearchPanel.render(context.extensionUri);
 	});
 
-	let disposableSearchTagAll = vscode.commands.registerCommand('tag-manager.searchTagAll', (searchText) => {
-		let files : vscode.Uri [] = [];
+	let disposableSearchTagAll = vscode.commands.registerCommand('tag-manager.searchTagAll', async (searchText) => {
 		
 		vscode.workspace.findFiles('**/*.{html,js}','**/node_modules/**').then(files => {
-			files.forEach( async (file,index) => {
-				files[index] = file;
-			});
-
+			vscode.commands.executeCommand("workbench.action.findInFiles", {
+				// Fill-in selected text to query
+				query: convertToRegex(searchText),
+				filesToInclude: files,
+				triggerSearch: true,
+				isRegex: true,
+				matchWholeWord: true,
+				replace: '',
+			}); 
 		});
-
-		vscode.commands.executeCommand("workbench.action.findInFiles", {
-			// Fill-in selected text to query
-			query: convertToRegex(searchText),
-			filesToInclude: files,
-			triggerSearch: true,
-			isRegex: true,
-			matchWholeWord: true,
-			replace: '',
-		  }); 
 	});
 
 	const rawContents : Uint8Array[] = [];
@@ -73,7 +67,7 @@ export function activate(context: vscode.ExtensionContext) {
 						if (replaceText === ""){
 							replaceText = searchText;
 						}
-						vscode.window.showInformationMessage(`Replacement process for "${replaceText}" is successful`);
+						vscode.window.showInformationMessage(`${choice} process for "${replaceText}" successful`);
 					}else {
 						vscode.window.showErrorMessage(processResult);
 					}
@@ -82,12 +76,12 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	});
 
-	let disposableRevertChanges = vscode.commands.registerCommand('tag-manager.revertChanges', async (searchText) => {
+	let disposableRevertChanges = vscode.commands.registerCommand('tag-manager.revertChanges', (searchText, choice) => {
 		if (rawContents.length > 0 && fileList.length > 0){
 			for(let index=0; index < fileList.length; index++){
-				await vscode.workspace.fs.writeFile(fileList[index], rawContents[index]);
+				vscode.workspace.fs.writeFile(fileList[index], rawContents[index]);
 			}
-			vscode.window.showInformationMessage(`Rollback process for "${searchText}" is successfull`);
+			vscode.window.showInformationMessage(`Rollback process of "${choice.toLowerCase()}" successful`);
 			rawContents.length = 0; fileList.length = 0;
 			vscode.commands.executeCommand("tag-manager.searchTagAll", searchText);
 		}

@@ -53,7 +53,7 @@ export class StructuralSearchPanel {
             break;
 
           case "revertChanges":
-            vscode.commands.executeCommand("tag-manager.revertChanges", search);
+            vscode.commands.executeCommand("tag-manager.revertChanges", search, choice);
             break;
         }
       },
@@ -107,12 +107,12 @@ export class StructuralSearchPanel {
               <vscode-tag style = "padding-bottom: 2px;">Replacement Options</vscode-tag>
               <div style = "padding-left: 5px;">
                 <vscode-dropdown id = "selection" onchange = "showReplacementForm(this)" position="below" style = "width: 120px;text-align-last: center;">
-                  <vscode-option value = "unselected">Unselected</vscode-option>
-                  <vscode-option value = "setClass">Set Class</vscode-option>
-                  <vscode-option value = "setAttribute">Set Attribute</vscode-option>
-                  <vscode-option value = "changeTag">Change Tag</vscode-option>
-                  <vscode-option value = "removeTag">Remove Tag</vscode-option>
-                  <vscode-option value = "removeAttribute">Remove Attribute</vscode-option>
+                  <vscode-option value = "Unselected">Unselected</vscode-option>
+                  <vscode-option value = "Set Class">Set Class</vscode-option>
+                  <vscode-option value = "Set Attribute">Set Attribute</vscode-option>
+                  <vscode-option value = "Change Tag">Change Tag</vscode-option>
+                  <vscode-option value = "Remove Tag">Remove Tag</vscode-option>
+                  <vscode-option value = "Remove Attribute">Remove Attribute</vscode-option>
                 </vscode-dropdown>
               </div>
             </div>
@@ -132,17 +132,17 @@ export class StructuralSearchPanel {
                 const replacementForm = document.getElementById("replacementForm");
                 const replacementBox = document.getElementById("replacementBox");
                 replacementBox.value = "";
-                if (that.value !== "unselected") {
+                if (that.value !== "Unselected") {
                   replacementForm.style.display = "inline";
-                  if(that.value === "setClass"){
+                  if(that.value === "Set Class"){
                     replacementBox.placeholder = "class name";
-                  }else if(that.value === "setAttribute"){
+                  }else if(that.value === "Set Attribute"){
                     replacementBox.placeholder = "attribute name = value";
-                  }else if(that.value === "changeTag"){
+                  }else if(that.value === "Change Tag"){
                     replacementBox.placeholder = "new tag name";
-                  }else if (that.value === "removeTag"){
+                  }else if (that.value === "Remove Tag"){
                     replacementBox.placeholder = "click replace if you are sure";
-                  }else if(that.value === "removeAttribute"){
+                  }else if(that.value === "Remove Attribute"){
                     replacementBox.placeholder = "attribute name";
                   }else {
                     console.log("this selection is not possible");

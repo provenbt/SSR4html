@@ -7,7 +7,7 @@ export function replaceInFile(results: any[], choice: string, replaceText: strin
 
     results.forEach((result : any)=> {
         switch (choice) {
-            case "setClass":
+            case "Set Class":
                 try {
                     const re = /[A-Za-z]+.*/g;
                     if (replaceText.match(re) === null){
@@ -19,7 +19,7 @@ export function replaceInFile(results: any[], choice: string, replaceText: strin
                     processResult = error.message;
                 }
                 break;
-            case "setAttribute":
+            case "Set Attribute":
                 try {
                     const re = /[A-Za-z]+\s*=\s*[A-Za-z0-9]+/g;
                     if (replaceText.match(re) === null){
@@ -32,7 +32,7 @@ export function replaceInFile(results: any[], choice: string, replaceText: strin
                     processResult = error.message;
                 }
                 break;
-            case "changeTag":
+            case "Change Tag":
                 try {
                     const newTagName = replaceText.trim().replaceAll(' ','');
                     const re = /[A-Za-z]+/g;
@@ -64,10 +64,10 @@ export function replaceInFile(results: any[], choice: string, replaceText: strin
                     processResult = error.message;
                 }
                 break;
-            case "removeTag":
+            case "Remove Tag":
                 result.remove();
                 break;
-            case "removeAttribute":
+            case "Remove Attribute":
                 try {
                     const re = /^[A-Za-z]+$/g;
                     replaceText = replaceText.trim().replaceAll(' ', '');

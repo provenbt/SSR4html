@@ -53,7 +53,7 @@ export class StructuralSearchPanel {
             break;
 
           case "revertChanges":
-            vscode.commands.executeCommand("tag-manager.revertChanges", search, replace);
+            vscode.commands.executeCommand("tag-manager.revertChanges", search);
             break;
         }
       },

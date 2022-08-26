@@ -70,7 +70,10 @@ export function activate(context: vscode.ExtensionContext) {
 					if (processResult === undefined){
 						vscode.window.showErrorMessage(searchMessage);
 					} else if (processResult === "Success"){
-						vscode.window.showInformationMessage(`Replacement process for "${searchText}" is successful`);
+						if (replaceText === ""){
+							replaceText = searchText;
+						}
+						vscode.window.showInformationMessage(`Replacement process for "${replaceText}" is successful`);
 					}else {
 						vscode.window.showErrorMessage(processResult);
 					}
@@ -79,12 +82,12 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	});
 
-	let disposableRevertChanges = vscode.commands.registerCommand('tag-manager.revertChanges', async (searchText,replaceText) => {
+	let disposableRevertChanges = vscode.commands.registerCommand('tag-manager.revertChanges', async (searchText) => {
 		if (rawContents.length > 0 && fileList.length > 0){
 			for(let index=0; index < fileList.length; index++){
 				await vscode.workspace.fs.writeFile(fileList[index], rawContents[index]);
 			}
-			vscode.window.showInformationMessage(`Rollback process for ${replaceText} is successfull`);
+			vscode.window.showInformationMessage(`Rollback process for "${searchText}" is successfull`);
 			rawContents.length = 0; fileList.length = 0;
 			vscode.commands.executeCommand("tag-manager.searchTagAll", searchText);
 		}

@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 export function replaceInFile(results: any[], choice: string, replaceText: string, file: any, dom: any) {
     const pretty = require('pretty');
     let processResult = "Success";
+    const jsdom = require("jsdom");
 
     results.forEach((result : any)=> {
         switch (choice) {
@@ -38,7 +39,26 @@ export function replaceInFile(results: any[], choice: string, replaceText: strin
                     if (newTagName.match(re) === null){
                         throw new Error("Invalid tag format");
                     }
-                    //TODO
+
+                    const { document } = (new jsdom.JSDOM()).window;
+                     // Create the document fragment 
+                    const frag = document.createDocumentFragment(); 
+                    // Fill it with what's in the source element 
+                    while (result.firstChild) { 
+                        frag.appendChild(result.firstChild); 
+                    }
+                     // Create the new element 
+                    const newElem = document.createElement(newTagName); 
+                    // Empty the document fragment into it 
+                    newElem.appendChild(frag); 
+                    //Get all attribute-value pairs
+                    const attributeNames = result.getAttributeNames();
+                    for (let name of attributeNames){
+                        let value = result.getAttributeNode(name).value;
+                        newElem.setAttribute(name, value);
+                    }
+                    // Replace the source element with the new element on the page 
+                    result.parentNode.replaceChild(newElem, result); 
                 } catch (error: any) {
                     console.log(error);
                     processResult = error.message;
@@ -53,6 +73,9 @@ export function replaceInFile(results: any[], choice: string, replaceText: strin
                     replaceText = replaceText.trim().replaceAll(' ', '');
                     if (replaceText.match(re) === null){
                         throw new Error("Invalid attribute name format");
+                    }
+                    if (!result.hasAttribute(replaceText)){
+                        throw new Error(`Element does not have "${replaceText}" attribute`);
                     }
                     result.removeAttribute(replaceText);
                 } catch (error: any) {

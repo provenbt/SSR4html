@@ -36,11 +36,9 @@ function onClickReplaceButton(){
 
 function onClickRevertButton(){
   const searchText = document.getElementById("searchBox").value;
-  const replacementText = document.getElementById("replacementBox").value;
 
   vscode.postMessage({
     command: "revertChanges",
     search: searchText,
-    replace: replacementText
   });
 }

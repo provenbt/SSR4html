@@ -1,6 +1,7 @@
-export function convertToRegex(searchText : string) : String {
+export function convertToRegex(searchText : string) : String{
     const queries : String [] | null= searchText.split(',');
-    let regex = [];
+    let regex : string[]= [];
+    const s2r = require("selector-2-regexp");
 
     try {
         let index = 0;
@@ -9,11 +10,10 @@ export function convertToRegex(searchText : string) : String {
             const attribute = query.replace('~','').slice(query.indexOf('[')+1, query.lastIndexOf('=')).
             replace('=','').replaceAll(' ', '');
 
-            query = query.replaceAll(' ','').replaceAll(`"`,`"""`);
-            const command = `s2r "${query}"`;
+            query = query.replaceAll(' ','');
+            regex[index] = s2r.default(query);
 
-            const {execSync} = require("child_process");
-            regex[index] = execSync(command).toString().trim().replace("class=","class\\s*=\\s*").
+            regex[index] = regex[index].trim().replace("class=","class\\s*=\\s*").
             replace("id=","id\\s*=\\s*").replaceAll("\\:","[:]").replace(`${attribute}=`,`${attribute}\\s*=\\s*`).
             replace(`(${attribute})`, `(${attribute}\\s*=\\s*)`);
             
@@ -21,8 +21,11 @@ export function convertToRegex(searchText : string) : String {
                 throw new Error("Invalid regular expression detected");
             }
 
-            if (query.match(/^[A-Za-z]+/g) !== null){
-                regex[index] = regex[index].replace(")\\s*",")\\s+");
+            if (query.match(/^[A-Za-z]+.*/g) !== null){
+                let tagName = query.split('[')[0];
+                tagName = query.split('.')[0];
+                console.log(tagName);
+                regex[index] = regex[index].replace(`${tagName}`,`(?<!\\w)${tagName}(?!\\w)`);
             }
 
             index++;

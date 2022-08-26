@@ -12,7 +12,7 @@ export function activate(context: vscode.ExtensionContext) {
 		StructuralSearchPanel.render(context.extensionUri);
 	});
 
-	let disposableSearchTagAll = vscode.commands.registerCommand('tag-manager.searchTagAll', async (searchText) => {
+	let disposableSearchTagAll = vscode.commands.registerCommand('tag-manager.searchTagAll', (searchText) => {
 		
 		vscode.workspace.findFiles('**/*.{html,js}','**/node_modules/**').then(files => {
 			vscode.commands.executeCommand("workbench.action.findInFiles", {
@@ -76,10 +76,10 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	});
 
-	let disposableRevertChanges = vscode.commands.registerCommand('tag-manager.revertChanges', (searchText, choice) => {
+	let disposableRevertChanges = vscode.commands.registerCommand('tag-manager.revertChanges', async (searchText, choice) => {
 		if (rawContents.length > 0 && fileList.length > 0){
 			for(let index=0; index < fileList.length; index++){
-				vscode.workspace.fs.writeFile(fileList[index], rawContents[index]);
+				await vscode.workspace.fs.writeFile(fileList[index], rawContents[index]);
 			}
 			vscode.window.showInformationMessage(`Rollback process of "${choice.toLowerCase()}" successful`);
 			rawContents.length = 0; fileList.length = 0;

@@ -36,7 +36,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const rawContents : Uint8Array[] = [];
 	const fileList: vscode.Uri[] = [];
 
-	let disposableReplaceTagAll = vscode.commands.registerCommand('tag-manager.replaceTagAll',async (searchText, replaceText, choice) => {
+	let disposableReplaceTagAll = vscode.commands.registerCommand('tag-manager.replaceTagAll', (searchText, replaceText, choice) => {
 		let processResult: string;
 		let searchMessage : string;
 

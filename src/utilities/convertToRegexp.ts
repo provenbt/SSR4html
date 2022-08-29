@@ -10,7 +10,7 @@ export function convertToRegex(searchText : string) : String{
             const attribute = query.replace('~','').slice(query.indexOf('[')+1, query.lastIndexOf('=')).
             replace('=','').replaceAll(' ', '');
 
-            query = query.replaceAll(' ','');
+            //query = query.replaceAll(' ','');
             regex[index] = s2r.default(query);
 
             regex[index] = regex[index].trim().replace("class=","class\\s*=\\s*").
@@ -25,6 +25,10 @@ export function convertToRegex(searchText : string) : String{
                 let tagName = query.split('[')[0];
                 tagName = query.split('.')[0];
                 regex[index] = regex[index].replace(`${tagName}`,`(?<!\\w)${tagName}(?!\\w)`);
+            }
+
+            if (regex[index].includes('{')){
+                regex[index] = regex[index].replace("\\s+", "\\s+(").replace(".*{",".*){");
             }
 
             index++;

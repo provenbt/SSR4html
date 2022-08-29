@@ -24,7 +24,6 @@ export function convertToRegex(searchText : string) : String{
             if (query.match(/^[A-Za-z]+.*/g) !== null){
                 let tagName = query.split('[')[0];
                 tagName = query.split('.')[0];
-                console.log(tagName);
                 regex[index] = regex[index].replace(`${tagName}`,`(?<!\\w)${tagName}(?!\\w)`);
             }
 

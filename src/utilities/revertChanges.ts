@@ -8,7 +8,7 @@ export async function revertChanges(fileList: vscode.Uri[], rawContents: Uint8Ar
             }
             vscode.window.showInformationMessage(`Rollback process of "${choice.toLowerCase()}" successful`);
             rawContents.length = 0; fileList.length = 0;
-            vscode.commands.executeCommand("tag-manager.searchTagAll", searchText);
+            vscode.commands.executeCommand("tag-manager.searchInFiles", searchText);
         } catch (error) {
             console.log(error);
             vscode.window.showErrorMessage(`Error occured during rollback process of "${choice.toLowerCase()}"`);

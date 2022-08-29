@@ -14,14 +14,14 @@ export function activate(context: vscode.ExtensionContext) {
 		StructuralSearchPanel.render(context.extensionUri);
 	});
 
-	let disposableSearchTagAll = vscode.commands.registerCommand('tag-manager.searchTagAll', (searchText) => {
+	let disposableSearchTagAll = vscode.commands.registerCommand('tag-manager.searchInFiles', (searchText) => {
 		searchInWorkspace(searchText);
 	});
 
 	const rawContents : Uint8Array[] = [];
 	const fileList: vscode.Uri[] = [];
 
-	let disposableReplaceTagAll = vscode.commands.registerCommand('tag-manager.replaceTagAll', async (searchText, replaceText, choice) => {
+	let disposableReplaceTagAll = vscode.commands.registerCommand('tag-manager.replaceInFiles', async (searchText, replaceText, choice) => {
 		let processResult : string = "";
 		let searchMessage : string = "";
 
@@ -36,7 +36,7 @@ export function activate(context: vscode.ExtensionContext) {
 			const {results, searchResult} = getQuerySelectorResults(dom, searchText);
 			
 			if (results !== null && results.length > 0){
-				processResult = replaceInFile(results, choice, replaceText, file, dom);
+				processResult = await replaceInFile(results, choice, replaceText, file, dom);
 				
 				if (processResult === "Success"){
 					rawContents.push(rawContent);

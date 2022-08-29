@@ -11,8 +11,8 @@
   ],
   "activationEvents": [
     "onCommand:tag-manager.searchPanelTag",
-    "onCommand:tag-manager.searchTagAll",
-    "onCommand:tag-manager.replaceTagAll",
+    "onCommand:tag-manager.searchInFiles",
+    "onCommand:tag-manager.replaceInFiles",
     "onCommand:tag-manager.revertChanges"
   ],
   "main": "./out/extension.js",
@@ -23,11 +23,11 @@
         "title": "Structural Search and Replace Panel"
       },
       {
-        "command": "tag-manager.searchTagAll",
+        "command": "tag-manager.searchInFiles",
         "title": "Structural Search in All Files"
       },
       {
-        "command": "tag-manager.replaceTagAll",
+        "command": "tag-manager.replaceInFiles",
         "title": "Structural Replace in All Files"
       },
       {

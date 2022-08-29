@@ -10,10 +10,6 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:tag-manager.searchTag",
-    "onCommand:tag-manager.changeAttribute",
-    "onCommand:tag-manager.wrapTag",
-    "onCommand:tag-manager.removeTag",
     "onCommand:tag-manager.searchPanelTag",
     "onCommand:tag-manager.searchTagAll",
     "onCommand:tag-manager.replaceTagAll",
@@ -22,22 +18,6 @@
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
-      {
-        "command": "tag-manager.searchTag",
-        "title": "Structural Search in Current File"
-      },
-      {
-        "command": "tag-manager.changeAttribute",
-        "title": "Change Attribute"
-      },
-      {
-        "command": "tag-manager.wrapTag",
-        "title": "Wrap Tag"
-      },
-      {
-        "command": "tag-manager.removeTag",
-        "title": "Remove Upper Tag"
-      },
       {
         "command": "tag-manager.searchPanelTag",
         "title": "Structural Search and Replace Panel"
@@ -60,19 +40,7 @@
         "command": "tag-manager.searchPanelTag",
         "key": "ctrl+1"
       }
-    ],
-    "menus": {
-      "editor/context": [
-        {
-          "command": "tag-manager.wrapTag",
-          "group": "1_modification"
-        },
-        {
-          "command": "tag-manager.removeTag",
-          "group": "1_modification"
-        }
-      ]
-    }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

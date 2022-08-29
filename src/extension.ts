@@ -1,10 +1,11 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { getQuerySelectorResults } from './getQuerySelectorResults';
+import { getQuerySelectorResults } from './utilities/getQuerySelectorResults';
 import {StructuralSearchPanel} from './panels/StructuralSearchPanel';
-import { replaceInFile } from './replaceInFile';
+import { replaceInFile } from './utilities/replaceInFile';
 import { convertToRegex } from './utilities/convertToRegexp';
+import { revertChanges } from './utilities/revertChanges';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -47,12 +48,12 @@ export function activate(context: vscode.ExtensionContext) {
 				if (results !== null && results.length > 0){
 					processResult = replaceInFile(results, choice, replaceText, file, dom);
 
+					rawContents.push(rawContent);
+					fileList.push(file);
+
 					if (processResult !== "Success"){
 						throw new Error("Replacement Error");
 					}
-					
-					rawContents.push(rawContent);
-					fileList.push(file);
 				}
 				else {
 					searchMessage = searchResult;
@@ -76,72 +77,14 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	});
 
-	let disposableRevertChanges = vscode.commands.registerCommand('tag-manager.revertChanges', async (searchText, choice) => {
-		if (rawContents.length > 0 && fileList.length > 0){
-			for(let index=0; index < fileList.length; index++){
-				await vscode.workspace.fs.writeFile(fileList[index], rawContents[index]);
-			}
-			vscode.window.showInformationMessage(`Rollback process of "${choice.toLowerCase()}" successful`);
-			rawContents.length = 0; fileList.length = 0;
-			vscode.commands.executeCommand("tag-manager.searchTagAll", searchText);
-		}
-		else {
-			vscode.window.showErrorMessage("Nothing found to revert");
-		}
+	let disposableRevertChanges = vscode.commands.registerCommand('tag-manager.revertChanges', (searchText, choice) => {
+		revertChanges(fileList, rawContents, searchText, choice);
 	});
-
-		
- 	/* let disposableSearchTag = vscode.commands.registerCommand('tag-manager.searchTag', async (searchText) => {
-		if (editor === undefined || editor.document === undefined){
-			return ;
-		}
-
-		const text = editor.document.getText().trim();
-
-		searchText = await vscode.window.showInputBox();
-
-		
-		//tag ? editor.selections = findTag(tag, text, editor) : null;
-	}); */
 
 	context.subscriptions.push(disposableSearchPanel);
 	context.subscriptions.push(disposableSearchTagAll);
 	context.subscriptions.push(disposableReplaceTagAll);
 	context.subscriptions.push(disposableRevertChanges);
-	//context.subscriptions.push(disposableSearchTag);
-
-/*	let disposableChangeAttribute = vscode.commands.registerCommand('tag-manager.changeAttribute', async () => {
-		if (editor === undefined || editor.document === undefined){
-			return ;
-		}
-
-		const attributeValue = await (vscode.window.showInputBox());
-		const text = editor.document.getText().trim();
-
-		attributeValue ? editor.selections = findAttribute(attributeValue, text, editor) : null;
-	});
-
-	let disposableWrapTag = vscode.commands.registerCommand('tag-manager.wrapTag', async () => {
-		if (editor === undefined || editor.document === undefined){
-			return ;
-		}
-
-		let upperTag = await (vscode.window.showInputBox());
-
-		wrapTag(editor,editor.document,upperTag);		
-	});
-
-	let disposableRemoveUpperTag = vscode.commands.registerCommand('tag-manager.removeTag', async () => {
-		if (editor === undefined || editor.document === undefined){
-			return ;
-		}
-
-		removeUpperTag(editor, editor.document);
-	}); */
-
-	//context.subscriptions.push(disposableChangeAttribute);
-	//context.subscriptions.push(disposableWrapTag);
-	//context.subscriptions.push(disposableRemoveUpperTag);
 }
 
 // this method is called when your extension is deactivated

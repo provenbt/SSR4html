@@ -54,7 +54,7 @@ export function replaceInFile(results: any[], choice: string, replaceText: strin
                     //Get all attribute-value pairs
                     const attributeNames = result.getAttributeNames();
                     for (let name of attributeNames){
-                        let value = result.getAttributeNode(name).value;
+                        let value = result.getAttribute(name);
                         newElem.setAttribute(name, value);
                     }
                     // Replace the source element with the new element on the page 
@@ -74,9 +74,7 @@ export function replaceInFile(results: any[], choice: string, replaceText: strin
                     if (replaceText.match(re) === null){
                         throw new Error("Invalid attribute name format");
                     }
-                    if (!result.hasAttribute(replaceText)){
-                        throw new Error(`Element does not have "${replaceText}" attribute`);
-                    }
+
                     result.removeAttribute(replaceText);
                 } catch (error: any) {
                     console.log(error);

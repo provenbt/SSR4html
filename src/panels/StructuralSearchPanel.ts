@@ -137,23 +137,31 @@ export class StructuralSearchPanel {
               function showReplacementForm(that) {
                 const replacementForm = document.getElementById("replacementForm");
                 const replacementBox = document.getElementById("replacementBox");
+                const replaceBtn = document.getElementById("replaceBtn");
                 replacementBox.value = "";
                 if (that.value !== "Unselected") {
                   replacementForm.style.display = "inline";
                   if(that.value === "Set Class"){
                     replacementBox.placeholder = "class name";
+                    replaceBtn.innerText = "Set";
                   }else if(that.value === "Set Attribute"){
                     replacementBox.placeholder = "attribute name = value";
+                    replaceBtn.innerText = "Set";
                   }else if(that.value === "Change Tag"){
                     replacementBox.placeholder = "new tag name";
+                    replaceBtn.innerText = "Change";
                   }else if (that.value === "Remove Tag"){
-                    replacementBox.placeholder = "click replace if you are sure";
+                    replacementBox.placeholder = "click remove if you are sure";
+                    replaceBtn.innerText = "Remove";
                   }else if(that.value === "Remove Attribute"){
                     replacementBox.placeholder = "attribute name to remove";
+                    replaceBtn.innerText = "Remove";
                   }else if(that.value === "Add Upper Tag"){
                     replacementBox.placeholder = "new upper tag name";
+                    replaceBtn.innerText = "Add";
                   }else if(that.value === "Remove Upper Tag"){
-                    replacementBox.placeholder = "click replace if you are sure";
+                    replacementBox.placeholder = "click remove if you are sure";
+                    replaceBtn.innerText = "Remove";
                   }else {
                     console.log("this selection is not possible");
                     replacementForm.style.display = "none";

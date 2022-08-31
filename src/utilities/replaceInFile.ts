@@ -15,7 +15,7 @@ export async function replaceInFile(results: any[], choice: string, replaceText:
                     if (replaceText.match(re) === null){
                         throw new Error("Invalid class name format");
                     }
-                    
+
                     result.className = replaceText;
 
                     isFileChanged = true;  
@@ -26,7 +26,7 @@ export async function replaceInFile(results: any[], choice: string, replaceText:
                 break;
             case "Set Attribute":
                 try {
-                    const re = /^[A-Za-z]+\s*=\s*[A-Za-z0-9]+$/g;
+                    const re = /^[A-Za-z]+\s*=\s*[^<>]*[A-Za-z0-9]+[^<>]*$/g;
                     if (replaceText.match(re) === null){
                         throw new Error("Invalid attribute-value format");
                     }

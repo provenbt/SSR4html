@@ -8,6 +8,9 @@ export function getQuerySelectorResults(dom: any, searchText: string) {
         console.log(error);
         results = null;
         searchResult = error.message;
+        if(searchResult.startsWith("")){
+            searchResult = "Please Provide a Search Query";
+        }
     }
 
     return {results, searchResult};

@@ -12,7 +12,7 @@ export async function replaceInFile(results: any[], choice: string, replaceText:
             case "Set Class":
                 try {
                     const re = /^[A-Za-z]+.*/g;
-                    if (replaceText.match(re) === null){
+                    if (!re.test(replaceText)){
                         throw new Error("Invalid class name format");
                     }
 
@@ -27,7 +27,7 @@ export async function replaceInFile(results: any[], choice: string, replaceText:
             case "Set Attribute":
                 try {
                     const re = /^[A-Za-z]+\s*=\s*[^<>]*[A-Za-z0-9]+[^<>]*$/g;
-                    if (replaceText.match(re) === null){
+                    if (!re.test(replaceText)){
                         throw new Error("Invalid attribute-value format");
                     }
 
@@ -44,7 +44,7 @@ export async function replaceInFile(results: any[], choice: string, replaceText:
                 try {
                     const newTagName = replaceText.replaceAll(' ','');
                     const re = /^[A-Za-z]+$/g;
-                    if (newTagName.match(re) === null){
+                    if (!re.test(newTagName)){
                         throw new Error("Invalid tag format");
                     }
 
@@ -78,7 +78,7 @@ export async function replaceInFile(results: any[], choice: string, replaceText:
                 try {
                     const tagName = replaceText.replaceAll(' ','');
                     const re = /^[A-Za-z]+$/g;
-                    if (tagName.match(re) === null){
+                    if (!re.test(tagName)){
                         throw new Error("Invalid tag format");
                     }
 
@@ -102,7 +102,7 @@ export async function replaceInFile(results: any[], choice: string, replaceText:
                 try {
                     const re = /^[A-Za-z]+$/g;
                     replaceText = replaceText.trim().replaceAll(' ', '');
-                    if (replaceText.match(re) === null){
+                    if (!re.test(replaceText)){
                         throw new Error("Invalid attribute name format");
                     }
 

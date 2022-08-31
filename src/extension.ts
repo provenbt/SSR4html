@@ -25,7 +25,7 @@ export function activate(context: vscode.ExtensionContext) {
 		let processResult : string = "";
 		let searchMessage : string = "";
 
-		const files = await vscode.workspace.findFiles('**/*.{html}','**/node_modules/**');
+		const files = await vscode.workspace.findFiles('**/*.html','**/node_modules/**');
 		const jsdom = require("jsdom");
 
 		for(let file of files){

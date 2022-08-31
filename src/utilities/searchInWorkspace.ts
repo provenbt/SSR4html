@@ -11,7 +11,8 @@ export function searchInWorkspace(searchText: string){
             triggerSearch: true,
             isRegex: true,
             matchWholeWord: true,
-            replace: '',
+            isCaseSensitive: true,
+            replace: ''
         }); 
     });
 }

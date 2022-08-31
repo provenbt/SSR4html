@@ -44,12 +44,16 @@ export class StructuralSearchPanel {
         const { command, search, replace, choice } = message;
 
         switch (command) {
+          case "searchTag":
+            vscode.commands.executeCommand("tag-manager.searchInFile", search);
+            break;
+
           case "searchTagAll":
-            vscode.commands.executeCommand("tag-manager.searchTagAll", search);
+            vscode.commands.executeCommand("tag-manager.searchInFiles", search);
             break;
 
           case "replaceTagAll":
-            vscode.commands.executeCommand("tag-manager.replaceTagAll", search, replace, choice);
+            vscode.commands.executeCommand("tag-manager.replaceInFiles", search, replace, choice);
             break;
 
           case "revertChanges":
@@ -99,20 +103,22 @@ export class StructuralSearchPanel {
             <div class = "form-group row" style = "padding-top:12px;padding-bottom:12px;">
               <fieldset style = "width:50%;">
                 <legend>Search Options</legend>
-                <vscode-checkbox>Search in all files</vscode-checkbox>
+                <vscode-checkbox id="searchInAll" checked>Search in all files</vscode-checkbox>
               </fieldset>
             </div>
 
             <div class = "form-group row" style = "padding-top:12px;padding-bottom:12px;">
-              <vscode-tag style = "padding-bottom: 2px;">Replacement Options</vscode-tag>
-              <div style = "padding-left: 5px;">
-                <vscode-dropdown id = "selection" onchange = "showReplacementForm(this)" position="below" style = "width: 120px;text-align-last: center;">
+              <vscode-tag style = "padding-bottom: 2px;">Replacement Choice</vscode-tag>
+              <div>
+                <vscode-dropdown id = "selection" onchange = "showReplacementForm(this)" position="below" style = "width: 165px;text-align-last: center;">
                   <vscode-option value = "Unselected">Unselected</vscode-option>
                   <vscode-option value = "Set Class">Set Class</vscode-option>
                   <vscode-option value = "Set Attribute">Set Attribute</vscode-option>
                   <vscode-option value = "Change Tag">Change Tag</vscode-option>
+                  <vscode-option value = "Add Upper Tag">Add Upper Tag</vscode-option>
                   <vscode-option value = "Remove Tag">Remove Tag</vscode-option>
                   <vscode-option value = "Remove Attribute">Remove Attribute</vscode-option>
+                  <vscode-option value = "Remove Upper Tag">Remove Upper Tag</vscode-option>
                 </vscode-dropdown>
               </div>
             </div>
@@ -143,7 +149,11 @@ export class StructuralSearchPanel {
                   }else if (that.value === "Remove Tag"){
                     replacementBox.placeholder = "click replace if you are sure";
                   }else if(that.value === "Remove Attribute"){
-                    replacementBox.placeholder = "attribute name";
+                    replacementBox.placeholder = "attribute name to remove";
+                  }else if(that.value === "Add Upper Tag"){
+                    replacementBox.placeholder = "new upper tag name";
+                  }else if(that.value === "Remove Upper Tag"){
+                    replacementBox.placeholder = "click replace if you are sure";
                   }else {
                     console.log("this selection is not possible");
                     replacementForm.style.display = "none";

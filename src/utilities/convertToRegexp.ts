@@ -10,14 +10,13 @@ export function convertToRegex(searchText : string) : String{
             const attribute = query.replace('~','').slice(query.indexOf('[')+1, query.lastIndexOf('=')).
             replace('=','').replaceAll(' ', '');
 
-            //query = query.replaceAll(' ','');
             regex[index] = s2r.default(query);
 
             regex[index] = regex[index].trim().replace("class=","class\\s*=\\s*").
             replace("id=","id\\s*=\\s*").replaceAll("\\:","[:]").replace(`${attribute}=`,`${attribute}\\s*=\\s*`).
             replace(`(${attribute})`, `(${attribute}\\s*=\\s*)`);
             
-           if (regex[index] === "" || regex[index].startsWith("(?<")){
+            if (regex[index].startsWith("(?<")){
                 throw new Error("Invalid regular expression detected");
             }
 

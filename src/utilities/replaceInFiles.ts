@@ -14,10 +14,10 @@ export async function replaceInFiles(files: vscode.Uri[], fileList: vscode.Uri[]
     }, async (progress) => {
         const numOfFiles = files.length;
         //If workspace is empty, it would give number/0 error
-        let inc = numOfFiles > 0 ? Math.floor(100 / numOfFiles) : 100;
+        let inc = numOfFiles > 0 ? Math.round(100 / numOfFiles) : 100;
         let progressCounter = 0;
 
-        for (let file of files) {
+        for(let file of files) {
             const rawContent = await vscode.workspace.fs.readFile(file);
             const htmlText = new TextDecoder().decode(rawContent);
             const dom = new jsdom.JSDOM(htmlText);
@@ -39,7 +39,7 @@ export async function replaceInFiles(files: vscode.Uri[], fileList: vscode.Uri[]
                 break;
             }
             progressCounter++;
-            progress.report({ increment: inc, message: `${inc * progressCounter}}% completed` });
+            progress.report({ increment: inc, message: `${inc * progressCounter}% completed` });
         }
     });
 

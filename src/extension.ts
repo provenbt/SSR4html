@@ -1,9 +1,8 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { getQuerySelectorResults } from './utilities/getQuerySelectorResults';
-import {StructuralSearchPanel} from './panels/StructuralSearchPanel';
-import { replaceInFile } from './utilities/replaceInFile';
+import { StructuralSearchPanel } from './panels/StructuralSearchPanel';
+import { replaceInFiles } from './utilities/replaceInFiles';
 import { searchInWorkspace } from './utilities/searchInWorkspace';
 import { revertChanges } from './utilities/revertChanges';
 import { notifyUser } from './utilities/notifyUser';
@@ -18,41 +17,18 @@ export function activate(context: vscode.ExtensionContext) {
 		searchInWorkspace(searchText);
 	});
 
-	const rawContents : Uint8Array[] = [];
+	const rawContents: Uint8Array[] = [];
 	const fileList: vscode.Uri[] = [];
 
 	let disposableReplaceTagAll = vscode.commands.registerCommand('tag-manager.replaceInFiles', async (searchText, replaceText, choice) => {
-		let processResult : string = "";
-		let searchMessage : string = "";
 
-		const files = await vscode.workspace.findFiles('**/*.html','**/node_modules/**');
-		const jsdom = require("jsdom");
+		const files = await vscode.workspace.findFiles('**/*.html', '**/node_modules/**');
 
-		for(let file of files){
-			const rawContent = await vscode.workspace.fs.readFile(file);
-			const htmlText = new TextDecoder().decode(rawContent);
-			
-			const dom = new jsdom.JSDOM(htmlText);
-			const {results, searchResult} = getQuerySelectorResults(dom, searchText);
-			
-			if (results !== null && results.length > 0){
-				processResult = await replaceInFile(results, choice, replaceText, file, dom);
-				
-				if (processResult === "Success"){
-					rawContents.push(rawContent);
-					fileList.push(file);
-				}
+		const { processResult, searchMessage } = await replaceInFiles(files, fileList, rawContents, choice, searchText, replaceText);
 
-				else {
-					break;
-				}
-			}
-			else {
-				searchMessage = searchResult;
-			}
-		}
-
-		notifyUser(processResult,searchMessage,searchText,replaceText,choice);
+		setTimeout(() => {
+			notifyUser(processResult, searchMessage, searchText, replaceText, choice);
+		}, 1000);
 	});
 
 	let disposableRevertChanges = vscode.commands.registerCommand('tag-manager.revertChanges', (searchText, choice) => {
@@ -66,4 +42,4 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }

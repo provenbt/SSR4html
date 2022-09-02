@@ -93,7 +93,7 @@ export class StructuralSearchPanel {
           <form class = "btn-group" style = "padding-left: 5px;">
             <div class = "form-group row" style = "display:inline">
               <span style = "vertical-align: middle;">
-                <vscode-text-area id = "searchBox" autofocus cols="40" rows="1" placeholder="basic CSS selector commands">Search</vscode-text-area>
+                <vscode-text-area id = "searchBox" autofocus cols="45" rows="1" placeholder="basic CSS selector commands">Search</vscode-text-area>
               </span>
               <div>
                 <vscode-button id = "searchBtn" appearance="primary">Search</vscode-button>
@@ -125,7 +125,7 @@ export class StructuralSearchPanel {
 
             <div id = "replacementForm" class = "form-group row" style = "display:none;">
               <span style = "vertical-align: middle;">
-                <vscode-text-area id = "replacementBox" autofocus cols="40" rows="1">Replace</vscode-text-area>
+                <vscode-text-area id = "replacementBox" autofocus cols="45" rows="1">Replace</vscode-text-area>
               </span>
               <div>
                 <vscode-button id = "replaceBtn" appearance="primary">Replace</vscode-button>
@@ -157,7 +157,7 @@ export class StructuralSearchPanel {
                     replacementBox.placeholder = "attribute name to remove";
                     replaceBtn.innerText = "Remove";
                   }else if(that.value === "Add Upper Tag"){
-                    replacementBox.placeholder = "new upper tag name";
+                    replacementBox.placeholder = "element#id.class[attribute=value]";
                     replaceBtn.innerText = "Add";
                   }else if(that.value === "Remove Upper Tag"){
                     replacementBox.placeholder = "click remove if you are sure";

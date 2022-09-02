@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
+import { createElementFromSelector } from './createElementFromSelector';
+const pretty = require('pretty');
+const jsdom = require("jsdom");
 
 export async function replaceInFile(results: any[], choice: string, replaceText: string, file: any, dom: any) {
-    const pretty = require('pretty');
     let processResult !: string;
-    const jsdom = require("jsdom");
-    let isFileChanged: boolean = false;
+    let isFileChanged : boolean = false;
     replaceText = replaceText.trim();
 
     results.forEach((result : any)=> {
@@ -76,14 +77,17 @@ export async function replaceInFile(results: any[], choice: string, replaceText:
                 break;
             case "Add Upper Tag":
                 try {
-                    const tagName = replaceText.replaceAll(' ','');
-                    const re = /^[A-Za-z]+$/g;
-                    if (!re.test(tagName)){
+                    const parentInfo = replaceText.replaceAll(' ','');
+                    const re = /^[A-Za-z]+.*$/g;
+                    if (!re.test(parentInfo)){
                         throw new Error("Invalid tag format");
                     }
 
-                    const { document } = (new jsdom.JSDOM()).window;
-                    const newParent = document.createElement(tagName);
+                    const newParent = createElementFromSelector(parentInfo);
+                    if (newParent === null){
+                        throw new Error("Invalid Selector to create HTML element");
+                    }
+
                     result.parentNode.insertBefore(newParent,result);
                     newParent.appendChild(result);
                    
@@ -119,11 +123,11 @@ export async function replaceInFile(results: any[], choice: string, replaceText:
                     if (result.parentElement === null){
                         throw new Error(`${result.tagName.toLowerCase()} tag does not have an upper tag`);
                     }
-                    if(result.parentElement.tagName === "HEAD" || result.parentElement.tagName === "BODY"){
-                        throw new Error(`You cannot remove ${result.parentElement.tagName} tag`);
+                    
+                    //Remove any upper tag except HTML, HEAD and BODY tags
+                    if(result.parentElement.tagName !== "HTML" && result.parentElement.tagName !== "HEAD" && result.parentElement.tagName !== "BODY"){
+                        result.parentElement.replaceWith(...result.parentElement.childNodes);
                     }
-
-                    result.parentElement.replaceWith(...result.parentElement.childNodes);
 
                     isFileChanged = true;
                 } catch (error: any) {

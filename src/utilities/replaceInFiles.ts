@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
 import { getQuerySelectorResults } from './getQuerySelectorResults';
 import { replaceInFile } from './replaceInFile';
+const jsdom = require("jsdom");
 
 export async function replaceInFiles(fileList: vscode.Uri[], rawContents: Uint8Array[], choice: string, searchText: string, replaceText: string) {
     let processResult: string = "";
     let searchMessage: string = "";
-    const jsdom = require("jsdom");
 
     await vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,

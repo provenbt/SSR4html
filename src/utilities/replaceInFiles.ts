@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { getQuerySelectorResults } from './getQuerySelectorResults';
 import { replaceInFile } from './replaceInFile';
 
-export async function replaceInFiles(files: vscode.Uri[], fileList: vscode.Uri[], rawContents: Uint8Array[], choice: string, searchText: string, replaceText: string) {
+export async function replaceInFiles(fileList: vscode.Uri[], rawContents: Uint8Array[], choice: string, searchText: string, replaceText: string) {
     let processResult: string = "";
     let searchMessage: string = "";
     const jsdom = require("jsdom");
@@ -12,12 +12,14 @@ export async function replaceInFiles(files: vscode.Uri[], fileList: vscode.Uri[]
         title: `${choice} process is under the progress`,
         cancellable: false
     }, async (progress) => {
+
+        const files = await vscode.workspace.findFiles('**/*.html', '**/node_modules/**');
         const numOfFiles = files.length;
         //If workspace is empty, it would give number/0 error
         let inc = numOfFiles > 0 ? Math.round(100 / numOfFiles) : 100;
         let progressCounter = 0;
 
-        for(let file of files) {
+        for (let file of files) {
             const rawContent = await vscode.workspace.fs.readFile(file);
             const htmlText = new TextDecoder().decode(rawContent);
             const dom = new jsdom.JSDOM(htmlText);
@@ -36,10 +38,11 @@ export async function replaceInFiles(files: vscode.Uri[], fileList: vscode.Uri[]
             }
             else {
                 searchMessage = searchResult;
-                break;
             }
+            
             progressCounter++;
-            progress.report({ increment: inc, message: `${inc * progressCounter}% completed` });
+            let progressPercentage = inc * progressCounter;
+            progress.report({ increment: inc, message: `${progressPercentage < 100 ? progressPercentage : 100}% completed` });
         }
     });
 

@@ -22,9 +22,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	let disposableReplaceTagAll = vscode.commands.registerCommand('tag-manager.replaceInFiles', async (searchText, replaceText, choice) => {
 
-		const files = await vscode.workspace.findFiles('**/*.html', '**/node_modules/**');
-
-		const { processResult, searchMessage } = await replaceInFiles(files, fileList, rawContents, choice, searchText, replaceText);
+		const { processResult, searchMessage } = await replaceInFiles(fileList, rawContents, choice, searchText, replaceText);
 
 		setTimeout(() => {
 			notifyUser(processResult, searchMessage, searchText, replaceText, choice);

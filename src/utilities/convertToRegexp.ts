@@ -7,6 +7,11 @@ export function convertToRegex(searchText : string) : String{
         let index = 0;
         for(let query of queries){
             
+            query = query.trim();
+            if(query.includes('|') || /^[^A-Za-z#\[.]/g.test(query)){
+                throw new Error("Unsupported selector command detected");
+            }
+            
             regex[index] = s2r.default(query);
 
             if (regex[index].startsWith("(?<")){
@@ -39,8 +44,9 @@ export function convertToRegex(searchText : string) : String{
             replace("id=","id\\s*=\\s*").replaceAll("\\:","[:]").replaceAll('_-', "_\\-;");
 
             if (query.match(/^[A-Za-z]+.*/g) !== null){
-                let tagName = query.split('[')[0];
-                tagName = query.split('.')[0];
+                let tagName = query.split(/[#\[.]/g)[0];
+                tagName = query.split(/[#\[.]/g)[0];
+    
                 regex[index] = regex[index].replace(`${tagName}`,`(?<!\\w)${tagName}(?!\\w)`);
             }
 

@@ -1,24 +1,42 @@
 export function convertToRegex(searchText : string) : String{
-    const queries : String [] | null= searchText.split(',');
+    const queries : string [] | null= searchText.split(',');
     let regex : string[]= [];
     const s2r = require("selector-2-regexp");
 
     try {
         let index = 0;
         for(let query of queries){
-
-            const attribute = query.replace('~','').slice(query.indexOf('[')+1, query.lastIndexOf('=')).
-            replace('=','').replaceAll(' ', '');
-
+            
             regex[index] = s2r.default(query);
 
-            regex[index] = regex[index].trim().replace("class=","class\\s*=\\s*").
-            replace("id=","id\\s*=\\s*").replaceAll("\\:","[:]").replace(`${attribute}=`,`${attribute}\\s*=\\s*`).
-            replace(`(${attribute})`, `(${attribute}\\s*=\\s*)`);
-            
             if (regex[index].startsWith("(?<")){
                 throw new Error("Invalid regular expression detected");
             }
+            
+            if (query.includes('[')){
+                let re = /\[\s*(.+?)\s*(\=|\])/g;
+
+                let attributes = [];
+                let m;
+    
+                while ((m = re.exec(query)) !== null) {
+                    attributes.push(m[0]);
+                }
+
+                for(let attribute of attributes){
+
+                    attribute = attribute.replaceAll(/[\^\$\*\~\[\]\=]/g,'').trim();
+
+                    if(attribute !== "id" && attribute !== "class"){
+                        regex[index] = regex[index].replace(`${attribute}=`, `${attribute}`).
+                        replace(`${attribute}`, `${attribute}=`).
+                        replace(`${attribute}=`,`${attribute}\\s*=\\s*`);
+                    }
+                }
+            }
+
+            regex[index] = regex[index].trim().replace("class=","class\\s*=\\s*").
+            replace("id=","id\\s*=\\s*").replaceAll("\\:","[:]").replaceAll('_-', "_\\-;");
 
             if (query.match(/^[A-Za-z]+.*/g) !== null){
                 let tagName = query.split('[')[0];

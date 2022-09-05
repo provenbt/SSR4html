@@ -25,6 +25,21 @@ export async function replaceInFile(results: any[], choice: string, replaceText:
                     processResult = error.message;
                 }
                 break;
+            case "Set Id":
+                try {
+                    const re = /^[A-Za-z]+.*/g;
+                    if (!re.test(replaceText)){
+                        throw new Error("Invalid id value format");
+                    }
+
+                    result.id = replaceText;
+
+                    isFileChanged = true;  
+                } catch (error: any) {
+                    console.log(error);
+                    processResult = error.message;
+                }
+                break;
             case "Set Attribute":
                 try {
                     const re = /^[A-Za-z]+\s*=\s*[^<>]*[A-Za-z0-9]+[^<>]*$/g;

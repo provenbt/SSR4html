@@ -113,6 +113,7 @@ export class StructuralSearchPanel {
                 <vscode-dropdown id = "selection" onchange = "showReplacementForm(this)" position="below" style = "width: 165px;text-align-last: center;">
                   <vscode-option value = "Unselected">Unselected</vscode-option>
                   <vscode-option value = "Set Class">Set Class</vscode-option>
+                  <vscode-option value = "Set Id">Set Id</vscode-option>
                   <vscode-option value = "Set Attribute">Set Attribute</vscode-option>
                   <vscode-option value = "Change Tag">Change Tag</vscode-option>
                   <vscode-option value = "Add Upper Tag">Add Upper Tag</vscode-option>
@@ -143,6 +144,9 @@ export class StructuralSearchPanel {
                   replacementForm.style.display = "inline";
                   if(that.value === "Set Class"){
                     replacementBox.placeholder = "class name";
+                    replaceBtn.innerText = "Set";
+                  }else if(that.value === "Set Id"){
+                    replacementBox.placeholder = "id value";
                     replaceBtn.innerText = "Set";
                   }else if(that.value === "Set Attribute"){
                     replacementBox.placeholder = "attribute name = value";

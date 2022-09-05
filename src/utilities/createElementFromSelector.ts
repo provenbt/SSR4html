@@ -9,7 +9,7 @@ const jsdom = require("jsdom");
 export function createElementFromSelector(selector: string) {
     let element;
     try {
-        let pattern = /^(.*?)(?:#(.*?))?(?:\.(.*?))?(?:[[](.*?)(?:=(.*?))?)?$/;
+        let pattern = /^(.*?)(?:#(.*?))?(?:\.(.*?))?(?:\[(.*?)(?:=(.*?)\])?)?$/;
         let matches = selector.match(pattern);
 
         if(matches === null){

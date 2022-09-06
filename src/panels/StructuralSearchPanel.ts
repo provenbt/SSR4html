@@ -19,6 +19,7 @@ export class StructuralSearchPanel {
     } else {
       const panel = vscode.window.createWebviewPanel("webview", "Structural Search and Replace", vscode.ViewColumn.Beside, {
         enableScripts: true,
+        retainContextWhenHidden: true
       });
 
       StructuralSearchPanel.currentPanel = new StructuralSearchPanel(panel, extensionUri);

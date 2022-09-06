@@ -1,7 +1,5 @@
 import * as vscode from 'vscode';
-import { getQuerySelectorResults } from './getQuerySelectorResults';
 import { replaceInFile } from './replaceInFile';
-const jsdom = require("jsdom");
 
 export async function replaceInFiles(fileList: vscode.Uri[], rawContents: Uint8Array[], choice: string, searchText: string, replaceText: string) {
     let processResult: string = "";
@@ -22,24 +20,11 @@ export async function replaceInFiles(fileList: vscode.Uri[], rawContents: Uint8A
         for (let file of files) {
             const rawContent = await vscode.workspace.fs.readFile(file);
             const htmlText = new TextDecoder().decode(rawContent);
-            const dom = new jsdom.JSDOM(htmlText);
-            const { results, searchResult } = getQuerySelectorResults(dom, searchText);
 
-            if (results !== null && results.length > 0) {
-                processResult = await replaceInFile(results, choice, replaceText, file, dom);
+            const results = await replaceInFile(htmlText, choice, searchText, replaceText, file, fileList, rawContents);
+            processResult = results.processResult;
+            searchMessage = results.searchMessage;
 
-                if (processResult === "Success") {
-                    rawContents.push(rawContent);
-                    fileList.push(file);
-                }
-                else {
-                    break;
-                }
-            }
-            else {
-                searchMessage = searchResult;
-            }
-            
             progressCounter++;
             let progressPercentage = inc * progressCounter;
             progress.report({ increment: inc, message: `${progressPercentage < 100 ? progressPercentage : 100}% completed` });

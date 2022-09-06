@@ -56,28 +56,13 @@ export function activate(context: vscode.ExtensionContext) {
 				return;
 			}
 
-			const jsdom = require("jsdom");
 			const htmlText = editor.document.getText();
-
 			const file = editor.document.uri;
-			const rawContent = new TextEncoder().encode(htmlText);
-
-			const dom = new jsdom.JSDOM(htmlText);
-
-			let processResult: string = "";
-			const { results, searchResult } = getQuerySelectorResults(dom, searchText);
-
-			if (results !== null && results.length > 0){
-				processResult = await replaceInFile(results, choice, replaceText, editor.document.uri, dom);
-
-				if (processResult === "Success") {
-                    rawContents.push(rawContent);
-                    fileList.push(file);
-                }
-			}
-	
+			
+			const {processResult, searchMessage} = await replaceInFile(htmlText, choice, searchText, replaceText, file, fileList, rawContents);
+			
 			setTimeout(() => {
-				notifyUser(processResult, searchResult, searchText, replaceText, choice);
+				notifyUser(processResult, searchMessage, searchText, replaceText, choice);
 			}, 1000);	
 		});
 	});

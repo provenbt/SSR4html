@@ -25,9 +25,11 @@ export async function replaceInFiles(fileList: vscode.Uri[], rawContents: Uint8A
             processResult = results.processResult;
             searchMessage = results.searchMessage;
 
-            progressCounter++;
-            let progressPercentage = inc * progressCounter;
-            progress.report({ increment: inc, message: `${progressPercentage < 100 ? progressPercentage : 100}% completed` });
+            if (processResult === "Success"){
+                progressCounter++;
+                let progressPercentage = inc * progressCounter;
+                progress.report({ increment: inc, message: `${progressPercentage < 100 ? progressPercentage : 100}% completed` });
+            }
         }
     });
 

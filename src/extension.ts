@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import { StructuralSearchPanel } from './panels/StructuralSearchPanel';
 import { replaceInFiles } from './utilities/replaceInFiles';
 import { searchInWorkspace, searchInFile } from './utilities/search';
-import { getQuerySelectorResults } from './utilities/getQuerySelectorResults';
+import { checkReplacementText } from './utilities/checkReplacementText';
 import { replaceInFile } from './utilities/replaceInFile';
 import { revertChanges } from './utilities/revertChanges';
 import { notifyUser } from './utilities/notifyUser';
@@ -40,6 +40,12 @@ export function activate(context: vscode.ExtensionContext) {
 
 	let disposableReplaceInFiles = vscode.commands.registerCommand('tag-manager.replaceInFiles', async (searchText, replaceText, choice) => {
 
+		const isReplacementTextValid = checkReplacementText(choice, replaceText);
+		if(isReplacementTextValid !== "Valid"){
+			vscode.window.showWarningMessage(isReplacementTextValid);
+			return;
+		}
+
 		const { processResult, searchMessage } = await replaceInFiles(fileList, rawContents, choice, searchText, replaceText);
 
 		setTimeout(() => {
@@ -53,6 +59,12 @@ export function activate(context: vscode.ExtensionContext) {
 			const editor = vscode.window.activeTextEditor;
 
 			if(editor === undefined || editor.document === undefined){
+				return;
+			}
+
+			const isReplacementTextValid = checkReplacementText(choice, replaceText);
+			if(isReplacementTextValid !== "Valid"){
+				vscode.window.showWarningMessage(isReplacementTextValid);
 				return;
 			}
 

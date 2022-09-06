@@ -44,15 +44,15 @@ export class StructuralSearchPanel {
         const { command, search, replace, choice } = message;
 
         switch (command) {
-          case "searchTag":
+          case "searchInFile":
             vscode.commands.executeCommand("tag-manager.searchInFile", search);
             break;
 
-          case "searchTagAll":
+          case "searchInFiles":
             vscode.commands.executeCommand("tag-manager.searchInFiles", search);
             break;
 
-          case "replaceTagAll":
+          case "replaceInFiles":
             vscode.commands.executeCommand("tag-manager.replaceInFiles", search, replace, choice);
             break;
 

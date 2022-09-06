@@ -15,8 +15,10 @@ function main() {
 
 function onClickSearchBtn() {
   const searchText = document.getElementById("searchBox").value;
+  const checkbox = document.getElementById("searchInAll").checked;
+
   vscode.postMessage({
-      command: "searchTagAll",
+      command: checkbox ? "searchInFiles" : "searchInFile",
       search: searchText
     });
 }
@@ -27,7 +29,7 @@ function onClickReplaceButton(){
   const choice = document.getElementById("selection").value;
 
   vscode.postMessage({
-    command: "replaceTagAll",
+    command: "replaceInFiles",
     search: searchText,
     replace: replacementText,
     choice: choice

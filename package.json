@@ -12,6 +12,7 @@
   "activationEvents": [
     "onCommand:tag-manager.searchPanelTag",
     "onCommand:tag-manager.searchInFiles",
+    "onCommand:tag-manager.searchInFile",
     "onCommand:tag-manager.replaceInFiles",
     "onCommand:tag-manager.revertChanges"
   ],
@@ -25,6 +26,10 @@
       {
         "command": "tag-manager.searchInFiles",
         "title": "Structural Search in All Files"
+      },
+      {
+        "command": "tag-manager.searchInFile",
+        "title": "Structural Search in Current File"
       },
       {
         "command": "tag-manager.replaceInFiles",

@@ -17,7 +17,7 @@ export async function revertChanges(fileList: vscode.Uri[], rawContents: Uint8Ar
             setTimeout(() => {
                 rawContents.length = 0; fileList.length = 0;
                 vscode.window.showInformationMessage(`Rollback process of "${choice.toLowerCase()}" successful`);
-                vscode.commands.executeCommand("tag-manager.searchInFiles", searchText);
+                vscode.commands.executeCommand("search.action.refreshSearchResults");
             }, 1000);
         } catch (error) {
             console.log(error);

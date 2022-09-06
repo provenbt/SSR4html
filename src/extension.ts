@@ -3,7 +3,7 @@
 import * as vscode from 'vscode';
 import { StructuralSearchPanel } from './panels/StructuralSearchPanel';
 import { replaceInFiles } from './utilities/replaceInFiles';
-import { searchInWorkspace } from './utilities/searchInWorkspace';
+import { searchInWorkspace, searchInFile } from './utilities/search';
 import { revertChanges } from './utilities/revertChanges';
 import { notifyUser } from './utilities/notifyUser';
 
@@ -13,14 +13,30 @@ export function activate(context: vscode.ExtensionContext) {
 		StructuralSearchPanel.render(context.extensionUri);
 	});
 
-	let disposableSearchTagAll = vscode.commands.registerCommand('tag-manager.searchInFiles', (searchText) => {
+	let disposableSearchInFiles = vscode.commands.registerCommand('tag-manager.searchInFiles', (searchText) => {
 		searchInWorkspace(searchText);
 	});
 
+	
+	let disposableSearchInFile= vscode.commands.registerCommand('tag-manager.searchInFile', (searchText) => {
+
+		vscode.commands.executeCommand("workbench.action.openPreviousRecentlyUsedEditor").then( async () => {
+			const editor = vscode.window.activeTextEditor;
+
+			if(editor === undefined || editor.document === undefined){
+				return;
+			}
+
+			const filePath = editor.document.fileName.split(/\/|\\/g);
+
+			searchInFile(searchText, filePath);
+		});
+	});
+	
 	const rawContents: Uint8Array[] = [];
 	const fileList: vscode.Uri[] = [];
 
-	let disposableReplaceTagAll = vscode.commands.registerCommand('tag-manager.replaceInFiles', async (searchText, replaceText, choice) => {
+	let disposableReplaceInFiles = vscode.commands.registerCommand('tag-manager.replaceInFiles', async (searchText, replaceText, choice) => {
 
 		const { processResult, searchMessage } = await replaceInFiles(fileList, rawContents, choice, searchText, replaceText);
 
@@ -34,8 +50,9 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	context.subscriptions.push(disposableSearchPanel);
-	context.subscriptions.push(disposableSearchTagAll);
-	context.subscriptions.push(disposableReplaceTagAll);
+	context.subscriptions.push(disposableSearchInFiles);
+	context.subscriptions.push(disposableSearchInFile);
+	context.subscriptions.push(disposableReplaceInFiles);
 	context.subscriptions.push(disposableRevertChanges);
 }
 

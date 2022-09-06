@@ -27,9 +27,10 @@ function onClickReplaceButton(){
   const searchText = document.getElementById("searchBox").value;
   const replacementText = document.getElementById("replacementBox").value;
   const choice = document.getElementById("selection").value;
+  const checkbox = document.getElementById("searchInAll").checked;
 
   vscode.postMessage({
-    command: "replaceInFiles",
+    command: checkbox ? "replaceInFiles" : "replaceInFile",
     search: searchText,
     replace: replacementText,
     choice: choice

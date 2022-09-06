@@ -14,6 +14,7 @@
     "onCommand:tag-manager.searchInFiles",
     "onCommand:tag-manager.searchInFile",
     "onCommand:tag-manager.replaceInFiles",
+    "onCommand:tag-manager.replaceInFile",
     "onCommand:tag-manager.revertChanges"
   ],
   "main": "./out/extension.js",
@@ -34,6 +35,10 @@
       {
         "command": "tag-manager.replaceInFiles",
         "title": "Structural Replace in All Files"
+      },
+      {
+        "command": "tag-manager.replaceInFile",
+        "title": "Structural Replace in Current File"
       },
       {
         "command": "tag-manager.revertChanges",

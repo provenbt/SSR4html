@@ -4,6 +4,8 @@ import * as vscode from 'vscode';
 import { StructuralSearchPanel } from './panels/StructuralSearchPanel';
 import { replaceInFiles } from './utilities/replaceInFiles';
 import { searchInWorkspace, searchInFile } from './utilities/search';
+import { getQuerySelectorResults } from './utilities/getQuerySelectorResults';
+import { replaceInFile } from './utilities/replaceInFile';
 import { revertChanges } from './utilities/revertChanges';
 import { notifyUser } from './utilities/notifyUser';
 
@@ -45,6 +47,41 @@ export function activate(context: vscode.ExtensionContext) {
 		}, 1000);
 	});
 
+	let disposableReplaceInFile = vscode.commands.registerCommand('tag-manager.replaceInFile', (searchText, replaceText, choice) => {
+
+		vscode.commands.executeCommand("workbench.action.openPreviousRecentlyUsedEditor").then( async () => {
+			const editor = vscode.window.activeTextEditor;
+
+			if(editor === undefined || editor.document === undefined){
+				return;
+			}
+
+			const jsdom = require("jsdom");
+			const htmlText = editor.document.getText();
+
+			const file = editor.document.uri;
+			const rawContent = new TextEncoder().encode(htmlText);
+
+			const dom = new jsdom.JSDOM(htmlText);
+
+			let processResult: string;
+			const { results, searchResult } = getQuerySelectorResults(dom, searchText);
+
+			if (results !== null && results.length > 0){
+				processResult = await replaceInFile(results, choice, replaceText, editor.document.uri, dom);
+
+				if (processResult === "Success") {
+                    rawContents.push(rawContent);
+                    fileList.push(file);
+                }
+			}
+	
+			setTimeout(() => {
+				notifyUser(processResult, searchResult, searchText, replaceText, choice);
+			}, 1000);	
+		});
+	});
+
 	let disposableRevertChanges = vscode.commands.registerCommand('tag-manager.revertChanges', (searchText, choice) => {
 		revertChanges(fileList, rawContents, searchText, choice);
 	});
@@ -53,6 +90,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(disposableSearchInFiles);
 	context.subscriptions.push(disposableSearchInFile);
 	context.subscriptions.push(disposableReplaceInFiles);
+	context.subscriptions.push(disposableReplaceInFile);
 	context.subscriptions.push(disposableRevertChanges);
 }
 

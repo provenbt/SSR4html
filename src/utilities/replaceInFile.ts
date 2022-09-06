@@ -4,11 +4,11 @@ const pretty = require('pretty');
 const jsdom = require("jsdom");
 
 export async function replaceInFile(results: any[], choice: string, replaceText: string, file: any, dom: any) {
-    let processResult !: string;
+    let processResult : string = "";
     let isFileChanged : boolean = false;
     replaceText = replaceText.trim();
 
-    results.forEach((result : any)=> {
+    for(let result of results){
         switch (choice) {
             case "Set Class":
                 try {
@@ -151,7 +151,7 @@ export async function replaceInFile(results: any[], choice: string, replaceText:
                 }
                 break;
           }
-    });
+    }
 
     try {
         if (isFileChanged){

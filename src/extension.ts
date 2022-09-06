@@ -64,7 +64,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 			const dom = new jsdom.JSDOM(htmlText);
 
-			let processResult: string;
+			let processResult: string = "";
 			const { results, searchResult } = getQuerySelectorResults(dom, searchText);
 
 			if (results !== null && results.length > 0){

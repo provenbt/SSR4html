@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 import { replaceInFile } from './replaceInFile';
 
 export async function replaceInFiles(fileList: vscode.Uri[], rawContents: Uint8Array[], choice: string, searchText: string, replaceText: string) {
-    let processResult: string = "";
-    let searchMessage: string = "";
+    let processResults : string[] = [];
+    let searchMessage : string = "Nothing found to replace";
 
     await vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
@@ -21,17 +21,15 @@ export async function replaceInFiles(fileList: vscode.Uri[], rawContents: Uint8A
             const rawContent = await vscode.workspace.fs.readFile(file);
             const htmlText = new TextDecoder().decode(rawContent);
 
-            const results = await replaceInFile(htmlText, choice, searchText, replaceText, file, fileList, rawContents);
-            processResult = results.processResult;
-            searchMessage = results.searchMessage;
-
-            if (processResult === "Success"){
-                progressCounter++;
-                let progressPercentage = inc * progressCounter;
-                progress.report({ increment: inc, message: `${progressPercentage < 100 ? progressPercentage : 100}% completed` });
-            }
+            const result = await replaceInFile(htmlText, choice, searchText, replaceText, file, fileList, rawContents);
+            processResults.push(result.processResult);
+            searchMessage = result.searchMessage;
+            
+            progressCounter++;
+            let progressPercentage = inc * progressCounter;
+            progress.report({ increment: inc, message: `${progressPercentage < 100 ? progressPercentage : 100}% completed` });
         }
     });
 
-    return { processResult, searchMessage };
+    return { processResults, searchMessage };
 }

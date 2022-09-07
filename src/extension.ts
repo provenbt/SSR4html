@@ -46,7 +46,8 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 
-		const { processResult, searchMessage } = await replaceInFiles(fileList, rawContents, choice, searchText, replaceText);
+		const { processResults, searchMessage } = await replaceInFiles(fileList, rawContents, choice, searchText, replaceText);
+		const processResult = processResults.includes("Success") ? "Success" : "";
 
 		setTimeout(() => {
 			notifyUser(processResult, searchMessage, searchText, replaceText, choice);

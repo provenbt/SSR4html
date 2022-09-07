@@ -4,13 +4,14 @@ export function getQuerySelectorResults(dom: any, searchText: string) {
 
     try {
         results = dom.window.document.querySelectorAll(searchText.replaceAll(' ',''));
-    } catch (error: any) {
+    } catch (error) {
         console.log(error);
         results = null;
-        searchResult = error.message;
     
         if(searchResult.startsWith(`''`)){
             searchResult = "Please Provide a Search Query";
+        }else{
+            searchResult = `"${searchText}" is not a valid CSS selector`;
         }
     }
 

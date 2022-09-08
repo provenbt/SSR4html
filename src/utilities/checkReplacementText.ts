@@ -7,11 +7,9 @@ export function checkReplacementText(choice: string, replaceText: string){
     switch (choice) {
         case "Set Class":
             try {
-                const re = /^[A-Za-z]+.*/g;
-                if (!re.test(replaceText)){
+                if (!(new RegExp(/^[A-Za-z]+.*/,'g').test(replaceText))){
                     throw new Error("Invalid class name format");
-                }
-                
+                }    
             } catch (error: any) {
                 console.log(error);
                 result = error.message;
@@ -19,11 +17,9 @@ export function checkReplacementText(choice: string, replaceText: string){
             break;
         case "Set Id":
             try {
-                const re = /^[A-Za-z]+.*/g;
-                if (!re.test(replaceText)){
+                if (!(new RegExp(/^[A-Za-z]+.*/,'g').test(replaceText))){
                     throw new Error("Invalid id value format");
                 }
-
             } catch (error: any) {
                 console.log(error);
                 result = error.message;
@@ -31,11 +27,13 @@ export function checkReplacementText(choice: string, replaceText: string){
             break;
         case "Set Attribute":
             try {
-                const re = /^[A-Za-z]+\s*=\s*[^<>]*[A-Za-z0-9]+[^<>]*$/g;
-                if (!re.test(replaceText)){
-                    throw new Error("Invalid attribute-value format");
-                }
+                const attributeValuePairs: string[] = replaceText.split(',');
 
+                for(let attributeValuePair of attributeValuePairs){
+                    if (!(new RegExp(/^\s*[A-Za-z]+\s*=\s*[^<>]*[A-Za-z0-9]+[^<>]*$/,'g').test(attributeValuePair))){
+                        throw new Error("Invalid attribute-value format");
+                    }
+                }
             } catch (error: any) {
                 console.log(error);
                 result = error.message;
@@ -44,8 +42,8 @@ export function checkReplacementText(choice: string, replaceText: string){
         case "Change Tag":
             try {
                 const newTagName = replaceText.replaceAll(' ','');
-                const re = /^[A-Za-z]+$/g;
-                if (!re.test(newTagName)){
+
+                if (!(new RegExp(/^[A-Za-z]+$/, 'g').test(newTagName))){
                     throw new Error("Invalid tag format");
                 }
 
@@ -57,8 +55,8 @@ export function checkReplacementText(choice: string, replaceText: string){
         case "Add Upper Tag":
             try {
                 const parentInfo = replaceText.replaceAll(' ','');
-                const re = /^[A-Za-z]+.*$/g;
-                if (!re.test(parentInfo)){
+        
+                if (!(new RegExp( /^[A-Za-z]+.*$/, 'g').test(parentInfo))){
                     throw new Error("Invalid tag format");
                 }
 
@@ -74,12 +72,14 @@ export function checkReplacementText(choice: string, replaceText: string){
             break;
         case "Remove Attribute":
             try {
-                const re = /^[A-Za-z]+/g;
-                replaceText = replaceText.trim().replaceAll(' ', '');
-                if (!re.test(replaceText)){
-                    throw new Error("Invalid attribute name format");
-                }
+                replaceText = replaceText.replaceAll(' ', '');
+                const attributes: string[] = replaceText.split(',');
 
+                for(let attribute of attributes){
+                    if (!(new RegExp( /^[A-Za-z]+/,'g').test(attribute))){
+                        throw new Error("Invalid attribute name format");
+                    }
+                }
             } catch (error: any) {
                 console.log(error);
                 result = error.message;

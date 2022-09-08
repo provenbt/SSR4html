@@ -39,8 +39,15 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                     break;
                 case "Set Attribute":
                     try {
-                        const attributeValuePair = replaceText.replaceAll(/"|'/g, '').split('=');
-                        result.setAttribute(attributeValuePair[0].trim().replaceAll(' ', ''), attributeValuePair[1].trim());
+                        const attributeValuePairs: string[] = replaceText.replaceAll(/"|'/g, '').split(',');
+                        
+                        for(let attributeValuePair of attributeValuePairs){
+                            //Attribute name cannot include any kind of space character
+                            let attribute = attributeValuePair.split('=')[0].replaceAll(' ', '');
+                            let value = attributeValuePair.split('=')[1].trim();
+
+                            result.setAttribute(attribute, value);
+                        }
 
                         isFileChanged = true;
                     } catch (error: any) {

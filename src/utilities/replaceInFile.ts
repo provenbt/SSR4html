@@ -101,7 +101,11 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                 case "Remove Attribute":
                     try {
                         replaceText = replaceText.trim().replaceAll(' ', '');
-                        result.removeAttribute(replaceText);
+                        const attributes: string[] = replaceText.split(',');
+
+                        for(let attribute of attributes){
+                            result.removeAttribute(attribute);
+                        }
 
                         isFileChanged = true;
                     } catch (error: any) {

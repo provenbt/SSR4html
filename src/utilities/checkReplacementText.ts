@@ -74,7 +74,7 @@ export function checkReplacementText(choice: string, replaceText: string){
             break;
         case "Remove Attribute":
             try {
-                const re = /^[A-Za-z]+,?/g;
+                const re = /^[A-Za-z]+/g;
                 replaceText = replaceText.trim().replaceAll(' ', '');
                 if (!re.test(replaceText)){
                     throw new Error("Invalid attribute name format");

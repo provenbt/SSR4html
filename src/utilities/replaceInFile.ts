@@ -14,12 +14,12 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
     const dom = new jsdom.JSDOM(htmlText);
     const { results, searchResult } = getQuerySelectorResults(dom, searchText);
 
-    if (results !== null && results.length > 0) {
+    if (searchResult === "Result found to replace") {
         for (let result of results) {
             switch (choice) {
                 case "Set Class":
                     try {
-                        result.className = replaceText;
+                        result.className = replaceText.trim();
                         
                         isFileChanged = true;
                     } catch (error: any) {
@@ -27,9 +27,22 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                         processResult = error.message;
                     }
                     break;
+                case "Append Class Value":
+                    try {
+                        const classNames = replaceText.trim().split(' ');
+
+                        for(let className of classNames){
+                            result.classList.add(className);
+                        }
+
+                        isFileChanged = true;
+                    } catch (error: any) {
+                        console.log(error);
+                        processResult = error.message;
+                    }
                 case "Set Id":
                     try {
-                        result.id = replaceText;
+                        result.id = replaceText.trim();
 
                         isFileChanged = true;
                     } catch (error: any) {

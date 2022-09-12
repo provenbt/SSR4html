@@ -1,18 +1,24 @@
 export function getQuerySelectorResults(dom: any, searchText: string) {
-    let results!: any[] | null;
-    let searchResult: string = "Nothing found to replace";
+    let results !: any[];
+    let searchResult: string = "";
 
     try {
         results = dom.window.document.querySelectorAll(searchText.replaceAll(' ',''));
-    } catch (error) {
-        console.log(error);
-        results = null;
-    
-        if(searchResult.startsWith(`''`)){
-            searchResult = "Please Provide a Search Query";
-        }else{
-            searchResult = `"${searchText}" is not a valid CSS selector`;
+
+        if (results === undefined || results === null){
+            throw new Error(`"${searchText}" is not a valid CSS selector`);
+        } 
+        
+        if (results.length === 0){
+            searchResult = "Nothing found to replace";
         }
+        else {
+            searchResult = "Result found to replace";
+        }
+        
+    } catch (error: any) {
+        console.log(error);
+        searchResult = error.message;
     }
 
     return {results, searchResult};

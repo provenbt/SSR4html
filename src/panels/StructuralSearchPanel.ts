@@ -118,11 +118,13 @@ export class StructuralSearchPanel {
                 <vscode-dropdown id = "selection" onchange = "showReplacementForm(this)" position="below" style = "width: 165px;text-align-last: center;">
                   <vscode-option value = "Unselected">Unselected</vscode-option>
                   <vscode-option value = "Set Class">Set Class</vscode-option>
+                  <vscode-option value = "Append Class">Append Class</vscode-option>
                   <vscode-option value = "Set Id">Set Id</vscode-option>
                   <vscode-option value = "Set Attribute">Set Attribute</vscode-option>
-                  <vscode-option value = "Change Tag">Change Tag</vscode-option>
+                  <vscode-option value = "Change Tag Name">Change Tag Name</vscode-option>
                   <vscode-option value = "Add Upper Tag">Add Upper Tag</vscode-option>
                   <vscode-option value = "Remove Tag">Remove Tag</vscode-option>
+                  <vscode-option value = "Remove Class">Remove Class</vscode-option>
                   <vscode-option value = "Remove Attribute">Remove Attribute</vscode-option>
                   <vscode-option value = "Remove Upper Tag">Remove Upper Tag</vscode-option>
                 </vscode-dropdown>
@@ -148,25 +150,31 @@ export class StructuralSearchPanel {
                 if (that.value !== "Unselected") {
                   replacementForm.style.display = "inline";
                   if(that.value === "Set Class"){
-                    replacementBox.placeholder = "class name";
+                    replacementBox.placeholder = "class-name1 class-name2 ... class-name(i)";
                     replaceBtn.innerText = "Set";
+                  }else if(that.value === "Append Class"){
+                    replacementBox.placeholder = "class-name1 class-name2 ... class-name(i)";
+                    replaceBtn.innerText = "Append";
                   }else if(that.value === "Set Id"){
                     replacementBox.placeholder = "id value";
                     replaceBtn.innerText = "Set";
                   }else if(that.value === "Set Attribute"){
-                    replacementBox.placeholder = "attribute name = value";
+                    replacementBox.placeholder = "atr name1=value1,name2=value2, ... ,name(i)=value(i)";
                     replaceBtn.innerText = "Set";
-                  }else if(that.value === "Change Tag"){
+                  }else if(that.value === "Change Tag Name"){
                     replacementBox.placeholder = "new tag name";
                     replaceBtn.innerText = "Change";
                   }else if (that.value === "Remove Tag"){
                     replacementBox.placeholder = "click remove if you are sure";
                     replaceBtn.innerText = "Remove";
+                  }else if(that.value === "Remove Class"){
+                    replacementBox.placeholder = "class-name1 class-name2 ... class-name(i)";
+                    replaceBtn.innerText = "Remove";
                   }else if(that.value === "Remove Attribute"){
-                    replacementBox.placeholder = "attribute name to remove";
+                    replacementBox.placeholder = "atr-name1,atr-name2, ... ,atr-name(i)";
                     replaceBtn.innerText = "Remove";
                   }else if(that.value === "Add Upper Tag"){
-                    replacementBox.placeholder = "element#id.class[attribute=value]";
+                    replacementBox.placeholder = "tagName#id.class[attribute=value]";
                     replaceBtn.innerText = "Add";
                   }else if(that.value === "Remove Upper Tag"){
                     replacementBox.placeholder = "click remove if you are sure";

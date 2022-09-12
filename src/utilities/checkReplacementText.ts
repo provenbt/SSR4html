@@ -6,10 +6,15 @@ export function checkReplacementText(choice: string, replaceText: string){
 
     switch (choice) {
         case "Set Class":
+        case "Append Class":
+        case "Remove Class":
+            const classValues = replaceText.trim().split(' ');
             try {
-                if (!(new RegExp(/^[A-Za-z]+.*/,'g').test(replaceText))){
-                    throw new Error("Invalid class name format");
-                }    
+                for (let classValue of classValues){
+                    if (!(new RegExp(/^[A-Za-z]+.*/,'g').test(classValue))){
+                        throw new Error("Invalid class name format");
+                    }      
+                }
             } catch (error: any) {
                 console.log(error);
                 result = error.message;
@@ -17,7 +22,7 @@ export function checkReplacementText(choice: string, replaceText: string){
             break;
         case "Set Id":
             try {
-                if (!(new RegExp(/^[A-Za-z]+.*/,'g').test(replaceText))){
+                if (!(new RegExp(/^[A-Za-z]+.*/,'g').test(replaceText.trim()))){
                     throw new Error("Invalid id value format");
                 }
             } catch (error: any) {
@@ -39,7 +44,7 @@ export function checkReplacementText(choice: string, replaceText: string){
                 result = error.message;
             }
             break;
-        case "Change Tag":
+        case "Change Tag Name":
             try {
                 const newTagName = replaceText.replaceAll(' ','');
 

@@ -27,7 +27,7 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                         processResult = error.message;
                     }
                     break;
-                case "Append Class Value":
+                case "Append Class":
                     try {
                         const classNames = replaceText.trim().split(' ');
 
@@ -40,6 +40,7 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                         console.log(error);
                         processResult = error.message;
                     }
+                    break;
                 case "Set Id":
                     try {
                         result.id = replaceText.trim();
@@ -68,7 +69,7 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                         processResult = error.message;
                     }
                     break;
-                case "Change Tag":
+                case "Change Tag Name":
                     try {
                         const newTagName = replaceText.replaceAll(' ', '');
 
@@ -118,13 +119,31 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
 
                     isFileChanged = true;
                     break;
+                case "Remove Class":
+                    try {
+                        const classNames = replaceText.trim().split(' ');
+
+                        for(let className of classNames){
+                            if (result.classList.contains(className)){
+                                result.classList.remove(className);
+                            }
+                        }
+
+                        isFileChanged = true;
+                    } catch (error: any) {
+                        console.log(error);
+                        processResult = error.message;
+                    }
+                    break;
                 case "Remove Attribute":
                     try {
                         replaceText = replaceText.trim().replaceAll(' ', '');
                         const attributes: string[] = replaceText.split(',');
 
                         for(let attribute of attributes){
-                            result.removeAttribute(attribute);
+                            if (result.hasAttribute){
+                                result.removeAttribute(attribute);
+                            }
                         }
 
                         isFileChanged = true;

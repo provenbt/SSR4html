@@ -3,7 +3,7 @@ export function getQuerySelectorResults(dom: any, searchText: string) {
     let searchResult: string = "";
 
     try {
-        results = dom.window.document.querySelectorAll(searchText.replaceAll(' ',''));
+        results = dom.window.document.querySelectorAll(searchText);
 
         if (results === undefined || results === null){
             throw new Error(`"${searchText}" is not a valid CSS selector`);

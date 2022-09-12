@@ -14,48 +14,33 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
     const dom = new jsdom.JSDOM(htmlText);
     const { results, searchResult } = getQuerySelectorResults(dom, searchText);
 
-    if (searchResult === "Result found to replace") {
-        for (let result of results) {
-            switch (choice) {
-                case "Set Class":
-                    try {
-                        result.className = replaceText.trim();
-                        
-                        isFileChanged = true;
-                    } catch (error: any) {
-                        console.log(error);
-                        processResult = error.message;
-                    }
-                    break;
-                case "Append Class":
-                    try {
-                        const classNames = replaceText.trim().split(' ');
+    try {
+        if (searchResult === "Result found to replace") {
+            for (let result of results) {
+                switch (choice) {
+                    case "Set Class":
+                        result.className = replaceText;
 
-                        for(let className of classNames){
+                        isFileChanged = true;
+                        break;
+                    case "Append Class":
+                        const classNamesToAppend = replaceText.split(' ');
+
+                        for (let className of classNamesToAppend) {
                             result.classList.add(className);
                         }
 
                         isFileChanged = true;
-                    } catch (error: any) {
-                        console.log(error);
-                        processResult = error.message;
-                    }
-                    break;
-                case "Set Id":
-                    try {
-                        result.id = replaceText.trim();
+                        break;
+                    case "Set Id":
+                        result.id = replaceText;
 
                         isFileChanged = true;
-                    } catch (error: any) {
-                        console.log(error);
-                        processResult = error.message;
-                    }
-                    break;
-                case "Set Attribute":
-                    try {
+                        break;
+                    case "Set Attribute":
                         const attributeValuePairs: string[] = replaceText.replaceAll(/"|'/g, '').split(',');
-                        
-                        for(let attributeValuePair of attributeValuePairs){
+
+                        for (let attributeValuePair of attributeValuePairs) {
                             //Attribute name cannot include any kind of space character
                             let attribute = attributeValuePair.split('=')[0].replaceAll(' ', '');
                             let value = attributeValuePair.split('=')[1].trim();
@@ -64,13 +49,8 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                         }
 
                         isFileChanged = true;
-                    } catch (error: any) {
-                        console.log(error);
-                        processResult = error.message;
-                    }
-                    break;
-                case "Change Tag Name":
-                    try {
+                        break;
+                    case "Change Tag Name":
                         const newTagName = replaceText.replaceAll(' ', '');
 
                         const { document } = (new jsdom.JSDOM()).window;
@@ -94,13 +74,8 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                         result.parentNode.replaceChild(newElem, result);
 
                         isFileChanged = true;
-                    } catch (error: any) {
-                        console.log(error);
-                        processResult = error.message;
-                    }
-                    break;
-                case "Add Upper Tag":
-                    try {
+                        break;
+                    case "Add Upper Tag":
                         const parentInfo = replaceText.replaceAll(' ', '');
 
                         const newParent = createElementFromSelector(parentInfo);
@@ -109,51 +84,36 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                         newParent.appendChild(result);
 
                         isFileChanged = true;
-                    } catch (error: any) {
-                        console.log(error);
-                        processResult = error.message;
-                    }
-                    break;
-                case "Remove Tag":
-                    result.remove();
+                        break;
+                    case "Remove Tag":
+                        result.remove();
 
-                    isFileChanged = true;
-                    break;
-                case "Remove Class":
-                    try {
-                        const classNames = replaceText.trim().split(' ');
+                        isFileChanged = true;
+                        break;
+                    case "Remove Class":
+                        const classNamesToRemove = replaceText.trim().split(' ');
 
-                        for(let className of classNames){
-                            if (result.classList.contains(className)){
+                        for (let className of classNamesToRemove) {
+                            if (result.classList.contains(className)) {
                                 result.classList.remove(className);
                             }
                         }
 
                         isFileChanged = true;
-                    } catch (error: any) {
-                        console.log(error);
-                        processResult = error.message;
-                    }
-                    break;
-                case "Remove Attribute":
-                    try {
+                        break;
+                    case "Remove Attribute":
                         replaceText = replaceText.trim().replaceAll(' ', '');
-                        const attributes: string[] = replaceText.split(',');
+                        const attributesToRemove: string[] = replaceText.split(',');
 
-                        for(let attribute of attributes){
-                            if (result.hasAttribute){
+                        for (let attribute of attributesToRemove) {
+                            if (result.hasAttribute) {
                                 result.removeAttribute(attribute);
                             }
                         }
 
                         isFileChanged = true;
-                    } catch (error: any) {
-                        console.log(error);
-                        processResult = error.message;
-                    }
-                    break;
-                case "Remove Upper Tag":
-                    try {
+                        break;
+                    case "Remove Upper Tag":
                         if (result.parentElement === null) {
                             throw new Error(`${result.tagName.toLowerCase()} tag does not have an upper tag`);
                         }
@@ -164,26 +124,22 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                         }
 
                         isFileChanged = true;
-                    } catch (error: any) {
-                        console.log(error);
-                        processResult = error.message;
-                    }
-                    break;
+                        break;
+                }
             }
         }
-    }
-    else {
-        searchMessage = searchResult;
-    }
+        else {
+            searchMessage = searchResult;
+        }
 
-    try {
         if (isFileChanged) {
             rawContents.push(new TextEncoder().encode(htmlText));
             fileList.push(file);
             await vscode.workspace.fs.writeFile(file, new TextEncoder().encode(pretty(dom.serialize(), { ocd: true })));
             processResult = "Success";
         }
-    } catch (error: any) {
+    }
+    catch (error: any) {
         console.log(error);
         processResult = error.message;
     }

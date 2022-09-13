@@ -14,8 +14,9 @@ export async function revertChanges(fileList: vscode.Uri[], rawContents: Uint8Ar
                 }
             });
 
+            rawContents.splice(0,rawContents.length); fileList.splice(0,fileList.length);
+            
             setTimeout(() => {
-                rawContents.length = 0; fileList.length = 0;
                 vscode.window.showInformationMessage(`Rollback process of "${choice.toLowerCase()}" successful`);
                 vscode.commands.executeCommand("search.action.refreshSearchResults");
             }, 1000);

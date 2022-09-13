@@ -46,6 +46,7 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 
+		rawContents.splice(0,rawContents.length); fileList.splice(0,fileList.length);
 		const { processResults, searchMessage } = await replaceInFiles(fileList, rawContents, choice, searchText, replaceText);
 		const processResult = processResults.includes("Success") ? "Success" : "";
 
@@ -72,6 +73,7 @@ export function activate(context: vscode.ExtensionContext) {
 			const htmlText = editor.document.getText();
 			const file = editor.document.uri;
 			
+			rawContents.splice(0,rawContents.length); fileList.splice(0,fileList.length);
 			const {processResult, searchMessage} = await replaceInFile(htmlText, choice, searchText, replaceText, file, fileList, rawContents);
 			
 			setTimeout(() => {

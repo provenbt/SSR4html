@@ -40,8 +40,10 @@ export function convertToRegex(searchText : string) : String{
                 }
             }
 
-            regex[index] = regex[index].trim().replace("class=","class\\s*=\\s*").
-            replace("id=","id\\s*=\\s*").replaceAll("\\:","[:]").replaceAll('_-', "_\\-;");
+
+            regex[index] = regex[index].replace("class=","class\\s*=\\s*").
+            replace("id=","id\\s*=\\s*").replaceAll(`.*[\\s'"]`, `[^=]*[\\s'"]`).
+            replaceAll("\\:","[:]").replaceAll('_-', "_\\-;");
 
             if (query.match(/^[A-Za-z]+.*/g) !== null){
                 let tagName = query.split(/[#\[.]/g)[0];
@@ -52,10 +54,6 @@ export function convertToRegex(searchText : string) : String{
 
             if (regex[index].includes('{')){
                 regex[index] = regex[index].replace("\\s+", "\\s+(").replace(".*{",".*){");
-            }
-
-            if (regex[index].includes('class')){
-                regex[index] = regex[index].replace(`.*[\\s'"]`, `[^=]*[\\s'"]`);
             }
 
             index++;

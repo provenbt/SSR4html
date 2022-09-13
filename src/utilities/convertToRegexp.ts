@@ -54,6 +54,10 @@ export function convertToRegex(searchText : string) : String{
                 regex[index] = regex[index].replace("\\s+", "\\s+(").replace(".*{",".*){");
             }
 
+            if (regex[index].includes('class')){
+                regex[index] = regex[index].replace(`.*[\\s'"]`, `[^=]*[\\s'"]`);
+            }
+
             index++;
         }
     } catch (error) {

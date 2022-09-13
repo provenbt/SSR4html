@@ -8,7 +8,7 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
     let processResult: string = "";
     let searchMessage: string = "";
 
-    let isFileChanged: boolean = false;
+    let changeFile: boolean = false;
     replaceText = replaceText.trim();
 
     const dom = new jsdom.JSDOM(htmlText);
@@ -16,30 +16,41 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
 
     try {
         if (searchResult === "Result found to replace") {
-            for (let result of results) {
-                switch (choice) {
-                    case "Set Class":
+            switch (choice) {
+                case "Set Class":
+                    for(let result of results){
                         result.className = replaceText;
+                    }
 
-                        isFileChanged = true;
-                        break;
-                    case "Append Class":
-                        const classNamesToAppend = replaceText.split(' ');
+                    changeFile = true;
+                    break;
 
+                case "Append to Class":
+                    const classNamesToAppend = replaceText.split(' ');
+
+                    for(let result of results){
                         for (let className of classNamesToAppend) {
+                            //Remove spaces if classNames seperated with more than one white space char
+                            className = className.trim();
                             result.classList.add(className);
                         }
+                    }
 
-                        isFileChanged = true;
-                        break;
-                    case "Set Id":
+                    changeFile = true;
+                    break;
+
+                case "Set Id":
+                    for(let result of results){
                         result.id = replaceText;
+                    }
 
-                        isFileChanged = true;
-                        break;
-                    case "Set Attribute":
-                        const attributeValuePairs: string[] = replaceText.replaceAll(/"|'/g, '').split(',');
+                    changeFile = true;
+                    break;
 
+                case "Set Attribute":
+                    const attributeValuePairs: string[] = replaceText.replaceAll(/"|'/g, '').split(',');
+
+                    for(let result of results){
                         for (let attributeValuePair of attributeValuePairs) {
                             //Attribute name cannot include any kind of space character
                             let attribute = attributeValuePair.split('=')[0].replaceAll(' ', '');
@@ -47,15 +58,38 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
 
                             result.setAttribute(attribute, value);
                         }
+                    }
 
-                        isFileChanged = true;
-                        break;
-                    case "Change Tag Name":
-                        const newTagName = replaceText.replaceAll(' ', '');
+                    changeFile = true;
+                    break;
 
-                        const { document } = (new jsdom.JSDOM()).window;
+                case "Append to Attribute":
+                    const attributeNameForAppend: string = replaceText.split(',')[0];
+                    const valuesToAppend : string[] = replaceText.replaceAll(/"|'/g, '').split(',').slice(1).map(value => {
+                        return value.trim();
+                    });
+                    
+                    for (let result of results){
+                        const oldValue: string = result.getAttribute(attributeNameForAppend);
+
+                        if (oldValue !== null){
+                            const newValue: string = oldValue + ' ' + valuesToAppend.join(' ');
+                          
+                            result.setAttribute(attributeNameForAppend, newValue);
+                            changeFile = true;
+                        }
+                    }
+
+                    break;
+
+                case "Change Tag Name":
+                    const newTagName = replaceText.replaceAll(' ', '');
+                    const { document } = (new jsdom.JSDOM()).window;
+
+                    for (let result of results){
                         // Create the document fragment 
                         const frag = document.createDocumentFragment();
+
                         // Fill it with what's in the source element 
                         while (result.firstChild) {
                             frag.appendChild(result.firstChild);
@@ -72,48 +106,87 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                         }
                         // Replace the source element with the new element on the page 
                         result.parentNode.replaceChild(newElem, result);
+                    }
 
-                        isFileChanged = true;
-                        break;
-                    case "Add Upper Tag":
-                        const parentInfo = replaceText.replaceAll(' ', '');
+                    changeFile = true;
+                    break;
 
+                case "Add Upper Tag":
+                    const parentInfo = replaceText.replaceAll(' ', '');
+
+                    for (let result of results){
                         const newParent = createElementFromSelector(parentInfo);
-
                         result.parentNode.insertBefore(newParent, result);
                         newParent.appendChild(result);
+                    }
 
-                        isFileChanged = true;
-                        break;
-                    case "Remove Tag":
+                    changeFile = true;
+                    break;
+
+                case "Remove Tag":
+                    for(let result of results){
                         result.remove();
+                    }
 
-                        isFileChanged = true;
-                        break;
-                    case "Remove Class":
-                        const classNamesToRemove = replaceText.trim().split(' ');
+                    changeFile = true;
+                    break;
+                    
+                case "Remove from Class":
+                    const classNamesToRemove = replaceText.trim().split(' ');
 
+                    for (let result of results){
                         for (let className of classNamesToRemove) {
+                            //Remove spaces if classNames seperated with more than one white space char
+                            className = className.trim();
                             if (result.classList.contains(className)) {
                                 result.classList.remove(className);
                             }
                         }
+                    }
 
-                        isFileChanged = true;
-                        break;
-                    case "Remove Attribute":
-                        replaceText = replaceText.trim().replaceAll(' ', '');
-                        const attributesToRemove: string[] = replaceText.split(',');
+                    changeFile = true;
+                    break;
 
+                case "Remove from Attribute":
+                    const attributeNameForRemove: string = replaceText.split(',')[0];
+                    const valuesToRemove : string[] = replaceText.replaceAll(/"|'/g, '').split(',').slice(1).map(value => {
+                        return value.trim();
+                    });
+
+                    for(let result of results){
+                        const oldValue: string = result.getAttribute(attributeNameForRemove);
+                        
+                        if (oldValue !== null){
+                            let newValue = oldValue;
+
+                            for(let value of valuesToRemove){
+                                newValue = newValue.replace(new RegExp(`(?:^|[\\W])${value}`,'g'),'');
+                            }
+
+                            result.setAttribute(attributeNameForRemove, newValue.trim());
+                            changeFile = true;
+                        }
+                    }
+                    
+                    break;
+
+                case "Remove Attribute":
+                    replaceText = replaceText.trim().replaceAll(' ', '');
+                    const attributesToRemove: string[] = replaceText.split(',');
+
+                    for(let result of results){
                         for (let attribute of attributesToRemove) {
                             if (result.hasAttribute) {
                                 result.removeAttribute(attribute);
                             }
                         }
+                    }
 
-                        isFileChanged = true;
-                        break;
-                    case "Remove Upper Tag":
+                    changeFile = true;
+                    break;
+
+                case "Remove Upper Tag":
+                    for (let result of results){
                         if (result.parentElement === null) {
                             throw new Error(`${result.tagName.toLowerCase()} tag does not have an upper tag`);
                         }
@@ -121,18 +194,18 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                         //Remove any upper tag except HTML, HEAD and BODY tags
                         if (result.parentElement.tagName !== "HTML" && result.parentElement.tagName !== "HEAD" && result.parentElement.tagName !== "BODY") {
                             result.parentElement.replaceWith(...result.parentElement.childNodes);
+                            changeFile = true;
                         }
+                    }
 
-                        isFileChanged = true;
-                        break;
-                }
+                    break;
             }
         }
         else {
             searchMessage = searchResult;
         }
 
-        if (isFileChanged) {
+        if (changeFile) {
             rawContents.push(new TextEncoder().encode(htmlText));
             fileList.push(file);
             await vscode.workspace.fs.writeFile(file, new TextEncoder().encode(pretty(dom.serialize(), { ocd: true })));

@@ -3,19 +3,19 @@ import { getUri } from "../utilities/getUri";
 
 export class StructuralSearchPanel {
   public static currentPanel: StructuralSearchPanel | undefined;
-  public readonly _panel: vscode.WebviewPanel;
-  private _disposables: vscode.Disposable[] = [];
+  private readonly panel: vscode.WebviewPanel;
+  private disposables: vscode.Disposable[] = [];
 
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
-    this._panel = panel;
-    this._panel.onDidDispose(this.dispose, null, this._disposables);
-    this._panel.webview.html = this._getWebviewContent(this._panel.webview, extensionUri);
-    this._setWebviewMessageListener(this._panel.webview);
+    this.panel = panel;
+    this.panel.onDidDispose(this.dispose, null, this.disposables);
+    this.panel.webview.html = this.getWebviewContent(this.panel.webview, extensionUri);
+    this.setWebviewMessageListener(this.panel.webview);
   }
 
   public static render(extensionUri: vscode.Uri) {
     if (StructuralSearchPanel.currentPanel) {
-      StructuralSearchPanel.currentPanel._panel.reveal(vscode.ViewColumn.Beside);
+      StructuralSearchPanel.currentPanel.panel.reveal(vscode.ViewColumn.Beside);
     } else {
       const panel = vscode.window.createWebviewPanel("webview", "Structural Search and Replace", vscode.ViewColumn.Beside, {
         enableScripts: true,
@@ -29,17 +29,17 @@ export class StructuralSearchPanel {
   public dispose() {
     StructuralSearchPanel.currentPanel = undefined;
 
-    this._panel.dispose();
+    this.panel.dispose();
 
-    while (this._disposables.length) {
-      const disposable = this._disposables.pop();
+    while (this.disposables.length) {
+      const disposable = this.disposables.pop();
       if (disposable) {
         disposable.dispose();
       }
     }
   }
 
-  private _setWebviewMessageListener(webview: vscode.Webview) {
+  private setWebviewMessageListener(webview: vscode.Webview) {
     webview.onDidReceiveMessage(
       (message: any) => {
         const { command, search, replace, choice } = message;
@@ -67,11 +67,11 @@ export class StructuralSearchPanel {
         }
       },
       undefined,
-      this._disposables
+      this.disposables
     );
   }
 
-  private _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
+  private getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
     const toolkitUri = getUri(webview, extensionUri, [
       "node_modules",
       "@vscode",

@@ -35,8 +35,8 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	});
 	
-	const rawContents: Uint8Array[] = [];
-	const fileList: vscode.Uri[] = [];
+	const RAW_CONTENTS: Uint8Array[] = [];
+	const FILE_LIST: vscode.Uri[] = [];
 
 	let disposableReplaceInFiles = vscode.commands.registerCommand('tag-manager.replaceInFiles', async (searchText, replaceText, choice) => {
 
@@ -46,8 +46,8 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 
-		rawContents.splice(0,rawContents.length); fileList.splice(0,fileList.length);
-		const { processResults, searchMessage } = await replaceInFiles(fileList, rawContents, choice, searchText, replaceText);
+		RAW_CONTENTS.splice(0,RAW_CONTENTS.length); FILE_LIST.splice(0,FILE_LIST.length);
+		const { processResults, searchMessage } = await replaceInFiles(FILE_LIST, RAW_CONTENTS, choice, searchText, replaceText);
 		const processResult = processResults.includes("Success") ? "Success" : "";
 
 		setTimeout(() => {
@@ -73,8 +73,8 @@ export function activate(context: vscode.ExtensionContext) {
 			const htmlText = editor.document.getText();
 			const file = editor.document.uri;
 			
-			rawContents.splice(0,rawContents.length); fileList.splice(0,fileList.length);
-			const {processResult, searchMessage} = await replaceInFile(htmlText, choice, searchText, replaceText, file, fileList, rawContents);
+			RAW_CONTENTS.splice(0,RAW_CONTENTS.length); FILE_LIST.splice(0,FILE_LIST.length);
+			const {processResult, searchMessage} = await replaceInFile(htmlText, choice, searchText, replaceText, file, FILE_LIST, RAW_CONTENTS);
 			
 			setTimeout(() => {
 				notifyUser(processResult, searchMessage, searchText, replaceText, choice);
@@ -83,7 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	let disposableRevertChanges = vscode.commands.registerCommand('tag-manager.revertChanges', (searchText, choice) => {
-		revertChanges(fileList, rawContents, searchText, choice);
+		revertChanges(FILE_LIST, RAW_CONTENTS, searchText, choice);
 	});
 
 	context.subscriptions.push(disposableSearchPanel);

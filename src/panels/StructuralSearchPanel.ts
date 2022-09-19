@@ -17,7 +17,7 @@ export class StructuralSearchPanel {
     if (StructuralSearchPanel.currentPanel) {
       StructuralSearchPanel.currentPanel.panel.reveal(vscode.ViewColumn.Beside);
     } else {
-      const panel = vscode.window.createWebviewPanel("webview", "Structural Search and Replace", vscode.ViewColumn.Beside, {
+      const panel = vscode.window.createWebviewPanel("webview", "SSR4HTML", vscode.ViewColumn.Beside, {
         enableScripts: true,
         retainContextWhenHidden: true
       });
@@ -90,7 +90,7 @@ export class StructuralSearchPanel {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <script type = "module" src = "${toolkitUri}"></script>
           <script type = "module" src = "${mainUri}"></script>
-          <title>Structural Search and Replace</title>
+          <title>SSR4HTML</title>
         </head>
         <body>
           <h3>Structural Search and Replace</h3>
@@ -108,7 +108,7 @@ export class StructuralSearchPanel {
             <div class = "form-group row" style = "padding-top:12px;padding-bottom:12px;">
               <fieldset style = "width:50%;">
                 <legend>Search Option</legend>
-                <vscode-checkbox id="searchInAll" checked>Search in all files</vscode-checkbox>
+                <vscode-checkbox id="searchInAll" checked>Search in all HTML files</vscode-checkbox>
               </fieldset>
             </div>
 

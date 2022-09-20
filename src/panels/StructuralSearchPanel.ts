@@ -98,7 +98,7 @@ export class StructuralSearchPanel {
           <form class = "btn-group" style = "padding-left: 5px;">
             <div class = "form-group row" style = "display:inline">
               <span style = "vertical-align: middle;">
-                <vscode-text-area id = "searchBox" autofocus cols="45" rows="1" placeholder="basic CSS selector commands">Search</vscode-text-area>
+                <vscode-text-area id = "searchBox" autofocus cols="90" rows="1" placeholder="basic CSS selector commands">Search</vscode-text-area>
               </span>
               <div>
                 <vscode-button id = "searchBtn" appearance="primary">Search</vscode-button>
@@ -106,7 +106,7 @@ export class StructuralSearchPanel {
             </div>
 
             <div class = "form-group row" style = "padding-top:12px;padding-bottom:12px;">
-              <fieldset style = "width:50%;">
+              <fieldset style="width:175px;">
                 <legend>Search Option</legend>
                 <vscode-checkbox id="searchInAll" checked>Search in all HTML files</vscode-checkbox>
               </fieldset>
@@ -135,7 +135,7 @@ export class StructuralSearchPanel {
 
             <div id = "replacementForm" class = "form-group row" style = "display:none;">
               <span style = "vertical-align: middle;">
-                <vscode-text-area id = "replacementBox" autofocus cols="45" rows="1">Replace</vscode-text-area>
+                <vscode-text-area id = "replacementBox" autofocus cols="90" rows="1">Replace</vscode-text-area>
               </span>
               <div>
                 <vscode-button id = "replaceBtn" appearance="primary">Replace</vscode-button>
@@ -161,7 +161,7 @@ export class StructuralSearchPanel {
                     replacementBox.placeholder = "id value";
                     replaceBtn.innerText = "Set";
                   }else if(that.value === "Set Attribute"){
-                    replacementBox.placeholder = "atr name1=value1,name2=value2, ...";
+                    replacementBox.placeholder = "name1=value1,name2=value2, ...";
                     replaceBtn.innerText = "Set";
                   }else if(that.value === "Append to Attribute"){
                     replacementBox.placeholder = "atr-name,value1,value2, ...";

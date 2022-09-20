@@ -48,7 +48,7 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                     break;
 
                 case "Set Attribute":
-                    const attributeValuePairs: string[] = replaceText.replaceAll(/"|'/g, '').split(',');
+                    const attributeValuePairs: string[] = replaceText.replace(/"|'/g, '').split(',');
 
                     for(let result of results){
                         for (let attributeValuePair of attributeValuePairs) {
@@ -65,7 +65,7 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
 
                 case "Append to Attribute":
                     const attributeNameForAppend: string = replaceText.split(',')[0];
-                    const valuesToAppend : string[] = replaceText.replaceAll(/"|'/g, '').split(',').slice(1).map(value => {
+                    const valuesToAppend : string[] = replaceText.replace(/"|'/g, '').split(',').slice(1).map(value => {
                         return value.trim();
                     });
                     
@@ -149,7 +149,7 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
 
                 case "Remove from Attribute":
                     const attributeNameForRemove: string = replaceText.split(',')[0];
-                    const valuesToRemove : string[] = replaceText.replaceAll(/"|'/g, '').split(',').slice(1).map(value => {
+                    const valuesToRemove : string[] = replaceText.replace(/"|'/g, '').split(',').slice(1).map(value => {
                         return value.trim();
                     });
 

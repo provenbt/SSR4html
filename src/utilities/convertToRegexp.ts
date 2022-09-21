@@ -8,8 +8,8 @@ export function convertToRegex(searchText : string) : String{
         for(let query of queries){
             
             query = query.trim();
-            if(query.includes('|') || /^[^A-Za-z#\[.]/g.test(query)){
-                throw new Error("Unsupported selector command detected");
+            if( query.includes('|') || /^[^A-Za-z#\[.]/g.test(query) || (!query.includes('[') && (query.includes(' ') || query.includes(':'))) ){
+                throw new Error("Unsupported CSS selector");
             }
             
             regex[index] = s2r.default(query);
@@ -53,8 +53,8 @@ export function convertToRegex(searchText : string) : String{
 
                     for(let atrQuery of attributeQueries){
                         let value = atrQuery.slice(atrQuery.indexOf('=')+1, atrQuery.indexOf(']'));
-                        value = value.replace(/"|'/g, '');
-                        console.log(value);
+                        value = value.trim().replace(/"|'/g, '');
+                    
                         if (atrQuery.includes("$=")){
                             regex[index] = regex[index].replace(`${value}[\\s`, `${value}[`);
                         } else if(atrQuery.includes("^=")){
@@ -79,7 +79,7 @@ export function convertToRegex(searchText : string) : String{
         console.log(error);
     }
     
-    let finalRegex = regex.length ? regex.join('|') : "Invalid Css Selector Command";
+    let finalRegex = regex.length ? regex.join('|') : "Invalid Css Selector";
 
     return finalRegex; 
 }

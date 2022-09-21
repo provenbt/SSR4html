@@ -20,7 +20,7 @@ export function createElementFromSelector(selector: string) {
         element = document.createElement(matches[1].toLowerCase()||'div');
         if(matches[2]) {element.id = matches[2];}
         if(matches[3]) {element.className = matches[3];}
-        if(matches[4]) {element.setAttribute(matches[4],matches[5].replace(']',"").replaceAll(/'|"/g,"")||'');}
+        if(matches[4]) {element.setAttribute(matches[4],matches[5].replace(']',"").replace(/'|"/g,"")||'');}
         
     } catch (error) {
         element = null;

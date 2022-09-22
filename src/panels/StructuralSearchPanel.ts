@@ -98,10 +98,10 @@ export class StructuralSearchPanel {
           <form class = "btn-group" style = "padding-left: 5px;">
             <div class = "form-group row" style = "display:inline">
               <span style = "vertical-align: middle;">
-                <vscode-text-area id = "searchBox" autofocus cols="90" rows="1" placeholder="basic CSS selector commands">Search</vscode-text-area>
+                <vscode-text-area id = "searchBox" onkeyup="enableSearchButton(this)" cols="90" rows="1" placeholder="Basic CSS Selector(s)">Search</vscode-text-area>
               </span>
               <div>
-                <vscode-button id = "searchBtn" appearance="primary">Search</vscode-button>
+                <vscode-button id = "searchBtn" appearance="primary" disabled>Search</vscode-button>
               </div>
             </div>
 
@@ -144,11 +144,13 @@ export class StructuralSearchPanel {
             </div>
 
             <script>
+
               function showReplacementForm(that) {
                 const replacementForm = document.getElementById("replacementForm");
                 const replacementBox = document.getElementById("replacementBox");
                 const replaceBtn = document.getElementById("replaceBtn");
                 replacementBox.value = "";
+
                 if (that.value !== "Unselected") {
                   replacementForm.style.display = "inline";
                   if(that.value === "Set Class"){
@@ -158,7 +160,7 @@ export class StructuralSearchPanel {
                     replacementBox.placeholder = "class-name1 class-name2 ...";
                     replaceBtn.innerText = "Append";
                   }else if(that.value === "Set Id"){
-                    replacementBox.placeholder = "id value";
+                    replacementBox.placeholder = "Id Value";
                     replaceBtn.innerText = "Set";
                   }else if(that.value === "Set Attribute"){
                     replacementBox.placeholder = "name1=value1,name2=value2, ...";
@@ -167,10 +169,10 @@ export class StructuralSearchPanel {
                     replacementBox.placeholder = "atr-name,value1,value2, ...";
                     replaceBtn.innerText = "Append";
                   }else if(that.value === "Change Tag Name"){
-                    replacementBox.placeholder = "new tag name";
+                    replacementBox.placeholder = "New Tag Name";
                     replaceBtn.innerText = "Change";
                   }else if (that.value === "Remove Tag"){
-                    replacementBox.placeholder = "click remove if you are sure";
+                    replacementBox.placeholder = "Click Remove if You Are Sure";
                     replaceBtn.innerText = "Remove";
                   }else if(that.value === "Remove from Class"){
                     replacementBox.placeholder = "class-name1 class-name2 ...";
@@ -185,7 +187,7 @@ export class StructuralSearchPanel {
                     replacementBox.placeholder = "tagName#id.class[attribute=value]";
                     replaceBtn.innerText = "Add";
                   }else if(that.value === "Remove Upper Tag"){
-                    replacementBox.placeholder = "click remove if you are sure";
+                    replacementBox.placeholder = "Click Remove If You Are Sure";
                     replaceBtn.innerText = "Remove";
                   }else {
                     console.log("this selection is not possible");
@@ -195,6 +197,17 @@ export class StructuralSearchPanel {
                 else {
                   replacementForm.style.display = "none";
                 }
+              }
+
+              function enableSearchButton(that) {
+                const inputValue = that.value;
+                const button = document.getElementById("searchBtn");
+               
+                if(inputValue==="") { 
+                  button.disabled = true; 
+                } else { 
+                  button.disabled = false;
+                }   
               }
             </script>
           </form>

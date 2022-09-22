@@ -12,10 +12,10 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
     replaceText = replaceText.trim();
 
     const dom = new jsdom.JSDOM(htmlText);
-    const { results, searchResult } = getQuerySelectorResults(dom, searchText);
+    const { results, searchOperationResult } = getQuerySelectorResults(dom, searchText);
 
     try {
-        if (searchResult === "Result found to replace") {
+        if (searchOperationResult === "Result found to replace") {
             switch (choice) {
                 case "Set Class":
                     for(let result of results){
@@ -202,7 +202,7 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
             }
         }
         else {
-            searchMessage = searchResult;
+            searchMessage = searchOperationResult;
         }
 
         if (changeFile) {

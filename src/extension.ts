@@ -11,6 +11,10 @@ import { notifyUser } from './utilities/notifyUser';
 
 export function activate(context: vscode.ExtensionContext) {
 
+	// To store the previous state of the files, vital to revert changes made in the file(s).
+	const RAW_CONTENTS: Uint8Array[] = [];
+	const FILE_LIST: vscode.Uri[] = [];
+
 	let disposableSearchPanel = vscode.commands.registerCommand('tag-manager.searchPanelTag', () => {
 		StructuralSearchPanel.render(context.extensionUri);
 	});
@@ -29,14 +33,11 @@ export function activate(context: vscode.ExtensionContext) {
 				return;
 			}
 
-			const filePath = editor.document.fileName.split(/\/|\\/g);
+			const filePath = editor.document.fileName;
 
 			searchInFile(searchText, filePath);
 		});
 	});
-	
-	const RAW_CONTENTS: Uint8Array[] = [];
-	const FILE_LIST: vscode.Uri[] = [];
 
 	let disposableReplaceInFiles = vscode.commands.registerCommand('tag-manager.replaceInFiles', async (searchText, replaceText, choice) => {
 

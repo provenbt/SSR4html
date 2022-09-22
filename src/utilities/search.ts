@@ -15,12 +15,12 @@ export function searchInWorkspace(searchText: string){
     }); 
 }
 
-export function searchInFile(searchText: string, filePath: string[]){
+export function searchInFile(searchText: string, filePath: string){
     
     vscode.commands.executeCommand("workbench.action.findInFiles", {
         // Fill-in selected text to query
         query: convertToRegex(searchText),
-        filesToInclude: `${filePath[filePath.length-2]}/${filePath[filePath.length-1]}`,
+        filesToInclude: `*${filePath}`,
         triggerSearch: true,
         isRegex: true,
         matchWholeWord: true,

@@ -93,124 +93,72 @@ export class StructuralSearchPanel {
           <title>SSR4HTML</title>
         </head>
         <body>
-          <h3>Structural Search and Replace</h3>
-          <div style = "width:auto">
-          <form class = "btn-group" style = "padding-left: 5px;">
-            <div class = "form-group row" style = "display:inline">
-              <span style = "vertical-align: middle;">
-                <vscode-text-area id = "searchBox" onkeyup="enableSearchButton(this)" cols="90" rows="1" placeholder="Basic CSS Selector(s)">Search</vscode-text-area>
-              </span>
-              <div>
-                <vscode-button id = "searchBtn" appearance="primary" disabled>Search</vscode-button>
+          <div style="width:300px;">
+            <h3>Structural Search and Replace</h3>
+          </div>
+
+          <div style = "width:auto;padding-left:5px;">
+            <form class="btn-group">
+              <div class="form-group row" style="padding-bottom:15px;">
+                <fieldset>
+                  <legend style="text-align:center;">Search</legend>
+                  <div>
+                    <vscode-text-area id = "searchBox" cols="90" rows="1" placeholder="Basic CSS Selector(s)">Search Text</vscode-text-area>
+                  </div>
+
+                  <div style="padding-top:10px;padding-bottom:10px;">
+                    <fieldset style="width:175px;">
+                      <legend>Search&Replace Option</legend>
+                      <vscode-checkbox id="searchInAll" checked>Include all HTML files</vscode-checkbox>
+                    </fieldset>
+                  </div>
+
+                  <div>
+                    <vscode-button id="searchBtn" appearance="primary" disabled>Search</vscode-button>
+                    <vscode-button id="cancelBtn" appearance="secondary" disabled>Research</vscode-button>
+                  </div>
+                </fieldset>
               </div>
-            </div>
+              
+              <div id="replacementPart" class="form-group row" style="display:none;">
+                <fieldset>
+                  <legend style="text-align:center;">Replace</legend>
+                  
+                  <div>
+                    <vscode-tag style = "padding-bottom:3px;">Replacement Choice</vscode-tag>
+                    <div>
+                      <vscode-dropdown id = "selection" position="below" style = "width:180px;text-align-last:center;">
+                        <vscode-option value = "Unselected">Unselected</vscode-option>
+                        <vscode-option value = "Set Class">Set Class</vscode-option>
+                        <vscode-option value = "Append to Class">Append to Class</vscode-option>
+                        <vscode-option value = "Remove from Class">Remove from Class</vscode-option>
+                        <vscode-option value = "Set Id">Set Id</vscode-option>
+                        <vscode-option value = "Set Attribute">Set Attribute</vscode-option>
+                        <vscode-option value = "Append to Attribute">Append to Attribute</vscode-option>
+                        <vscode-option value = "Remove from Attribute">Remove from Attribute</vscode-option>
+                        <vscode-option value = "Remove Attribute">Remove Attribute</vscode-option>
+                        <vscode-option value = "Change Tag Name">Change Tag Name</vscode-option>
+                        <vscode-option value = "Remove Tag">Remove Tag</vscode-option>
+                        <vscode-option value = "Add Upper Tag">Add Upper Tag</vscode-option>
+                        <vscode-option value = "Remove Upper Tag">Remove Upper Tag</vscode-option>
+                      </vscode-dropdown>
+                    </div>
+                  </div>
 
-            <div class = "form-group row" style = "padding-top:12px;padding-bottom:12px;">
-              <fieldset style="width:175px;">
-                <legend>Search Option</legend>
-                <vscode-checkbox id="searchInAll" checked>Search in all HTML files</vscode-checkbox>
-              </fieldset>
-            </div>
+                  <div id="replacementForm" class="form-group row" style="display:none;">
 
-            <div class = "form-group row" style = "padding-top:12px;padding-bottom:12px;">
-              <vscode-tag style = "padding-bottom: 2px;">Replacement Choice</vscode-tag>
-              <div>
-                <vscode-dropdown id = "selection" onchange = "showReplacementForm(this)" position="below" style = "width: 180px;text-align-last: center;">
-                  <vscode-option value = "Unselected">Unselected</vscode-option>
-                  <vscode-option value = "Set Class">Set Class</vscode-option>
-                  <vscode-option value = "Append to Class">Append to Class</vscode-option>
-                  <vscode-option value = "Remove from Class">Remove from Class</vscode-option>
-                  <vscode-option value = "Set Id">Set Id</vscode-option>
-                  <vscode-option value = "Set Attribute">Set Attribute</vscode-option>
-                  <vscode-option value = "Append to Attribute">Append to Attribute</vscode-option>
-                  <vscode-option value = "Remove from Attribute">Remove from Attribute</vscode-option>
-                  <vscode-option value = "Remove Attribute">Remove Attribute</vscode-option>
-                  <vscode-option value = "Change Tag Name">Change Tag Name</vscode-option>
-                  <vscode-option value = "Remove Tag">Remove Tag</vscode-option>
-                  <vscode-option value = "Add Upper Tag">Add Upper Tag</vscode-option>
-                  <vscode-option value = "Remove Upper Tag">Remove Upper Tag</vscode-option>
-                </vscode-dropdown>
-              </div>
-            </div>
+                    <div style="padding-top:10px;padding-bottom:10px;">
+                      <vscode-text-area id="replacementBox" cols="90" rows="1">Replacement Text</vscode-text-area>
+                    </div>
+                    <div>
+                      <vscode-button id="replaceBtn" appearance="primary">Replace</vscode-button>
+                      <vscode-button id="revertBtn" appearance="secondary">Revert</vscode-button>
+                    </div>
 
-            <div id = "replacementForm" class = "form-group row" style = "display:none;">
-              <span style = "vertical-align: middle;">
-                <vscode-text-area id = "replacementBox" autofocus cols="90" rows="1">Replace</vscode-text-area>
-              </span>
-              <div>
-                <vscode-button id = "replaceBtn" appearance="primary">Replace</vscode-button>
-                <vscode-button id = "revertBtn" appearance="secondary">Revert</vscode-button>
-              </div>
-            </div>
-
-            <script>
-
-              function showReplacementForm(that) {
-                const replacementForm = document.getElementById("replacementForm");
-                const replacementBox = document.getElementById("replacementBox");
-                const replaceBtn = document.getElementById("replaceBtn");
-                replacementBox.value = "";
-
-                if (that.value !== "Unselected") {
-                  replacementForm.style.display = "inline";
-                  if(that.value === "Set Class"){
-                    replacementBox.placeholder = "class-name1 class-name2 ...";
-                    replaceBtn.innerText = "Set";
-                  }else if(that.value === "Append to Class"){
-                    replacementBox.placeholder = "class-name1 class-name2 ...";
-                    replaceBtn.innerText = "Append";
-                  }else if(that.value === "Set Id"){
-                    replacementBox.placeholder = "Id Value";
-                    replaceBtn.innerText = "Set";
-                  }else if(that.value === "Set Attribute"){
-                    replacementBox.placeholder = "name1=value1,name2=value2, ...";
-                    replaceBtn.innerText = "Set";
-                  }else if(that.value === "Append to Attribute"){
-                    replacementBox.placeholder = "atr-name,value1,value2, ...";
-                    replaceBtn.innerText = "Append";
-                  }else if(that.value === "Change Tag Name"){
-                    replacementBox.placeholder = "New Tag Name";
-                    replaceBtn.innerText = "Change";
-                  }else if (that.value === "Remove Tag"){
-                    replacementBox.placeholder = "Click Remove if You Are Sure";
-                    replaceBtn.innerText = "Remove";
-                  }else if(that.value === "Remove from Class"){
-                    replacementBox.placeholder = "class-name1 class-name2 ...";
-                    replaceBtn.innerText = "Remove";
-                  }else if(that.value === "Remove from Attribute"){
-                    replacementBox.placeholder = "atr-name,value1,value2, ...";
-                    replaceBtn.innerText = "Remove";
-                  }else if(that.value === "Remove Attribute"){
-                    replacementBox.placeholder = "atr-name1,atr-name2, ...";
-                    replaceBtn.innerText = "Remove";
-                  }else if(that.value === "Add Upper Tag"){
-                    replacementBox.placeholder = "tagName#id.class[attribute=value]";
-                    replaceBtn.innerText = "Add";
-                  }else if(that.value === "Remove Upper Tag"){
-                    replacementBox.placeholder = "Click Remove If You Are Sure";
-                    replaceBtn.innerText = "Remove";
-                  }else {
-                    console.log("this selection is not possible");
-                    replacementForm.style.display = "none";
-                  }
-                } 
-                else {
-                  replacementForm.style.display = "none";
-                }
-              }
-
-              function enableSearchButton(that) {
-                const inputValue = that.value;
-                const button = document.getElementById("searchBtn");
-               
-                if(inputValue==="") { 
-                  button.disabled = true; 
-                } else { 
-                  button.disabled = false;
-                }   
-              }
-            </script>
-          </form>
+                  </div>
+                </fieldset>
+              </div>    
+            </form>
           </div>
         </body>
       </html>

@@ -53,6 +53,11 @@ export class StructuralSearchPanel {
             vscode.commands.executeCommand("tag-manager.searchInFiles", search);
             break;
 
+          case "cancelSearch":
+            vscode.commands.executeCommand("search.action.clearSearchResults");
+            vscode.commands.executeCommand("workbench.action.closeSidebar");
+            break;
+
           case "replaceInFile":
             vscode.commands.executeCommand("tag-manager.replaceInFile", search, replace, choice);
             break;
@@ -103,7 +108,7 @@ export class StructuralSearchPanel {
                 <fieldset>
                   <legend style="text-align:center;">Search</legend>
                   <div>
-                    <vscode-text-area id = "searchBox" cols="90" rows="1" placeholder="Basic CSS Selector(s)">Search Text</vscode-text-area>
+                    <vscode-text-area id = "searchBox" cols="150" rows="1" placeholder="Basic CSS Selector(s)">Search Text</vscode-text-area>
                   </div>
 
                   <div style="padding-top:10px;padding-bottom:10px;">
@@ -115,7 +120,7 @@ export class StructuralSearchPanel {
 
                   <div>
                     <vscode-button id="searchBtn" appearance="primary" disabled>Search</vscode-button>
-                    <vscode-button id="cancelBtn" appearance="secondary" disabled>Research</vscode-button>
+                    <vscode-button id="cancelBtn" appearance="secondary" disabled>Cancel</vscode-button>
                   </div>
                 </fieldset>
               </div>
@@ -148,7 +153,7 @@ export class StructuralSearchPanel {
                   <div id="replacementForm" class="form-group row" style="display:none;">
 
                     <div style="padding-top:10px;padding-bottom:10px;">
-                      <vscode-text-area id="replacementBox" cols="90" rows="1">Replacement Text</vscode-text-area>
+                      <vscode-text-area id="replacementBox" cols="150" rows="1">Replacement Text</vscode-text-area>
                     </div>
                     <div>
                       <vscode-button id="replaceBtn" appearance="primary">Replace</vscode-button>
@@ -164,5 +169,4 @@ export class StructuralSearchPanel {
       </html>
     `;
   }
-
 }

@@ -55,6 +55,10 @@ function onClickCancelButton(){
   REPLACEMENT_PART.style.display = "none";
   REPLACEMENT_FORM.style.display = "none";
   SELECTION.value = "";
+
+  vscode.postMessage({
+    command: "cancelSearch"
+  });  
 }
 
 function onClickReplaceButton(){
@@ -78,11 +82,11 @@ function onClickRevertButton(){
 
 function enableSearchButton(that) {
  
-  if(SEARCH_BOX.value==="") { 
+  if(SEARCH_BOX.value.trim() === "") { 
     SEARCH_BUTTON.disabled = true;
   } else { 
     SEARCH_BUTTON.disabled = false;
-  }   
+  }
 }
 
 function showReplacementForm() {

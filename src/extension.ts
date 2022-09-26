@@ -48,11 +48,11 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 
 		RAW_CONTENTS.splice(0,RAW_CONTENTS.length); FILE_LIST.splice(0,FILE_LIST.length);
-		const { processResults, searchMessage } = await replaceInFiles(FILE_LIST, RAW_CONTENTS, choice, searchText, replaceText);
+		const { processResults, warningMessage } = await replaceInFiles(FILE_LIST, RAW_CONTENTS, choice, searchText, replaceText);
 		const processResult = processResults.includes("Success") ? "Success" : "";
 
 		setTimeout(() => {
-			notifyUser(processResult, searchMessage, searchText, replaceText, choice);
+			notifyUser(processResult, warningMessage, searchText, replaceText, choice);
 		}, 1000);
 	});
 
@@ -75,10 +75,10 @@ export function activate(context: vscode.ExtensionContext) {
 			const file = editor.document.uri;
 			
 			RAW_CONTENTS.splice(0,RAW_CONTENTS.length); FILE_LIST.splice(0,FILE_LIST.length);
-			const {processResult, searchMessage} = await replaceInFile(htmlText, choice, searchText, replaceText, file, FILE_LIST, RAW_CONTENTS);
+			const {processResult, warningMessage} = await replaceInFile(htmlText, choice, searchText, replaceText, file, FILE_LIST, RAW_CONTENTS);
 			
 			setTimeout(() => {
-				notifyUser(processResult, searchMessage, searchText, replaceText, choice);
+				notifyUser(processResult, warningMessage, searchText, replaceText, choice);
 			}, 1000);	
 		});
 	});

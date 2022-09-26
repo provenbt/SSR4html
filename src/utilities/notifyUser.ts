@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 
-export function notifyUser(processResult: string, searchMessage: string, searchText: string, replaceText: string, choice: string){
+export function notifyUser(processResult: string, warningMessage: string, searchText: string, replaceText: string, choice: string){
     if (processResult === ""){
-        vscode.window.showWarningMessage(searchMessage);
+        vscode.window.showWarningMessage(warningMessage);
     } else if (processResult === "Success"){
         vscode.commands.executeCommand("search.action.refreshSearchResults").then(()=>{
             if (replaceText === ""){

@@ -6,7 +6,7 @@ const jsdom = require("jsdom");
 
 export async function replaceInFile(htmlText: string, choice: string, searchText: string, replaceText: string, file: vscode.Uri, fileList: vscode.Uri[], rawContents: Uint8Array[]) {
     let processResult: string = "";
-    let searchMessage: string = "";
+    let warningMessage: string = "";
 
     let changeFile: boolean = false;
     replaceText = replaceText.trim();
@@ -29,14 +29,19 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                     const classNamesToAppend = replaceText.split(' ');
 
                     for(let result of results){
-                        for (let className of classNamesToAppend) {
-                            //Remove spaces if classNames seperated with more than one white space char
-                            className = className.trim();
-                            result.classList.add(className);
+                        if (result.hasAttribute("class")){
+                            for (let className of classNamesToAppend) {
+                                //Remove spaces if classNames seperated with more than one white space char
+                                className = className.trim();
+                                result.classList.add(className);
+                            }
+                            changeFile = true;
+                        }
+                        else {
+                            warningMessage = "Class attribute does not exist";
                         }
                     }
 
-                    changeFile = true;
                     break;
 
                 case "Set Id":
@@ -77,6 +82,9 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                           
                             result.setAttribute(attributeNameForAppend, newValue);
                             changeFile = true;
+                        }
+                        else {
+                            warningMessage = `Attribute "${attributeNameForAppend}" does not exist`;
                         }
                     }
 
@@ -135,16 +143,26 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                     const classNamesToRemove = replaceText.trim().split(' ');
 
                     for (let result of results){
-                        for (let className of classNamesToRemove) {
-                            //Remove spaces if classNames seperated with more than one white space char
-                            className = className.trim();
-                            if (result.classList.contains(className)) {
-                                result.classList.remove(className);
+                        if (result.hasAttribute("class")){
+                            for (let className of classNamesToRemove) {
+                                //Remove spaces if classNames seperated with more than one whitespace
+                                className = className.trim();
+    
+                                if (result.classList.contains(className)) {
+                                    result.classList.remove(className);
+                                    changeFile = true;
+                                }
                             }
+
+                            if(!changeFile){
+                                warningMessage = classNamesToRemove.length > 1 ? `Classnames "${classNamesToRemove.join(',')}" already don't exist` : `Classname "${classNamesToRemove[0]}" already does not exist`;
+                            }
+                        }
+                        else {
+                            warningMessage = "Class attribute does not exist";
                         }
                     }
 
-                    changeFile = true;
                     break;
 
                 case "Remove from Attribute":
@@ -160,33 +178,45 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                             let newValue = oldValue;
 
                             for(let value of valuesToRemove){
-                                newValue = newValue.replace(new RegExp(`(?:^|[\\W])${value}`,'g'),'');
+                                if (oldValue.includes(value)){
+                                    newValue = newValue.replace(new RegExp(`(?:^|[\\W])${value}`,'g'),'');
+                                    result.setAttribute(attributeNameForRemove, newValue.trim());
+                                    changeFile = true;
+                                }
                             }
-
-                            result.setAttribute(attributeNameForRemove, newValue.trim());
-                            changeFile = true;
+                            
+                            if(!changeFile){
+                                warningMessage = valuesToRemove.length > 1 ? `Values "${valuesToRemove.join(',')}" already don't exist` : `Value "${valuesToRemove[0]}" already does not exist`;
+                            }
+                        }
+                        else {
+                            warningMessage = `Attribute "${attributeNameForRemove}" does not exist`;
                         }
                     }
                     
                     break;
 
                 case "Remove Attribute":
-                    replaceText = replaceText.trim().replaceAll(' ', '');
+                    replaceText = replaceText.trim();
                     const attributesToRemove: string[] = replaceText.split(',');
 
                     for(let result of results){
                         for (let attribute of attributesToRemove) {
-                            if (result.hasAttribute) {
+                            if (result.hasAttribute(attribute)) {
                                 result.removeAttribute(attribute);
+                                changeFile = true;
                             }
                         }
                     }
 
-                    changeFile = true;
+                    if(!changeFile){
+                        warningMessage = attributesToRemove.length > 1 ? `Attributes "${attributesToRemove.join(',')}" already don't exist` : `Attribute "${attributesToRemove[0]}" already does not exist`;
+                    }
+
                     break;
 
                 case "Remove Upper Tag":
-                    for (let result of results){
+                    for (let result of results) {
                         if (result.parentElement === null) {
                             throw new Error(`${result.tagName.toLowerCase()} tag does not have an upper tag`);
                         }
@@ -196,13 +226,16 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                             result.parentElement.replaceWith(...result.parentElement.childNodes);
                             changeFile = true;
                         }
+                        else {
+                            warningMessage = `"${result.parentElement.tagName}" tag cannot be removed`;
+                        }
                     }
 
                     break;
             }
         }
         else {
-            searchMessage = searchOperationResult;
+            warningMessage = searchOperationResult;
         }
 
         if (changeFile) {
@@ -217,5 +250,5 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
         processResult = error.message;
     }
 
-    return { processResult, searchMessage };
+    return { processResult, warningMessage };
 }

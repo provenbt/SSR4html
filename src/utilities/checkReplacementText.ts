@@ -13,7 +13,7 @@ export function checkReplacementText(choice: string, replaceText: string){
 
                 for (let classValue of classValues){
                     if (!(new RegExp(/^[A-Za-z]+.*/,'g').test(classValue.trim()))){
-                        throw new Error("Invalid class name format");
+                        throw new Error("Invalid classname");
                     }      
                 }
 
@@ -21,7 +21,7 @@ export function checkReplacementText(choice: string, replaceText: string){
 
             case "Set Id":
                 if (!(new RegExp(/^[A-Za-z]+.*/,'g').test(replaceText))){
-                    throw new Error("Invalid id value format");
+                    throw new Error("Invalid id value");
                 }
               
                 break;
@@ -31,7 +31,7 @@ export function checkReplacementText(choice: string, replaceText: string){
     
                 for(let attributeValuePair of attributeValuePairs){
                     if (!(new RegExp(/^\s*[A-Za-z]+\s*=\s*[^<>]*[A-Za-z0-9]+[^<>]*$/,'g').test(attributeValuePair))){
-                        throw new Error("Invalid attribute-value format");
+                        throw new Error("Invalid attribute-value pair");
                     }
                 }
             
@@ -41,7 +41,7 @@ export function checkReplacementText(choice: string, replaceText: string){
                 const newTagName = replaceText.replaceAll(' ','');
     
                 if (!(new RegExp(/^[A-Za-z]+$/, 'g').test(newTagName))){
-                    throw new Error("Invalid tag format");
+                    throw new Error("Invalid tag name");
                 }
     
                 break;
@@ -49,7 +49,7 @@ export function checkReplacementText(choice: string, replaceText: string){
             case "Add Upper Tag":
                 const parentInfo = replaceText.replaceAll(' ','');
                 if (!(new RegExp( /^[A-Za-z]+.*$/, 'g').test(parentInfo))){
-                    throw new Error("Invalid tag format");
+                    throw new Error("Invalid tag name");
                 }
     
                 const newParent = createElementFromSelector(parentInfo);
@@ -60,12 +60,15 @@ export function checkReplacementText(choice: string, replaceText: string){
                 break;
 
             case "Remove Attribute":
-                replaceText = replaceText.replaceAll(' ', '');
+                if (replaceText.trim().includes(' ') && !(replaceText.includes(','))){
+                    throw new Error("Use comma(,) beetwen attribute-name(s)");
+                }
+
                 const attributes: string[] = replaceText.split(',');
     
                 for(let attribute of attributes){
-                    if (!(new RegExp( /^[A-Za-z]+/,'g').test(attribute))){
-                        throw new Error("Invalid attribute name format");
+                    if (!(new RegExp( /^[A-Za-z]+/,'g').test(attribute.trim()))){
+                        throw new Error("Invalid attribute name");
                     }
                 }
     
@@ -75,7 +78,7 @@ export function checkReplacementText(choice: string, replaceText: string){
             case "Remove from Attribute":
 
                 if(!(replaceText.includes(','))){
-                    throw new Error("Use ',' to seperate attribute name from the value");
+                    throw new Error("Use comma(,) beetwen attribute-name and value(s)");
                 }
 
                 const attributeName: string = replaceText.split(',')[0];
@@ -84,12 +87,12 @@ export function checkReplacementText(choice: string, replaceText: string){
                 });
 
                 if (!(new RegExp( /^[A-Za-z]+/,'g').test(attributeName))){
-                    throw new Error("Invalid attribute name format");
+                    throw new Error("Invalid attribute name");
                 }
 
                 for(let value of values){
                     if (!(new RegExp(/^[^<>]*[A-Za-z0-9]+[^<>]*$/,'g').test(value))){
-                        throw new Error("Invalid attribute value format");
+                        throw new Error("Invalid attribute value");
                     }
                 }
 

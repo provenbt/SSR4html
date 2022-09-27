@@ -141,6 +141,8 @@ export class StructuralSearchPanel {
                         <vscode-option value = "Set Attribute">Set Attribute</vscode-option>
                         <vscode-option value = "Append to Attribute">Append to Attribute</vscode-option>
                         <vscode-option value = "Remove from Attribute">Remove from Attribute</vscode-option>
+                        <vscode-option value = "Set Style Property">Set Style Property</vscode-option>
+                        <vscode-option value = "Edit Style Property">Edit Style Property</vscode-option>
                         <vscode-option value = "Remove Attribute">Remove Attribute</vscode-option>
                         <vscode-option value = "Change Tag Name">Change Tag Name</vscode-option>
                         <vscode-option value = "Remove Tag">Remove Tag</vscode-option>

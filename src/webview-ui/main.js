@@ -111,6 +111,12 @@ function showReplacementForm() {
     }else if(choice === "Append to Attribute"){
       REPLACEMENT_BOX.placeholder = "atr-name,value1,value2, ...";
       REPLACE_BUTTON.innerText = "Append";
+    }else if(choice === "Set Style Property"){
+      REPLACEMENT_BOX.placeholder = "prop-1:value1,prop-2:value2, ...";
+      REPLACE_BUTTON.innerText = "Set";
+    }else if(choice === "Edit Style Property"){
+      REPLACEMENT_BOX.placeholder = "prop-1:value1,prop-2:value2, ...";
+      REPLACE_BUTTON.innerText = "Edit";
     }else if(choice === "Change Tag Name"){
       REPLACEMENT_BOX.placeholder = "New Tag Name";
       REPLACE_BUTTON.innerText = "Change";

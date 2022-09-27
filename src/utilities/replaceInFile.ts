@@ -18,7 +18,7 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
         if (searchOperationResult === "Result found to replace") {
             switch (choice) {
                 case "Set Class":
-                    for(let result of results){
+                    for (let result of results) {
                         result.className = replaceText;
                     }
 
@@ -28,8 +28,8 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                 case "Append to Class":
                     const classNamesToAppend = replaceText.split(' ');
 
-                    for(let result of results){
-                        if (result.hasAttribute("class")){
+                    for (let result of results) {
+                        if (result.hasAttribute("class")) {
                             for (let className of classNamesToAppend) {
                                 //Remove spaces if classNames seperated with more than one white space char
                                 className = className.trim();
@@ -37,15 +37,12 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                             }
                             changeFile = true;
                         }
-                        else {
-                            warningMessage = "Class attribute does not exist";
-                        }
                     }
 
                     break;
 
                 case "Set Id":
-                    for(let result of results){
+                    for (let result of results) {
                         result.id = replaceText;
                     }
 
@@ -55,7 +52,7 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                 case "Set Attribute":
                     const attributeValuePairs: string[] = replaceText.replace(/"|'/g, '').split(',');
 
-                    for(let result of results){
+                    for (let result of results) {
                         for (let attributeValuePair of attributeValuePairs) {
                             //Attribute name cannot include any kind of space character
                             let attribute = attributeValuePair.split('=')[0].replaceAll(' ', '');
@@ -69,22 +66,46 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                     break;
 
                 case "Append to Attribute":
-                    const attributeNameForAppend: string = replaceText.split(',')[0];
-                    const valuesToAppend : string[] = replaceText.replace(/"|'/g, '').split(',').slice(1).map(value => {
+                    const attributeNameForAppend: string = replaceText.split(',')[0].trim();
+                    const valuesToAppend: string[] = replaceText.replace(/"|'/g, '').split(',').slice(1).map(value => {
                         return value.trim();
                     });
-                    
-                    for (let result of results){
+
+                    for (let result of results) {
                         const oldValue: string = result.getAttribute(attributeNameForAppend);
 
-                        if (oldValue !== null){
-                            const newValue: string = oldValue + ' ' + valuesToAppend.join(' ');
-                          
-                            result.setAttribute(attributeNameForAppend, newValue);
+                        if (oldValue !== null) {
+                            let newValue = !(oldValue.endsWith(' ')) ? oldValue + ' ' + valuesToAppend.join(' ') : oldValue + valuesToAppend.join(' ');
+                            result.setAttribute(attributeNameForAppend, newValue.trim());
                             changeFile = true;
                         }
-                        else {
-                            warningMessage = `Attribute "${attributeNameForAppend}" does not exist`;
+                    }
+
+                    break;
+
+                case "Set Style Property":
+                    const propertiesInfoForSet = replaceText.split(',');
+
+                    for (let result of results) {
+                        const propertiesAndValues = propertiesInfoForSet.map(v => (v.split(':').map(a => (a.trim()))));
+                        for (let propertyAndValue of propertiesAndValues) {
+                            result.style.setProperty(propertyAndValue[0], propertyAndValue[1] !== "null" ? propertyAndValue[1] : null);
+                        }
+                    }
+
+                    changeFile = true;
+                    break;
+
+                case "Edit Style Property":
+                    const propertiesInfoForEdit = replaceText.split(',');
+
+                    for (let result of results) {
+                        if (result.hasAttribute("style")) {
+                            const propertiesAndValues = propertiesInfoForEdit.map(v => (v.split(':').map(a => (a.trim()))));
+                            for (let propertyAndValue of propertiesAndValues) {
+                                result.style.setProperty(propertyAndValue[0], propertyAndValue[1] !== "null" ? propertyAndValue[1] : null);
+                            }
+                            changeFile = true;
                         }
                     }
 
@@ -94,7 +115,7 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                     const newTagName = replaceText.replaceAll(' ', '');
                     const { document } = (new jsdom.JSDOM()).window;
 
-                    for (let result of results){
+                    for (let result of results) {
                         // Create the document fragment 
                         const frag = document.createDocumentFragment();
 
@@ -122,7 +143,7 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                 case "Add Upper Tag":
                     const parentInfo = replaceText.replaceAll(' ', '');
 
-                    for (let result of results){
+                    for (let result of results) {
                         const newParent = createElementFromSelector(parentInfo);
                         result.parentNode.insertBefore(newParent, result);
                         newParent.appendChild(result);
@@ -132,75 +153,60 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                     break;
 
                 case "Remove Tag":
-                    for(let result of results){
+                    for (let result of results) {
                         result.remove();
                     }
 
                     changeFile = true;
                     break;
-                    
+
                 case "Remove from Class":
                     const classNamesToRemove = replaceText.trim().split(' ');
 
-                    for (let result of results){
-                        if (result.hasAttribute("class")){
+                    for (let result of results) {
+                        if (result.hasAttribute("class")) {
                             for (let className of classNamesToRemove) {
                                 //Remove spaces if classNames seperated with more than one whitespace
                                 className = className.trim();
-    
+
                                 if (result.classList.contains(className)) {
                                     result.classList.remove(className);
                                     changeFile = true;
                                 }
                             }
-
-                            if(!changeFile){
-                                warningMessage = classNamesToRemove.length > 1 ? `Classnames "${classNamesToRemove.join(',')}" already don't exist` : `Classname "${classNamesToRemove[0]}" already does not exist`;
-                            }
-                        }
-                        else {
-                            warningMessage = "Class attribute does not exist";
                         }
                     }
 
                     break;
 
                 case "Remove from Attribute":
-                    const attributeNameForRemove: string = replaceText.split(',')[0];
-                    const valuesToRemove : string[] = replaceText.replace(/"|'/g, '').split(',').slice(1).map(value => {
+                    const attributeNameForRemove: string = replaceText.split(',')[0].trim();
+                    const valuesToRemove: string[] = replaceText.replace(/"|'/g, '').split(',').slice(1).map(value => {
                         return value.trim();
                     });
 
-                    for(let result of results){
+                    for (let result of results) {
                         const oldValue: string = result.getAttribute(attributeNameForRemove);
-                        
-                        if (oldValue !== null){
+                        if (oldValue !== null) {
                             let newValue = oldValue;
 
-                            for(let value of valuesToRemove){
-                                if (oldValue.includes(value)){
-                                    newValue = newValue.replace(new RegExp(`(?:^|[\\W])${value}`,'g'),'');
-                                    result.setAttribute(attributeNameForRemove, newValue.trim());
+                            for (let value of valuesToRemove) {
+                                if (oldValue.split(' ').includes(value)) {
+                                    newValue = newValue.replace(new RegExp(`(?:^|[\\W])${value}`, 'g'), '').trim();
+                                    result.setAttribute(attributeNameForRemove, newValue);
                                     changeFile = true;
                                 }
                             }
-                            
-                            if(!changeFile){
-                                warningMessage = valuesToRemove.length > 1 ? `Values "${valuesToRemove.join(',')}" already don't exist` : `Value "${valuesToRemove[0]}" already does not exist`;
-                            }
-                        }
-                        else {
-                            warningMessage = `Attribute "${attributeNameForRemove}" does not exist`;
                         }
                     }
-                    
+
                     break;
 
                 case "Remove Attribute":
                     replaceText = replaceText.trim();
-                    const attributesToRemove: string[] = replaceText.split(',');
+                    const attributesToRemove: string[] = replaceText.split(',').map(value => (value.trim()));
 
-                    for(let result of results){
+                    for (let result of results) {
                         for (let attribute of attributesToRemove) {
                             if (result.hasAttribute(attribute)) {
                                 result.removeAttribute(attribute);
@@ -209,16 +215,12 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                         }
                     }
 
-                    if(!changeFile){
-                        warningMessage = attributesToRemove.length > 1 ? `Attributes "${attributesToRemove.join(',')}" already don't exist` : `Attribute "${attributesToRemove[0]}" already does not exist`;
-                    }
-
                     break;
 
                 case "Remove Upper Tag":
                     for (let result of results) {
                         if (result.parentElement === null) {
-                            throw new Error(`${result.tagName.toLowerCase()} tag does not have an upper tag`);
+                            throw new Error(`${result.tagName.toLowerCase()} tag doesn't have an upper tag`);
                         }
 
                         //Remove any upper tag except HTML, HEAD and BODY tags
@@ -226,12 +228,12 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                             result.parentElement.replaceWith(...result.parentElement.childNodes);
                             changeFile = true;
                         }
-                        else {
-                            warningMessage = `"${result.parentElement.tagName}" tag cannot be removed`;
-                        }
                     }
 
                     break;
+
+                default:
+                    throw new Error("Undefined Operation");
             }
         }
         else {

@@ -27,6 +27,9 @@ export class StructuralSearchPanel {
   }
 
   public dispose() {
+    vscode.commands.executeCommand("search.action.clearSearchResults");
+    vscode.commands.executeCommand("workbench.action.closeSidebar");
+    
     StructuralSearchPanel.currentPanel = undefined;
 
     this.panel.dispose();

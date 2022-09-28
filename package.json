@@ -50,7 +50,31 @@
         "command": "tag-manager.searchPanelTag",
         "key": "ctrl+1"
       }
-    ]
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "tag-manager.searchInFiles",
+          "when": "false"
+        },
+        {
+          "command": "tag-manager.searchInFile",
+          "when": "false"
+        },
+        {
+          "command": "tag-manager.replaceInFiles",
+          "when": "false"
+        },
+        {
+          "command": "tag-manager.replaceInFile",
+          "when": "false"
+        },
+        {
+          "command": "tag-manager.revertChanges",
+          "when": "false"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

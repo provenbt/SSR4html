@@ -27,6 +27,9 @@ export class StructuralSearchPanel {
   }
 
   public dispose() {
+    // To clear Search Query/Results fields
+    vscode.commands.executeCommand("search.action.clearSearchResults");
+    // To clear Files to Include/Exclude fields
     vscode.commands.executeCommand("search.action.clearSearchResults");
     vscode.commands.executeCommand("workbench.action.closeSidebar");
     
@@ -57,6 +60,9 @@ export class StructuralSearchPanel {
             break;
 
           case "cancelSearch":
+            // To clear Search Query/Results fields
+            vscode.commands.executeCommand("search.action.clearSearchResults");
+            // To clear Files to Include/Exclude fields.
             vscode.commands.executeCommand("search.action.clearSearchResults");
             vscode.commands.executeCommand("workbench.action.closeSidebar");
             break;

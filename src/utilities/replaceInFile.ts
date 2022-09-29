@@ -8,6 +8,11 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
     let processResult: string = "";
     let warningMessage: string = "";
 
+    if (!(file.toString().endsWith(".html"))) {
+        warningMessage = "The current file is not an HTML file";
+        return {processResult, warningMessage};
+    }
+
     let changeFile: boolean = false;
     replaceText = replaceText.trim();
 

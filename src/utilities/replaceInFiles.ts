@@ -9,7 +9,7 @@ export async function replaceInFiles(fileList: vscode.Uri[], rawContents: Uint8A
     const numOfFiles = files.length;
 
     if (numOfFiles === 0) {
-        warningMessage = "There is not any html file in the workspace";
+        warningMessage = "There is not any HTML file in the workspace";
     }
     else {
         await vscode.window.withProgress({

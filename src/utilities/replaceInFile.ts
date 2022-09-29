@@ -78,11 +78,22 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
 
                     for (let result of results) {
                         const oldValue: string = result.getAttribute(attributeNameForAppend);
+                        let newValue = oldValue;
 
                         if (oldValue !== null) {
-                            let newValue = !(oldValue.endsWith(' ')) ? oldValue + ' ' + valuesToAppend.join(' ') : oldValue + valuesToAppend.join(' ');
+                            /* let newValue = !(oldValue.endsWith(' ')) ? oldValue + ' ' + valuesToAppend.join(' ') : oldValue + valuesToAppend.join(' ');
                             result.setAttribute(attributeNameForAppend, newValue.trim());
-                            changeFile = true;
+                            changeFile = true; */
+                            const oldValues = oldValue.split(/\b/);
+
+                            // Append a value if the value do not already exists in the attribute
+                            for (let value of valuesToAppend) {
+                                if (!(oldValues.includes(value))) {
+                                    newValue = !(oldValue.endsWith(' ')) ? newValue + ' ' + value : newValue + value;
+                                    result.setAttribute(attributeNameForAppend,newValue);
+                                    changeFile = true;
+                                }
+                            }
                         }
                     }
 
@@ -192,11 +203,14 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
 
                     for (let result of results) {
                         const oldValue: string = result.getAttribute(attributeNameForRemove);
+
                         if (oldValue !== null) {
+                            const oldValues = oldValue.split(/\b/);
                             let newValue = oldValue;
 
+                            // Remove a value if the value really exists in the attribute
                             for (let value of valuesToRemove) {
-                                if (oldValue.split(' ').includes(value)) {
+                                if (oldValues.includes(value)) {
                                     newValue = newValue.replace(new RegExp(`(?:^|[\\W])${value}`, 'g'), '').trim();
                                     result.setAttribute(attributeNameForRemove, newValue);
                                     changeFile = true;

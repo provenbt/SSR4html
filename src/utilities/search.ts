@@ -10,8 +10,7 @@ export function searchInWorkspace(searchText: string){
         triggerSearch: true,
         isRegex: true,
         matchWholeWord: true,
-        isCaseSensitive: true,
-        replace: ''
+        isCaseSensitive: true
     }); 
 }
 
@@ -24,7 +23,6 @@ export function searchInFile(searchText: string, filePath: string){
         triggerSearch: true,
         isRegex: true,
         matchWholeWord: true,
-        isCaseSensitive: true,
-        replace: ''
+        isCaseSensitive: true
     }); 
 }

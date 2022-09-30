@@ -14,7 +14,6 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
     }
 
     let changeFile: boolean = false;
-    replaceText = replaceText.trim();
 
     const dom = new jsdom.JSDOM(htmlText);
     const { results, searchOperationResult } = getQuerySelectorResults(dom, searchText);
@@ -23,32 +22,37 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
         if (searchOperationResult === "Result found to replace") {
             switch (choice) {
                 case "Set Class":
+                    const className = replaceText.split(/\s/).map(v => (v.trim())).filter(e => (e !== "")).join(' ');
+
                     for (let result of results) {
-                        result.className = replaceText;
+                        result.className = className;
                     }
 
                     changeFile = true;
                     break;
 
                 case "Append to Class":
-                    const classNamesToAppend = replaceText.split(' ');
+                    const classNamesToAppend = replaceText.split(/\s/).map(v => (v.trim())).filter(e => (e !== ""));
 
                     for (let result of results) {
                         if (result.hasAttribute("class")) {
                             for (let className of classNamesToAppend) {
-                                // Remove spaces if classnames seperated with more than one space character
-                                className = className.trim();
-                                result.classList.add(className);
+                                // Append a classname if the name does not exist in the classname
+                                if (!(result.classList.contains(className))) {
+                                    result.classList.add(className);
+                                    changeFile = true;
+                                }
                             }
-                            changeFile = true;
                         }
                     }
 
                     break;
 
                 case "Set Id":
+                    const id = replaceText.trim();
+
                     for (let result of results) {
-                        result.id = replaceText;
+                        result.id = id;
                     }
 
                     changeFile = true;
@@ -59,7 +63,7 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
 
                     for (let result of results) {
                         for (let attributeValuePair of attributeValuePairs) {
-                            // Attribute name cannot include any kind of space character
+                            // Remove all kind of space character in the attribute name
                             let attribute = attributeValuePair.split('=')[0].replaceAll(' ', '');
                             let value = attributeValuePair.split('=')[1].trim();
 
@@ -72,9 +76,7 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
 
                 case "Append to Attribute":
                     const attributeNameForAppend: string = replaceText.split(',')[0].trim();
-                    const valuesToAppend: string[] = replaceText.replace(/"|'/g, '').split(',').slice(1).map(value => {
-                        return value.trim();
-                    });
+                    const valuesToAppend: string[] = replaceText.replace(/"|'/g, '').split(',').slice(1).map(v => (v.trim()));
 
                     for (let result of results) {
                         const oldValue: string = result.getAttribute(attributeNameForAppend);
@@ -82,7 +84,7 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                         if (oldValue !== null) {
                             let newValue = oldValue;
                             // Seperate each attribute value
-                            const oldValues = oldValue.split(/\b/);
+                            const oldValues = oldValue.split(/\s/).map(v => (v.trim())).filter(e => (e !== ""));
 
                             // Append a value if the value do not already exists in the attribute
                             for (let value of valuesToAppend) {
@@ -196,14 +198,11 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                     break;
 
                 case "Remove from Class":
-                    const classNamesToRemove = replaceText.trim().split(' ');
+                    const classNamesToRemove = replaceText.split(/\s/).map(v => (v.trim())).filter(e => (e !== ""));
 
                     for (let result of results) {
                         if (result.hasAttribute("class")) {
                             for (let className of classNamesToRemove) {
-                                // Remove spaces if classnames seperated with more than one space character
-                                className = className.trim();
-
                                 // Remove a classname if the name really exists in the classname
                                 if (result.classList.contains(className)) {
                                     result.classList.remove(className);
@@ -217,9 +216,7 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
 
                 case "Remove from Attribute":
                     const attributeNameForRemove: string = replaceText.split(',')[0].trim();
-                    const valuesToRemove: string[] = replaceText.replace(/"|'/g, '').split(',').slice(1).map(value => {
-                        return value.trim();
-                    });
+                    const valuesToRemove: string[] = replaceText.replace(/"|'/g, '').split(',').slice(1).map(v => (v.trim()));
 
                     for (let result of results) {
                         const oldValue: string = result.getAttribute(attributeNameForRemove);
@@ -227,7 +224,7 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                         if (oldValue !== null) {
                             let newValue = oldValue;
                             // Seperate each attribute value
-                            const oldValues = oldValue.split(/\b/);
+                            const oldValues = oldValue.split(/\s/).map(v => (v.trim())).filter(e => (e !== ""));
 
                             // Remove a value if the value really exists in the attribute
                             for (let value of valuesToRemove) {

@@ -10,10 +10,9 @@ export function checkReplacementText(choice: string, replaceText: string) {
             case "Set Class":
             case "Append to Class":
             case "Remove from Class":
-                const classValues = replaceText.split(' ');
-
+                const classValues = replaceText.split(/\s/).map(v => (v.trim())).filter(e => (e !== ""));
                 for (let classValue of classValues) {
-                    if (!(new RegExp(/^[A-Za-z]+.*/, 'g').test(classValue.trim()))) {
+                    if (!(new RegExp(/^[A-Za-z]+.*/, 'g').test(classValue))) {
                         throw new Error("Invalid classname");
                     }
                 }
@@ -21,7 +20,8 @@ export function checkReplacementText(choice: string, replaceText: string) {
                 break;
 
             case "Set Id":
-                if (!(new RegExp(/^[A-Za-z]+.*/, 'g').test(replaceText))) {
+                const id = replaceText.trim();
+                if (!(new RegExp(/^[A-Za-z]+[\-:_.A-Za-z0-9]*$/, 'g').test(id))) {
                     throw new Error("Invalid id value");
                 }
 

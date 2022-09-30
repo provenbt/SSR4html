@@ -62,7 +62,7 @@ export class StructuralSearchPanel {
           case "cancelSearch":
             // To clear Search Query/Results fields
             vscode.commands.executeCommand("search.action.clearSearchResults");
-            // To clear Files to Include/Exclude fields.
+            // To clear Files to Include/Exclude fields
             vscode.commands.executeCommand("search.action.clearSearchResults");
             vscode.commands.executeCommand("workbench.action.closeSidebar");
             break;
@@ -148,11 +148,11 @@ export class StructuralSearchPanel {
                         <vscode-option value = "Remove from Class">Remove from Class</vscode-option>
                         <vscode-option value = "Set Id">Set Id</vscode-option>
                         <vscode-option value = "Set Attribute">Set Attribute</vscode-option>
+                        <vscode-option value = "Remove Attribute">Remove Attribute</vscode-option>
                         <vscode-option value = "Append to Attribute">Append to Attribute</vscode-option>
                         <vscode-option value = "Remove from Attribute">Remove from Attribute</vscode-option>
                         <vscode-option value = "Set Style Property">Set Style Property</vscode-option>
                         <vscode-option value = "Edit Style Property">Edit Style Property</vscode-option>
-                        <vscode-option value = "Remove Attribute">Remove Attribute</vscode-option>
                         <vscode-option value = "Change Tag Name">Change Tag Name</vscode-option>
                         <vscode-option value = "Remove Tag">Remove Tag</vscode-option>
                         <vscode-option value = "Add Upper Tag">Add Upper Tag</vscode-option>

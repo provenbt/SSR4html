@@ -10,7 +10,7 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
 
     if (!(file.toString().endsWith(".html"))) {
         warningMessage = "The current file is not an HTML file";
-        return {processResult, warningMessage};
+        return { processResult, warningMessage };
     }
 
     let changeFile: boolean = false;
@@ -36,7 +36,7 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                     for (let result of results) {
                         if (result.hasAttribute("class")) {
                             for (let className of classNamesToAppend) {
-                                //Remove spaces if classNames seperated with more than one white space char
+                                // Remove spaces if classnames seperated with more than one space character
                                 className = className.trim();
                                 result.classList.add(className);
                             }
@@ -59,7 +59,7 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
 
                     for (let result of results) {
                         for (let attributeValuePair of attributeValuePairs) {
-                            //Attribute name cannot include any kind of space character
+                            // Attribute name cannot include any kind of space character
                             let attribute = attributeValuePair.split('=')[0].replaceAll(' ', '');
                             let value = attributeValuePair.split('=')[1].trim();
 
@@ -78,19 +78,17 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
 
                     for (let result of results) {
                         const oldValue: string = result.getAttribute(attributeNameForAppend);
-                        let newValue = oldValue;
 
                         if (oldValue !== null) {
-                            /* let newValue = !(oldValue.endsWith(' ')) ? oldValue + ' ' + valuesToAppend.join(' ') : oldValue + valuesToAppend.join(' ');
-                            result.setAttribute(attributeNameForAppend, newValue.trim());
-                            changeFile = true; */
+                            let newValue = oldValue;
+                            // Seperate each attribute value
                             const oldValues = oldValue.split(/\b/);
 
                             // Append a value if the value do not already exists in the attribute
                             for (let value of valuesToAppend) {
                                 if (!(oldValues.includes(value))) {
                                     newValue = !(oldValue.endsWith(' ')) ? newValue + ' ' + value : newValue + value;
-                                    result.setAttribute(attributeNameForAppend,newValue);
+                                    result.setAttribute(attributeNameForAppend, newValue);
                                     changeFile = true;
                                 }
                             }
@@ -103,9 +101,19 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                     const propertiesInfoForSet = replaceText.split(',');
 
                     for (let result of results) {
+                        // Overwrite style attribute if it is already defined in the element
+                        if (result.hasAttribute("style")) {
+                            result.removeAttribute("style");
+                        }
+
                         const propertiesAndValues = propertiesInfoForSet.map(v => (v.split(':').map(a => (a.trim()))));
                         for (let propertyAndValue of propertiesAndValues) {
-                            result.style.setProperty(propertyAndValue[0], propertyAndValue[1] !== "null" ? propertyAndValue[1] : null);
+                            // Change null(string value) with empty string value to delete the property
+                            if (propertyAndValue[1] === "null") {
+                                propertyAndValue[1] = "";
+                            }
+
+                            result.style.setProperty(propertyAndValue[0], propertyAndValue[1]);
                         }
                     }
 
@@ -118,10 +126,18 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                     for (let result of results) {
                         if (result.hasAttribute("style")) {
                             const propertiesAndValues = propertiesInfoForEdit.map(v => (v.split(':').map(a => (a.trim()))));
+
                             for (let propertyAndValue of propertiesAndValues) {
-                                result.style.setProperty(propertyAndValue[0], propertyAndValue[1] !== "null" ? propertyAndValue[1] : null);
+                                // Change null(string value) with empty string value to delete the property
+                                if (propertyAndValue[1] === "null") {
+                                    propertyAndValue[1] = "";
+                                }
+                                // Append a property if it has a different value
+                                if (result.style.getPropertyValue(propertyAndValue[0]) !== propertyAndValue[1]) {
+                                    result.style.setProperty(propertyAndValue[0], propertyAndValue[1]);
+                                    changeFile = true;
+                                }
                             }
-                            changeFile = true;
                         }
                     }
 
@@ -160,8 +176,11 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                     const parentInfo = replaceText.replaceAll(' ', '');
 
                     for (let result of results) {
+                        // Create HTML element that will be upper tag
                         const newParent = createElementFromSelector(parentInfo);
+                        // Insert before the matched node(result)
                         result.parentNode.insertBefore(newParent, result);
+                        // Append the matched node(result) as the child of the created HTML element
                         newParent.appendChild(result);
                     }
 
@@ -182,9 +201,10 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                     for (let result of results) {
                         if (result.hasAttribute("class")) {
                             for (let className of classNamesToRemove) {
-                                //Remove spaces if classNames seperated with more than one whitespace
+                                // Remove spaces if classnames seperated with more than one space character
                                 className = className.trim();
 
+                                // Remove a classname if the name really exists in the classname
                                 if (result.classList.contains(className)) {
                                     result.classList.remove(className);
                                     changeFile = true;
@@ -205,8 +225,9 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
                         const oldValue: string = result.getAttribute(attributeNameForRemove);
 
                         if (oldValue !== null) {
-                            const oldValues = oldValue.split(/\b/);
                             let newValue = oldValue;
+                            // Seperate each attribute value
+                            const oldValues = oldValue.split(/\b/);
 
                             // Remove a value if the value really exists in the attribute
                             for (let value of valuesToRemove) {
@@ -227,6 +248,7 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
 
                     for (let result of results) {
                         for (let attribute of attributesToRemove) {
+                            // Remove only existing attributes in the element
                             if (result.hasAttribute(attribute)) {
                                 result.removeAttribute(attribute);
                                 changeFile = true;
@@ -260,8 +282,10 @@ export async function replaceInFile(htmlText: string, choice: string, searchText
         }
 
         if (changeFile) {
+            // Store the old state of the file 
             rawContents.push(new TextEncoder().encode(htmlText));
             fileList.push(file);
+            // Overwrite the manipulated version of the file
             await vscode.workspace.fs.writeFile(file, new TextEncoder().encode(pretty(dom.serialize(), { ocd: true })));
             processResult = "Success";
         }

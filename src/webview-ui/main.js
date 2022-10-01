@@ -24,13 +24,37 @@ function main() {
   REPLACEMENT_BOX = document.getElementById("replacementBox");
   REPLACE_BUTTON = document.getElementById("replaceBtn");
   REVERT_BUTTON = document.getElementById("revertBtn");
-  
+
   SEARCH_BOX.addEventListener("keyup", enableSearchButton);
   SEARCH_BUTTON.addEventListener("click", onClickSearchButton);
   CANCEL_BUTTON.addEventListener("click", onClickCancelButton);
   SELECTION.addEventListener("change", showReplacementForm);
   REPLACE_BUTTON.addEventListener("click", onClickReplaceButton);
   REVERT_BUTTON.addEventListener("click", onClickRevertButton);
+  window.addEventListener('message', event => {
+    const { command } = event.data;
+  
+    switch (command) {
+      // This part will lock all UI not to be modified during the API progress
+      case "lockUIComponents":
+        CANCEL_BUTTON.disabled = true;
+        SELECTION.disabled = true;
+        REVERT_BUTTON.disabled = true;
+        REPLACE_BUTTON.disabled = true;
+        REPLACEMENT_BOX.readOnly = true;
+  
+        break;
+      // This part will unlock all UI after the API progress
+      case "unlockUIComponents":
+        CANCEL_BUTTON.disabled = false;
+        SELECTION.disabled = false;
+        REVERT_BUTTON.disabled = false;
+        REPLACE_BUTTON.disabled = false;
+        REPLACEMENT_BOX.readOnly = false;
+  
+        break;
+    }
+  });
 }
 
 function onClickSearchButton() {
@@ -42,12 +66,12 @@ function onClickSearchButton() {
   SELECTION.value = "Unselected";
 
   vscode.postMessage({
-      command: CHECKBOX.checked ? "searchInFiles" : "searchInFile",
-      search: SEARCH_BOX.value
-    });
+    command: CHECKBOX.checked ? "searchInFiles" : "searchInFile",
+    search: SEARCH_BOX.value
+  });
 }
 
-function onClickCancelButton(){
+function onClickCancelButton() {
   SEARCH_BOX.readOnly = false;
   CHECKBOX.readOnly = false;
   SEARCH_BUTTON.disabled = false;
@@ -58,10 +82,10 @@ function onClickCancelButton(){
 
   vscode.postMessage({
     command: "cancelSearch"
-  });  
+  });
 }
 
-function onClickReplaceButton(){
+function onClickReplaceButton() {
 
   vscode.postMessage({
     command: CHECKBOX.checked ? "replaceInFiles" : "replaceInFile",
@@ -71,20 +95,19 @@ function onClickReplaceButton(){
   });
 }
 
-function onClickRevertButton(){
+function onClickRevertButton() {
 
   vscode.postMessage({
     command: "revertChanges",
-    search: SEARCH_BOX.value,
     choice: SELECTION.value
   });
 }
 
-function enableSearchButton(that) {
- 
-  if(SEARCH_BOX.value.trim() === "") { 
+function enableSearchButton() {
+
+  if (SEARCH_BOX.value.trim() === "") {
     SEARCH_BUTTON.disabled = true;
-  } else { 
+  } else {
     SEARCH_BUTTON.disabled = false;
   }
 }
@@ -96,52 +119,52 @@ function showReplacementForm() {
   if (choice !== "Unselected") {
     REPLACEMENT_FORM.style.display = "inline";
 
-    if(choice === "Set Class"){
+    if (choice === "Set Class") {
       REPLACEMENT_BOX.placeholder = "class-name1 class-name2 ...";
       REPLACE_BUTTON.innerText = "Set";
-    }else if(choice === "Append to Class"){
+    } else if (choice === "Append to Class") {
       REPLACEMENT_BOX.placeholder = "class-name1 class-name2 ...";
       REPLACE_BUTTON.innerText = "Append";
-    }else if(choice === "Set Id"){
+    } else if (choice === "Set Id") {
       REPLACEMENT_BOX.placeholder = "Id Value";
       REPLACE_BUTTON.innerText = "Set";
-    }else if(choice === "Set Attribute"){
+    } else if (choice === "Set Attribute") {
       REPLACEMENT_BOX.placeholder = "name1=value1,name2=value2, ...";
       REPLACE_BUTTON.innerText = "Set";
-    }else if(choice === "Append to Attribute"){
+    } else if (choice === "Append to Attribute") {
       REPLACEMENT_BOX.placeholder = "atr-name,value1,value2, ...";
       REPLACE_BUTTON.innerText = "Append";
-    }else if(choice === "Set Style Property"){
+    } else if (choice === "Set Style Property") {
       REPLACEMENT_BOX.placeholder = "prop-1:value1,prop-2:value2, ...";
       REPLACE_BUTTON.innerText = "Set";
-    }else if(choice === "Edit Style Property"){
+    } else if (choice === "Edit Style Property") {
       REPLACEMENT_BOX.placeholder = "prop-1:value1,prop-2:value2, ...";
       REPLACE_BUTTON.innerText = "Edit";
-    }else if(choice === "Change Tag Name"){
+    } else if (choice === "Change Tag Name") {
       REPLACEMENT_BOX.placeholder = "New Tag Name";
       REPLACE_BUTTON.innerText = "Change";
-    }else if (choice === "Remove Tag"){
+    } else if (choice === "Remove Tag") {
       REPLACEMENT_BOX.placeholder = "Click Remove if You Are Sure";
       REPLACE_BUTTON.innerText = "Remove";
-    }else if(choice === "Remove from Class"){
+    } else if (choice === "Remove from Class") {
       REPLACEMENT_BOX.placeholder = "class-name1 class-name2 ...";
       REPLACE_BUTTON.innerText = "Remove";
-    }else if(choice === "Remove from Attribute"){
+    } else if (choice === "Remove from Attribute") {
       REPLACEMENT_BOX.placeholder = "atr-name,value1,value2, ...";
       REPLACE_BUTTON.innerText = "Remove";
-    }else if(choice === "Remove Attribute"){
+    } else if (choice === "Remove Attribute") {
       REPLACEMENT_BOX.placeholder = "atr-name1,atr-name2, ...";
       REPLACE_BUTTON.innerText = "Remove";
-    }else if(choice === "Add Upper Tag"){
+    } else if (choice === "Add Upper Tag") {
       REPLACEMENT_BOX.placeholder = "tagName#id.class[attribute=value]";
       REPLACE_BUTTON.innerText = "Add";
-    }else if(choice === "Remove Upper Tag"){
+    } else if (choice === "Remove Upper Tag") {
       REPLACEMENT_BOX.placeholder = "Click Remove If You Are Sure";
       REPLACE_BUTTON.innerText = "Remove";
-    }else {
+    } else {
       REPLACEMENT_FORM.style.display = "none";
     }
-  } 
+  }
   else {
     REPLACEMENT_FORM.style.display = "none";
   }

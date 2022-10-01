@@ -3,7 +3,7 @@ import { getUri } from "../utilities/getUri";
 
 export class StructuralSearchPanel {
   public static currentPanel: StructuralSearchPanel | undefined;
-  private readonly panel: vscode.WebviewPanel;
+  public readonly panel: vscode.WebviewPanel;
   private disposables: vscode.Disposable[] = [];
 
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
@@ -46,6 +46,7 @@ export class StructuralSearchPanel {
   }
 
   private setWebviewMessageListener(webview: vscode.Webview) {
+    // Handle outgoing message from webview to extension
     webview.onDidReceiveMessage(
       (message: any) => {
         const { command, search, replace, choice } = message;
@@ -76,7 +77,7 @@ export class StructuralSearchPanel {
             break;
 
           case "revertChanges":
-            vscode.commands.executeCommand("tag-manager.revertChanges", search, choice);
+            vscode.commands.executeCommand("tag-manager.revertChanges", choice);
             break;
         }
       },

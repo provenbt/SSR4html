@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 export function notifyUser(processResult: string, warningMessage: string, searchText: string, replaceText: string, choice: string){
     if (processResult === ""){
-        vscode.window.showWarningMessage(warningMessage !== "" ? warningMessage : "No modifications required as the desired changes are already there");
+        vscode.window.showWarningMessage(warningMessage !== "" ? warningMessage : "No modifications required for the desired change");
     } else if (processResult === "Success"){
         vscode.commands.executeCommand("search.action.refreshSearchResults").then(()=>{
             replaceText = replaceText !== "" ? replaceText : searchText;

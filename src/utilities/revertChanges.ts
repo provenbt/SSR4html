@@ -8,7 +8,7 @@ export async function revertChanges(fileList: vscode.Uri[], rawContents: Uint8Ar
             cancellable: false
         }, async () => {
             for (let index = 0; index < fileList.length; index++) {
-                await vscode.workspace.fs.writeFile(fileList.pop() as vscode.Uri, rawContents.pop() as Uint8Array);
+                await vscode.workspace.fs.writeFile(fileList[index], rawContents[index]);
             }
         });
 

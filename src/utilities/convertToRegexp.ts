@@ -14,27 +14,15 @@
 const s2r = require("selector-2-regexp");
 
 export function convertToRegex(searchText: string): String {
-    // Search Text may include more than one CSS selector (refered as queries)
-    const queries: string[] | null = searchText.split(',');
     // To store RegExp(s)
     let regex: string[] = [];
-
+    
     try {
+        // Search Text may include more than one CSS selector (a CSS selector named as query)
+        const queries: string[] = searchText.split(',').map(v => v.trim());
         let index = 0;
         // Generate a RegExp for each CSS selector(query)
         for (let query of queries) {
-            //Remove unnecessary characters
-            query = query.trim();
-
-            /*
-                Be sure that the provided CSS selector is only one or combination of the followings:
-                Type selector, class selector, id selector, or attribute selector.
-                Any other kind of selector is not supported
-            */
-            if ((/(^[^A-Za-z#\[.])|([\+>\|])/g).test(query) || (/[\s\~*:](?![^\[]*\])/g).test(query)) {
-                throw new Error("Unsupported CSS selector detected");
-            }
-
             // Get RegExp of the provided CSS selector
             regex[index] = s2r.default(query);
 
@@ -120,9 +108,8 @@ export function convertToRegex(searchText: string): String {
         console.log(error);
     }
 
-    // If the provided CSS selector(s) valid and supported,
     // Create the final RegExp by concatenating all generated RegExps with the OR(|) symbol
-    let finalRegex = regex.length ? regex.join('|') : "Unsupported CSS Selector";
+    let finalRegex: string = regex.length ? regex.join('|') : "An error occured during the generation of RegExp";
 
     return finalRegex;
 }

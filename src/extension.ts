@@ -1,17 +1,16 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { StructuralSearchPanel } from './panels/StructuralSearchPanel';
-import { replaceInFiles } from './utilities/replaceInFiles';
+import { checkSearchText } from './utilities/checkSearchText';
 import { searchInWorkspace, searchInFile } from './utilities/search';
 import { checkReplacementText } from './utilities/checkReplacementText';
+import { replaceInFiles } from './utilities/replaceInFiles';
 import { replaceInFile } from './utilities/replaceInFile';
 import { revertChanges } from './utilities/revertChanges';
 import { notifyUser } from './utilities/notifyUser';
 
 export function activate(context: vscode.ExtensionContext) {
 
-	// To store the previous state of the files, vital to revert changes made in the file(s).
+	// To store the previous state of the files, vital to revert the most recent changes made in file(s).
 	const RAW_CONTENTS: Uint8Array[] = [];
 	const FILE_LIST: vscode.Uri[] = [];
 
@@ -19,23 +18,61 @@ export function activate(context: vscode.ExtensionContext) {
 		StructuralSearchPanel.render(context.extensionUri);
 	});
 
-	let disposableSearchInFiles = vscode.commands.registerCommand('tag-manager.searchInFiles', (searchText) => {
-		searchInWorkspace(searchText);
+	let disposableSearchInFiles = vscode.commands.registerCommand('tag-manager.searchInFiles', async (searchText) => {
+
+		const files = await vscode.workspace.findFiles('**/*.html', '**/node_modules/**');
+		if (files.length === 0) {
+			vscode.window.showWarningMessage("There is not any HTML file in the workspace");
+			return;
+		}
+
+		const isCssSelectorValid = checkSearchText(searchText);
+		if (isCssSelectorValid !== "Valid") {
+			vscode.window.showWarningMessage(isCssSelectorValid);
+			return;
+		}
+
+		const isThereAnyMatch = await searchInWorkspace(searchText);
+
+		if (isThereAnyMatch) {
+			StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'onFoundSearchResult' });
+		}
+		else {
+			vscode.window.showWarningMessage("Nothing found to modify");
+		}
+
 	});
 
 
 	let disposableSearchInFile = vscode.commands.registerCommand('tag-manager.searchInFile', (searchText) => {
 
 		vscode.commands.executeCommand("workbench.action.openPreviousRecentlyUsedEditor").then(async () => {
-			const editor = vscode.window.activeTextEditor;
 
+			const editor = vscode.window.activeTextEditor;
 			if (editor === undefined || editor.document === undefined) {
+				vscode.window.showWarningMessage("Please, open a HTML file");
 				return;
 			}
 
-			const filePath = editor.document.fileName;
+			if (!(editor.document.uri.toString().endsWith(".html"))) {
+				vscode.window.showWarningMessage("The current file is not an HTML file");
+				return;
+			}
 
-			searchInFile(searchText, filePath);
+			const isCssSelectorValid = checkSearchText(searchText);
+			if (isCssSelectorValid !== "Valid") {
+				vscode.window.showWarningMessage(isCssSelectorValid);
+				return;
+			}
+
+			const isThereAnyMatch = await searchInFile(searchText, editor.document.fileName);
+
+			if (isThereAnyMatch) {
+				StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'onFoundSearchResult' });
+			}
+			else {
+				vscode.window.showWarningMessage("Nothing found to modify");
+			}
 		});
 	});
 
@@ -49,13 +86,23 @@ export function activate(context: vscode.ExtensionContext) {
 
 		// Disable interactive UI components during the API progress
 		StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'lockUIComponents' });
-		// Clean up the previous state of the files
+		// Since only the effects of the last replacement process will be reverted,
+		// clean up all information of the previosly changed files before a new replacement process
 		RAW_CONTENTS.splice(0, RAW_CONTENTS.length); FILE_LIST.splice(0, FILE_LIST.length);
-		const { processResults, warningMessage } = await replaceInFiles(FILE_LIST, RAW_CONTENTS, choice, searchText, replaceText);
-		const processResult = processResults.includes("Success") ? "Success" : "";
+
+		const processResults = await replaceInFiles(FILE_LIST, RAW_CONTENTS, choice, searchText, replaceText);
+
+		let processResult: string;
+		if (processResults.includes("Error")) {
+			processResult = "Error";
+		} else if (processResults.includes("Success")) {
+			processResult = "Success";
+		} else {
+			processResult = "No modifications required for the desired change";
+		}
 
 		setTimeout(() => {
-			notifyUser(processResult, warningMessage, searchText, replaceText, choice);
+			notifyUser("Replacement", processResult, choice);
 			// Enable interactive UI components after the API progress
 			StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'unlockUIComponents' });
 		}, 1000);
@@ -64,8 +111,8 @@ export function activate(context: vscode.ExtensionContext) {
 	let disposableReplaceInFile = vscode.commands.registerCommand('tag-manager.replaceInFile', (searchText, replaceText, choice) => {
 
 		vscode.commands.executeCommand("workbench.action.openPreviousRecentlyUsedEditor").then(async () => {
-			const editor = vscode.window.activeTextEditor;
 
+			const editor = vscode.window.activeTextEditor;
 			if (editor === undefined || editor.document === undefined) {
 				return;
 			}
@@ -78,35 +125,36 @@ export function activate(context: vscode.ExtensionContext) {
 
 			// Disable interactive UI components during the API progress
 			StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'lockUIComponents' });
-			// Clean up the previous state of the files
+			// Since only the effects of the last replacement process will be reverted,
+			// clean up all information of the previosly changed files before a new replacement process
 			RAW_CONTENTS.splice(0, RAW_CONTENTS.length); FILE_LIST.splice(0, FILE_LIST.length);
 
-			const htmlText = editor.document.getText();
-			const file = editor.document.uri;
-
-			const { processResult, warningMessage } = await replaceInFile(htmlText, choice, searchText, replaceText, file, FILE_LIST, RAW_CONTENTS);
+			const processResult = await replaceInFile(editor.document.uri, choice, searchText, replaceText, FILE_LIST, RAW_CONTENTS);
 
 			setTimeout(() => {
-				notifyUser(processResult, warningMessage, searchText, replaceText, choice);
+				notifyUser("Replacement", processResult, choice);
 				// Enable interactive UI components after the API progress
 				StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'unlockUIComponents' });
 			}, 1000);
 		});
 	});
 
-	let disposableRevertChanges = vscode.commands.registerCommand('tag-manager.revertChanges', (choice) => {
+	let disposableRevertChanges = vscode.commands.registerCommand('tag-manager.revertChanges', async (choice) => {
 
-		if (FILE_LIST.length > 0 && RAW_CONTENTS.length > 0) {
-			StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'lockUIComponents' });
-			revertChanges(FILE_LIST, RAW_CONTENTS, choice).then(() => {
-				setTimeout(() => {
-					StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'unlockUIComponents' });
-				}, 1000);
-			});
+		if (FILE_LIST.length === 0 || RAW_CONTENTS.length === 0) {
+			vscode.window.showWarningMessage("Nothing found to revert");
+			return;
 		}
-		else {
-			vscode.window.showErrorMessage("Nothing found to revert");
-		}
+
+		// Disable interactive UI components during the API progress
+		StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'lockUIComponents' });
+		const processResult = await revertChanges(FILE_LIST, RAW_CONTENTS);
+
+		setTimeout(() => {
+			notifyUser("Rollback", processResult, choice);
+			// Enable interactive UI components after the API progress
+			StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'unlockUIComponents' });
+		}, 1000);
 	});
 
 	context.subscriptions.push(disposableSearchPanel);

@@ -1,14 +1,15 @@
 import * as vscode from 'vscode';
 
-export function notifyUser(processResult: string, warningMessage: string, searchText: string, replaceText: string, choice: string){
-    if (processResult === ""){
-        vscode.window.showWarningMessage(warningMessage !== "" ? warningMessage : "No modifications required for the desired change");
-    } else if (processResult === "Success"){
-        vscode.commands.executeCommand("search.action.refreshSearchResults").then(()=>{
-            replaceText = replaceText !== "" ? replaceText : searchText;
-            vscode.window.showInformationMessage(`${choice} process for "${replaceText}" successful`);
+export function notifyUser(processName: string, processResult: string, choice: string) {
+    if (processResult === "Success") {
+        vscode.commands.executeCommand("search.action.refreshSearchResults").then(() => {
+            vscode.window.showInformationMessage(`${processName} process for "${choice.toLowerCase()}" successful`);
         });
-    }else {
-        vscode.window.showErrorMessage(processResult);
+    }
+    else if (processResult === "No modifications required for the desired change") {
+        vscode.window.showWarningMessage(processResult);
+    }
+    else {
+        vscode.window.showErrorMessage(`An error occured during the ${processName} process`);
     }
 }

@@ -33,8 +33,18 @@ function main() {
   REVERT_BUTTON.addEventListener("click", onClickRevertButton);
   window.addEventListener('message', event => {
     const { command } = event.data;
-  
+
     switch (command) {
+      // Lock the search part not to be modified and display the replacement part 
+      case "onFoundSearchResult":
+        SEARCH_BOX.readOnly = true;
+        CHECKBOX.readOnly = true;
+        SEARCH_BUTTON.disabled = true;
+        CANCEL_BUTTON.disabled = false;
+        REPLACEMENT_PART.style.display = "inline";
+        SELECTION.value = "Unselected";
+
+        break;
       // This part will lock all UI not to be modified during the API progress
       case "lockUIComponents":
         CANCEL_BUTTON.disabled = true;
@@ -42,7 +52,7 @@ function main() {
         REVERT_BUTTON.disabled = true;
         REPLACE_BUTTON.disabled = true;
         REPLACEMENT_BOX.readOnly = true;
-  
+
         break;
       // This part will unlock all UI after the API progress
       case "unlockUIComponents":
@@ -51,19 +61,13 @@ function main() {
         REVERT_BUTTON.disabled = false;
         REPLACE_BUTTON.disabled = false;
         REPLACEMENT_BOX.readOnly = false;
-  
+
         break;
     }
   });
 }
 
 function onClickSearchButton() {
-  SEARCH_BOX.readOnly = true;
-  CHECKBOX.readOnly = true;
-  SEARCH_BUTTON.disabled = true;
-  CANCEL_BUTTON.disabled = false;
-  REPLACEMENT_PART.style.display = "inline";
-  SELECTION.value = "Unselected";
 
   vscode.postMessage({
     command: CHECKBOX.checked ? "searchInFiles" : "searchInFile",
@@ -144,7 +148,7 @@ function showReplacementForm() {
       REPLACEMENT_BOX.placeholder = "New Tag Name";
       REPLACE_BUTTON.innerText = "Change";
     } else if (choice === "Remove Tag") {
-      REPLACEMENT_BOX.placeholder = "Click Remove if You Are Sure";
+      REPLACEMENT_BOX.placeholder = "Click Remove if you are sure";
       REPLACE_BUTTON.innerText = "Remove";
     } else if (choice === "Remove from Class") {
       REPLACEMENT_BOX.placeholder = "class-name1 class-name2 ...";
@@ -159,7 +163,7 @@ function showReplacementForm() {
       REPLACEMENT_BOX.placeholder = "tagName#id.class[attribute=value]";
       REPLACE_BUTTON.innerText = "Add";
     } else if (choice === "Remove Upper Tag") {
-      REPLACEMENT_BOX.placeholder = "Click Remove If You Are Sure";
+      REPLACEMENT_BOX.placeholder = "Click Remove if you are sure";
       REPLACE_BUTTON.innerText = "Remove";
     } else {
       REPLACEMENT_FORM.style.display = "none";

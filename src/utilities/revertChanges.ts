@@ -1,10 +1,12 @@
 import * as vscode from 'vscode';
 
-export async function revertChanges(fileList: vscode.Uri[], rawContents: Uint8Array[], choice: string) {
+export async function revertChanges(fileList: vscode.Uri[], rawContents: Uint8Array[]) {
+    let processResult: string;
+
     try {
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
-            title: `Rollback process of "${choice.toLowerCase()}" is under the progress`,
+            title: `Rollback process is under the progress`,
             cancellable: false
         }, async () => {
             for (let index = 0; index < fileList.length; index++) {
@@ -12,15 +14,14 @@ export async function revertChanges(fileList: vscode.Uri[], rawContents: Uint8Ar
             }
         });
 
-        // Clean up the previous state of the files
+        // Since the rollback process for the last replacement process has already done,
+        // clean up all information of the previosly changed files
         rawContents.splice(0, rawContents.length); fileList.splice(0, fileList.length);
-
-        setTimeout(() => {
-            vscode.window.showInformationMessage(`Rollback process of "${choice.toLowerCase()}" successful`);
-            vscode.commands.executeCommand("search.action.refreshSearchResults");
-        }, 1000);
+        processResult = "Success";
     } catch (error) {
         console.log(error);
-        vscode.window.showErrorMessage(`Error occured during the rollback process of "${choice.toLowerCase()}"`);
+        processResult = `Error`;
     }
+
+    return processResult;
 }

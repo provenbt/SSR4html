@@ -3,8 +3,9 @@ import { convertToRegex } from './convertToRegexp';
 
 export async function searchInWorkspace(searchText: string) {
     await vscode.commands.executeCommand("workbench.action.findInFiles", {
-        // Fill-in selected text to query
+        // Send the generated regular expression to query
         query: convertToRegex(searchText),
+        // Search only in HTML files
         filesToInclude: "*.html",
         triggerSearch: true,
         isRegex: true,
@@ -17,8 +18,9 @@ export async function searchInWorkspace(searchText: string) {
 
 export async function searchInFile(searchText: string, filePath: string) {
     await vscode.commands.executeCommand("workbench.action.findInFiles", {
-        // Fill-in selected text to query
+        // Send the generated regular expression to query
         query: convertToRegex(searchText),
+        // Search only in the current file
         filesToInclude: `*${filePath}`,
         triggerSearch: true,
         isRegex: true,

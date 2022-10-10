@@ -129,7 +129,15 @@ export function activate(context: vscode.ExtensionContext) {
 			// clean up all information of the previosly changed files before a new replacement process
 			RAW_CONTENTS.splice(0, RAW_CONTENTS.length); FILE_LIST.splice(0, FILE_LIST.length);
 
-			const processResult = await replaceInFile(editor.document.uri, choice, searchText, replaceText, FILE_LIST, RAW_CONTENTS);
+			//Show progress of the replacement process within the file
+			let processResult: string;
+			await vscode.window.withProgress({
+				location: vscode.ProgressLocation.Notification,
+				title: `${choice} process is under the progress`,
+				cancellable: false
+			}, async () => {
+				processResult = await replaceInFile(editor.document.uri, choice, searchText, replaceText, FILE_LIST, RAW_CONTENTS);
+			});
 
 			setTimeout(() => {
 				notifyUser("Replacement", processResult, choice);

@@ -31,6 +31,11 @@ export class StructuralSearchPanel {
     vscode.commands.executeCommand("search.action.clearSearchResults");
     // To clear Files to Include/Exclude fields
     vscode.commands.executeCommand("search.action.clearSearchResults");
+    // To make the search settings default
+    vscode.commands.executeCommand("toggleSearchCaseSensitive");
+    vscode.commands.executeCommand("toggleSearchRegex");
+    vscode.commands.executeCommand("toggleSearchWholeWord");
+    // To close the primary sidebar
     vscode.commands.executeCommand("workbench.action.closeSidebar");
     
     StructuralSearchPanel.currentPanel = undefined;
@@ -61,10 +66,15 @@ export class StructuralSearchPanel {
             break;
 
           case "cancelSearch":
-            // To clear Search Query/Results fields
+             // To clear Search Query/Results fields
             vscode.commands.executeCommand("search.action.clearSearchResults");
             // To clear Files to Include/Exclude fields
             vscode.commands.executeCommand("search.action.clearSearchResults");
+            // To make the search settings default
+            vscode.commands.executeCommand("toggleSearchCaseSensitive");
+            vscode.commands.executeCommand("toggleSearchRegex");
+            vscode.commands.executeCommand("toggleSearchWholeWord");
+            // To close the primary sidebar
             vscode.commands.executeCommand("workbench.action.closeSidebar");
             break;
 

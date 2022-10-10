@@ -141,7 +141,7 @@ export async function replaceInFile(file: vscode.Uri, choice: string, searchText
                 break;
 
             case "Change Tag Name":
-                const newTagName = replaceText.replaceAll(' ', '');
+                const newTagName = replaceText.trim();
                 const { document } = (new jsdom.JSDOM()).window;
 
                 for (let result of results) {
@@ -170,7 +170,7 @@ export async function replaceInFile(file: vscode.Uri, choice: string, searchText
                 break;
 
             case "Add Upper Tag":
-                const parentInfo = replaceText.replaceAll(' ', '');
+                const parentInfo = replaceText.trim();
 
                 for (let result of results) {
                     // Create HTML element that will be upper tag

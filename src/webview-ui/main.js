@@ -118,8 +118,10 @@ function enableSearchButton() {
 
 function showReplacementForm() {
   const choice = SELECTION.value;
+  REPLACEMENT_BOX.innerText = "Replace Text";
   REPLACEMENT_BOX.value = "";
-
+  REPLACEMENT_BOX.readOnly = false;
+  
   if (choice !== "Unselected") {
     REPLACEMENT_FORM.style.display = "inline";
 
@@ -148,7 +150,9 @@ function showReplacementForm() {
       REPLACEMENT_BOX.placeholder = "New Tag Name";
       REPLACE_BUTTON.innerText = "Change";
     } else if (choice === "Remove Tag") {
-      REPLACEMENT_BOX.placeholder = "Click Remove if you are sure";
+      REPLACEMENT_BOX.innerText = "Are you sure to remove the tag with its children?";
+      REPLACEMENT_BOX.value = "Click Remove if you are sure";
+      REPLACEMENT_BOX.readOnly = true;
       REPLACE_BUTTON.innerText = "Remove";
     } else if (choice === "Remove from Class") {
       REPLACEMENT_BOX.placeholder = "class-name1 class-name2 ...";
@@ -163,7 +167,9 @@ function showReplacementForm() {
       REPLACEMENT_BOX.placeholder = "tagName#id.class[attribute=value]";
       REPLACE_BUTTON.innerText = "Add";
     } else if (choice === "Remove Upper Tag") {
-      REPLACEMENT_BOX.placeholder = "Click Remove if you are sure";
+      REPLACEMENT_BOX.innerText = "Are you sure to remove the upper tag?";
+      REPLACEMENT_BOX.value = "Click Remove if you are sure";
+      REPLACEMENT_BOX.readOnly = true;
       REPLACE_BUTTON.innerText = "Remove";
     } else {
       REPLACEMENT_FORM.style.display = "none";

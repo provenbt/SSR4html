@@ -9,7 +9,10 @@ import { revertChanges } from './utilities/revertChanges';
 import { notifyUser } from './utilities/notifyUser';
 
 export function activate(context: vscode.ExtensionContext) {
-
+	// Values will be assigned as valid values come from the user.
+	let SEARCH_TEXT: string;
+	let CHOICE: string;
+	let REPLACE_TEXT: string;
 	// To store the previous state of the files, vital to revert the most recent changes made in file(s).
 	const RAW_CONTENTS: Uint8Array[] = [];
 	const FILE_LIST: vscode.Uri[] = [];
@@ -32,7 +35,8 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 
-		const isThereAnyMatch = await searchInWorkspace(searchText);
+		SEARCH_TEXT = searchText;
+		const isThereAnyMatch = await searchInWorkspace(SEARCH_TEXT);
 
 		if (isThereAnyMatch) {
 			StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'onFoundSearchResult' });
@@ -65,7 +69,8 @@ export function activate(context: vscode.ExtensionContext) {
 				return;
 			}
 
-			const isThereAnyMatch = await searchInFile(searchText, editor.document.fileName);
+			SEARCH_TEXT = searchText;
+			const isThereAnyMatch = await searchInFile(SEARCH_TEXT, editor.document.fileName);
 
 			if (isThereAnyMatch) {
 				StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'onFoundSearchResult' });
@@ -76,7 +81,7 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	});
 
-	let disposableReplaceInFiles = vscode.commands.registerCommand('tag-manager.replaceInFiles', async (searchText, replaceText, choice) => {
+	let disposableReplaceInFiles = vscode.commands.registerCommand('tag-manager.replaceInFiles', async (replaceText, choice) => {
 
 		const isReplacementTextValid = checkReplacementText(choice, replaceText);
 		if (isReplacementTextValid !== "Valid") {
@@ -90,7 +95,8 @@ export function activate(context: vscode.ExtensionContext) {
 		// clean up all information of the previosly changed files before a new replacement process
 		RAW_CONTENTS.splice(0, RAW_CONTENTS.length); FILE_LIST.splice(0, FILE_LIST.length);
 
-		const processResults = await replaceInFiles(FILE_LIST, RAW_CONTENTS, choice, searchText, replaceText);
+		REPLACE_TEXT = replaceText; CHOICE = choice;
+		const processResults = await replaceInFiles(FILE_LIST, RAW_CONTENTS, CHOICE, SEARCH_TEXT, REPLACE_TEXT);
 
 		let processResult: string;
 		if (processResults.includes("Error")) {
@@ -108,7 +114,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}, 1000);
 	});
 
-	let disposableReplaceInFile = vscode.commands.registerCommand('tag-manager.replaceInFile', (searchText, replaceText, choice) => {
+	let disposableReplaceInFile = vscode.commands.registerCommand('tag-manager.replaceInFile', (replaceText, choice) => {
 
 		vscode.commands.executeCommand("workbench.action.openPreviousRecentlyUsedEditor").then(async () => {
 
@@ -136,7 +142,8 @@ export function activate(context: vscode.ExtensionContext) {
 				title: `${choice} process is under the progress`,
 				cancellable: false
 			}, async () => {
-				processResult = await replaceInFile(editor.document.uri, choice, searchText, replaceText, FILE_LIST, RAW_CONTENTS);
+				REPLACE_TEXT = replaceText; CHOICE = choice;
+				processResult = await replaceInFile(editor.document.uri, CHOICE, SEARCH_TEXT, REPLACE_TEXT, FILE_LIST, RAW_CONTENTS);
 			});
 
 			setTimeout(() => {
@@ -147,7 +154,7 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	});
 
-	let disposableRevertChanges = vscode.commands.registerCommand('tag-manager.revertChanges', async (choice) => {
+	let disposableRevertChanges = vscode.commands.registerCommand('tag-manager.revertChanges', async () => {
 
 		if (FILE_LIST.length === 0 || RAW_CONTENTS.length === 0) {
 			vscode.window.showWarningMessage("Nothing found to revert");
@@ -159,7 +166,7 @@ export function activate(context: vscode.ExtensionContext) {
 		const processResult = await revertChanges(FILE_LIST, RAW_CONTENTS);
 
 		setTimeout(() => {
-			notifyUser("Rollback", processResult, choice);
+			notifyUser("Rollback", processResult, CHOICE);
 			// Enable interactive UI components after the API progress
 			StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'unlockUIComponents' });
 		}, 1000);

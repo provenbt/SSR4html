@@ -79,15 +79,15 @@ export class StructuralSearchPanel {
             break;
 
           case "replaceInFile":
-            vscode.commands.executeCommand("tag-manager.replaceInFile", search, replace, choice);
+            vscode.commands.executeCommand("tag-manager.replaceInFile", replace, choice);
             break;
 
           case "replaceInFiles":
-            vscode.commands.executeCommand("tag-manager.replaceInFiles", search, replace, choice);
+            vscode.commands.executeCommand("tag-manager.replaceInFiles", replace, choice);
             break;
 
           case "revertChanges":
-            vscode.commands.executeCommand("tag-manager.revertChanges", choice);
+            vscode.commands.executeCommand("tag-manager.revertChanges");
             break;
         }
       },

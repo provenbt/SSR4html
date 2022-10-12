@@ -102,7 +102,7 @@ export class StructuralSearchPanel {
       "@vscode",
       "webview-ui-toolkit",
       "dist",
-      "toolkit.js" // A toolkit.min.js file is also available
+      "toolkit.js"
     ]);
 
     const mainUri = getUri(webview, extensionUri, ["src", "webview-ui", "main.js"]);
@@ -178,7 +178,7 @@ export class StructuralSearchPanel {
                       <vscode-text-area id="replacementBox" cols="150" rows="1">Replacement Text</vscode-text-area>
                     </div>
                     <div>
-                      <vscode-button id="replaceBtn" appearance="primary">Replace</vscode-button>
+                      <vscode-button id="replaceBtn" appearance="primary" disabled>Replace</vscode-button>
                       <vscode-button id="revertBtn" appearance="secondary">Revert</vscode-button>
                     </div>
 

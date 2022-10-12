@@ -29,6 +29,7 @@ function main() {
   SEARCH_BUTTON.addEventListener("click", onClickSearchButton);
   CANCEL_BUTTON.addEventListener("click", onClickCancelButton);
   SELECTION.addEventListener("change", showReplacementForm);
+  REPLACEMENT_BOX.addEventListener("keyup", enableReplaceButton);
   REPLACE_BUTTON.addEventListener("click", onClickReplaceButton);
   REVERT_BUTTON.addEventListener("click", onClickRevertButton);
   window.addEventListener('message', event => {
@@ -60,7 +61,12 @@ function main() {
         SELECTION.disabled = false;
         REVERT_BUTTON.disabled = false;
         REPLACE_BUTTON.disabled = false;
-        REPLACEMENT_BOX.readOnly = false;
+
+        // Since the text of the Remove Tag and Remove Upper Tag options is fixed,
+        // Replacement box for these choices will be always readonly.
+        if (SELECTION.value !== "Remove Tag" && SELECTION.value !== "Remove Upper Tag"){
+          REPLACEMENT_BOX.readOnly = false;
+        }
 
         break;
     }
@@ -116,10 +122,20 @@ function enableSearchButton() {
   }
 }
 
+function enableReplaceButton() {
+
+  if (REPLACEMENT_BOX.value.trim() === "") {
+    REPLACE_BUTTON.disabled = true;
+  } else {
+    REPLACE_BUTTON.disabled = false;
+  }
+}
+
 function showReplacementForm() {
   const choice = SELECTION.value;
   REPLACEMENT_BOX.innerText = "Replace Text";
   REPLACEMENT_BOX.value = "";
+  REPLACE_BUTTON.disabled = true;
   REPLACEMENT_BOX.readOnly = false;
   
   if (choice !== "Unselected") {
@@ -135,10 +151,10 @@ function showReplacementForm() {
       REPLACEMENT_BOX.placeholder = "Id Value";
       REPLACE_BUTTON.innerText = "Set";
     } else if (choice === "Set Attribute") {
-      REPLACEMENT_BOX.placeholder = "name1=value1,name2=value2, ...";
+      REPLACEMENT_BOX.placeholder = "atr-name value1 value2 ...";
       REPLACE_BUTTON.innerText = "Set";
     } else if (choice === "Append to Attribute") {
-      REPLACEMENT_BOX.placeholder = "atr-name,value1,value2, ...";
+      REPLACEMENT_BOX.placeholder = "atr-name value1 value2 ...";
       REPLACE_BUTTON.innerText = "Append";
     } else if (choice === "Set Style Property") {
       REPLACEMENT_BOX.placeholder = "prop-1:value1,prop-2:value2, ...";
@@ -153,15 +169,16 @@ function showReplacementForm() {
       REPLACEMENT_BOX.innerText = "Are you sure to remove the tag with its children?";
       REPLACEMENT_BOX.value = "Click Remove if you are sure";
       REPLACEMENT_BOX.readOnly = true;
+      REPLACE_BUTTON.disabled = false;
       REPLACE_BUTTON.innerText = "Remove";
     } else if (choice === "Remove from Class") {
       REPLACEMENT_BOX.placeholder = "class-name1 class-name2 ...";
       REPLACE_BUTTON.innerText = "Remove";
     } else if (choice === "Remove from Attribute") {
-      REPLACEMENT_BOX.placeholder = "atr-name,value1,value2, ...";
+      REPLACEMENT_BOX.placeholder = "atr-name value1 value2 ...";
       REPLACE_BUTTON.innerText = "Remove";
     } else if (choice === "Remove Attribute") {
-      REPLACEMENT_BOX.placeholder = "atr-name1,atr-name2, ...";
+      REPLACEMENT_BOX.placeholder = "atr-name value1 value2 ...";
       REPLACE_BUTTON.innerText = "Remove";
     } else if (choice === "Add Upper Tag") {
       REPLACEMENT_BOX.placeholder = "tagName#id.class[attribute=value]";
@@ -170,6 +187,7 @@ function showReplacementForm() {
       REPLACEMENT_BOX.innerText = "Are you sure to remove the upper tag?";
       REPLACEMENT_BOX.value = "Click Remove if you are sure";
       REPLACEMENT_BOX.readOnly = true;
+      REPLACE_BUTTON.disabled = false;
       REPLACE_BUTTON.innerText = "Remove";
     } else {
       REPLACEMENT_FORM.style.display = "none";

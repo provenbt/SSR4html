@@ -4,26 +4,30 @@ import { getUri } from "../utilities/getUri";
 export class StructuralSearchPanel {
   public static currentPanel: StructuralSearchPanel | undefined;
   public readonly panel: vscode.WebviewPanel;
+  
+  private readonly extensionUri: vscode.Uri;
   private disposables: vscode.Disposable[] = [];
 
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
     this.panel = panel;
-    this.panel.onDidDispose(this.dispose, null, this.disposables);
-    this.panel.webview.html = this.getWebviewContent(this.panel.webview, extensionUri);
+    this.extensionUri = extensionUri;
+    this.panel.onDidDispose(() => this.dispose(), null, this.disposables);
+    this.panel.webview.html = this.getWebviewContent(this.panel.webview);
     this.setWebviewMessageListener(this.panel.webview);
   }
 
   public static render(extensionUri: vscode.Uri) {
     if (StructuralSearchPanel.currentPanel) {
       StructuralSearchPanel.currentPanel.panel.reveal(vscode.ViewColumn.Beside);
-    } else {
-      const panel = vscode.window.createWebviewPanel("webview", "SSR4HTML", vscode.ViewColumn.Beside, {
-        enableScripts: true,
-        retainContextWhenHidden: true
-      });
-
-      StructuralSearchPanel.currentPanel = new StructuralSearchPanel(panel, extensionUri);
+      return;
     }
+
+    const panel = vscode.window.createWebviewPanel("showPanel", "SSR4HTML", vscode.ViewColumn.Beside, {
+      enableScripts: true,
+      retainContextWhenHidden: true
+    });
+
+    StructuralSearchPanel.currentPanel = new StructuralSearchPanel(panel, extensionUri);
   }
 
   public dispose() {
@@ -37,7 +41,7 @@ export class StructuralSearchPanel {
     vscode.commands.executeCommand("toggleSearchWholeWord");
     // To close the primary sidebar
     vscode.commands.executeCommand("workbench.action.closeSidebar");
-    
+
     StructuralSearchPanel.currentPanel = undefined;
 
     this.panel.dispose();
@@ -66,7 +70,7 @@ export class StructuralSearchPanel {
             break;
 
           case "cancelSearch":
-             // To clear Search Query/Results fields
+            // To clear Search Query/Results fields
             vscode.commands.executeCommand("search.action.clearSearchResults");
             // To clear Files to Include/Exclude fields
             vscode.commands.executeCommand("search.action.clearSearchResults");
@@ -91,13 +95,13 @@ export class StructuralSearchPanel {
             break;
         }
       },
-      undefined,
+      null,
       this.disposables
     );
   }
 
-  private getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
-    const toolkitUri = getUri(webview, extensionUri, [
+  private getWebviewContent(webview: vscode.Webview) {
+    const toolkitUri = getUri(webview, this.extensionUri, [
       "node_modules",
       "@vscode",
       "webview-ui-toolkit",
@@ -105,17 +109,18 @@ export class StructuralSearchPanel {
       "toolkit.js"
     ]);
 
-    const mainUri = getUri(webview, extensionUri, ["src", "webview-ui", "main.js"]);
+    const mainUri = getUri(webview, this.extensionUri, ["src", "webview-ui", "main.js"]);
 
     return /*html*/ `
       <!DOCTYPE html>
       <html lang="en">
         <head>
           <meta charset="UTF-8">
+          <meta http-equiv="Content-Security-Policy">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>SSR4HTML</title>
           <script type = "module" src = "${toolkitUri}"></script>
           <script type = "module" src = "${mainUri}"></script>
-          <title>SSR4HTML</title>
         </head>
         <body>
           <div style="width:300px;">

@@ -60,12 +60,18 @@ function main() {
         CANCEL_BUTTON.disabled = false;
         SELECTION.disabled = false;
         REVERT_BUTTON.disabled = false;
-        REPLACE_BUTTON.disabled = false;
-
-        // Since the text of the Remove Tag and Remove Upper Tag options is fixed,
-        // Replacement box for these choices will be always readonly.
-        if (SELECTION.value !== "Remove Tag" && SELECTION.value !== "Remove Upper Tag"){
+        
+        // Since the text of the Remove Tag and Remove Upper Tag options is fixed and already written,
+        // replacement box for these choices is always readonly and replace button is always enabled.
+        if (SELECTION.value === "Remove Tag" || SELECTION.value === "Remove Upper Tag"){
+          REPLACE_BUTTON.disabled = false;
+          REPLACEMENT_BOX.readOnly = true;
+        }
+        // Replacement box for other choices will be no longer readonly and
+        // replace button is enabled if a replace text has been provided 
+        else {
           REPLACEMENT_BOX.readOnly = false;
+          enableReplaceButton();
         }
 
         break;
@@ -181,7 +187,7 @@ function showReplacementForm() {
       REPLACEMENT_BOX.placeholder = "atr-name value1 value2 ...";
       REPLACE_BUTTON.innerText = "Remove";
     } else if (choice === "Add Upper Tag") {
-      REPLACEMENT_BOX.placeholder = "tagName#id.class[attribute=value]";
+      REPLACEMENT_BOX.placeholder = "tagname#id.class[attribute='value']";
       REPLACE_BUTTON.innerText = "Add";
     } else if (choice === "Remove Upper Tag") {
       REPLACEMENT_BOX.innerText = "Are you sure to remove the upper tag?";

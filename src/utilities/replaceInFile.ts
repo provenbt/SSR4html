@@ -54,24 +54,21 @@ export async function replaceInFile(file: vscode.Uri, choice: string, searchText
                 break;
 
             case "Set Attribute":
-                const attributeValuePairs: string[] = replaceText.replace(/"|'/g, '').split(',');
+                const attributeNameAndValuesForSet = replaceText.split(/\s/).map(v => v.trim()).filter(e => e !== "");
+                const attributeNameForSet: string = attributeNameAndValuesForSet[0];
+                const valuesToSet: string[] = attributeNameAndValuesForSet.slice(1);
 
                 for (let result of results) {
-                    for (let attributeValuePair of attributeValuePairs) {
-                        // Remove all kind of space character in the attribute name
-                        let attribute = attributeValuePair.split('=')[0].replaceAll(' ', '');
-                        let value = attributeValuePair.split('=')[1].trim();
-
-                        result.setAttribute(attribute, value);
-                    }
+                    result.setAttribute(attributeNameForSet, valuesToSet.join(' '));
                 }
 
                 changeFile = true;
                 break;
 
             case "Append to Attribute":
-                const attributeNameForAppend: string = replaceText.split(',')[0].trim();
-                const valuesToAppend: string[] = replaceText.replace(/"|'/g, '').split(',').slice(1).map(v => (v.trim()));
+                const attributeNameAndValuesForAppend = replaceText.split(/\s/).map(v => v.trim()).filter(e => e !== "");
+                const attributeNameForAppend: string = attributeNameAndValuesForAppend[0];
+                const valuesToAppend: string[] = attributeNameAndValuesForAppend.slice(1);
 
                 for (let result of results) {
                     const oldValue: string = result.getAttribute(attributeNameForAppend);
@@ -95,7 +92,7 @@ export async function replaceInFile(file: vscode.Uri, choice: string, searchText
                 break;
 
             case "Set Style Property":
-                const propertiesInfoForSet = replaceText.split(',');
+                const propertiesInfoForSet = replaceText.split(',').map(v => v.trim()).filter(e => e !== "");
 
                 for (let result of results) {
                     // Overwrite style attribute if it is already defined in the element
@@ -118,7 +115,7 @@ export async function replaceInFile(file: vscode.Uri, choice: string, searchText
                 break;
 
             case "Edit Style Property":
-                const propertiesInfoForEdit = replaceText.split(',');
+                const propertiesInfoForEdit = replaceText.split(',').map(v => v.trim()).filter(e => e !== "");
 
                 for (let result of results) {
                     if (result.hasAttribute("style")) {
@@ -210,8 +207,9 @@ export async function replaceInFile(file: vscode.Uri, choice: string, searchText
                 break;
 
             case "Remove from Attribute":
-                const attributeNameForRemove: string = replaceText.split(',')[0].trim();
-                const valuesToRemove: string[] = replaceText.replace(/"|'/g, '').split(',').slice(1).map(v => (v.trim()));
+                const attributeNameAndValuesForRemove = replaceText.split(/\s/).map(v => v.trim()).filter(e => e !== "");
+                const attributeNameForRemove: string = attributeNameAndValuesForRemove[0];
+                const valuesToRemove: string[] = attributeNameAndValuesForRemove.slice(1);
 
                 for (let result of results) {
                     const oldValue: string = result.getAttribute(attributeNameForRemove);
@@ -224,8 +222,8 @@ export async function replaceInFile(file: vscode.Uri, choice: string, searchText
                         // Remove a value if the value really exists in the attribute
                         for (let value of valuesToRemove) {
                             if (oldValues.includes(value)) {
-                                newValue = newValue.replace(new RegExp(`(?:^|[\\W])${value}`, 'g'), '').trim();
-                                result.setAttribute(attributeNameForRemove, newValue);
+                                newValue = newValue.replace(new RegExp(`(?:^|[\\s])${value}(?:$|[\\s])`, 'g'), ' ');
+                                result.setAttribute(attributeNameForRemove, newValue.trim());
                                 changeFile = true;
                             }
                         }
@@ -235,14 +233,13 @@ export async function replaceInFile(file: vscode.Uri, choice: string, searchText
                 break;
 
             case "Remove Attribute":
-                replaceText = replaceText.trim();
-                const attributesToRemove: string[] = replaceText.split(',').map(value => (value.trim()));
+                const attributesToRemove: string[] = replaceText.split(/\s/).map(v => v.trim()).filter(e => e !== "");
 
                 for (let result of results) {
-                    for (let attribute of attributesToRemove) {
-                        // Remove only existing attributes in the element
-                        if (result.hasAttribute(attribute)) {
-                            result.removeAttribute(attribute);
+                    for (let attributeName of attributesToRemove) {
+                        // Remove only exist attributes in the element
+                        if (result.hasAttribute(attributeName)) {
+                            result.removeAttribute(attributeName);
                             changeFile = true;
                         }
                     }

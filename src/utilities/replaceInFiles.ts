@@ -9,7 +9,7 @@ export async function replaceInFiles(fileList: vscode.Uri[], rawContents: Uint8A
         title: `${choice} process is under the progress`,
         cancellable: false
     }, async (progress) => {
-        const files = await vscode.workspace.findFiles('**/*.html', '**/node_modules/**');
+        const files = await vscode.workspace.findFiles('**/*.html');
         let inc = Math.round(100 / files.length);
         let progressCounter = 0;
 

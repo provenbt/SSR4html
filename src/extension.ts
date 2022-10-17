@@ -23,7 +23,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	let disposableSearchInFiles = vscode.commands.registerCommand('tag-manager.searchInFiles', async (searchText) => {
 
-		const files = await vscode.workspace.findFiles('**/*.html', '**/node_modules/**');
+		const files = await vscode.workspace.findFiles('**/*.html');
 		if (files.length === 0) {
 			vscode.window.showWarningMessage("There is not any HTML file in the workspace");
 			return;

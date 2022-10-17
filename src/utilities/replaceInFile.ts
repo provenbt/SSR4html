@@ -184,9 +184,9 @@ export async function replaceInFile(file: vscode.Uri, choice: string, searchText
             case "Remove Tag":
                 for (let result of results) {
                     result.remove();
+                    changeFile = true;
                 }
 
-                changeFile = true;
                 break;
 
             case "Remove from Class":

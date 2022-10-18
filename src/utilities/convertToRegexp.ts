@@ -16,7 +16,7 @@ const s2r = require("selector-2-regexp");
 export function convertToRegex(searchText: string): String {
     // To store RegExp(s)
     let regex: string[] = [];
-    
+
     try {
         // Search Text may include more than one CSS selector (a CSS selector named as query)
         const queries: string[] = searchText.split(',').map(v => v.trim());
@@ -26,7 +26,7 @@ export function convertToRegex(searchText: string): String {
             // Get RegExp of the provided CSS selector
             regex[index] = s2r.default(query);
 
-            // Means there is type selector in the query 
+            // Means the query includes type selector 
             if (query.match(/^[A-Za-z]+.*/g) !== null) {
                 //Parse element(tag) name
                 let tagName = query.split(/[#\[.]/g)[0];
@@ -39,7 +39,7 @@ export function convertToRegex(searchText: string): String {
                 regex[index] = regex[index].replace(`${tagName}`, `(?<!\\w)${tagName}(?!\\w)`);
             }
 
-            // Means there is at least one attribute selector in the query
+            // Means the query includes attribute selector
             if (query.includes('[')) {
                 const findAttributes = /\[\s*(.+?)\s*(\=|\])/g;
 
@@ -52,21 +52,17 @@ export function convertToRegex(searchText: string): String {
                 }
 
                 /*
-                    Edit the generated RegExp for attribute selectors to accept whitespaces 
+                    Edit the generated RegExp for each attribute selector to accept whitespaces 
                     before and after the equality(=) symbol
                 */
                 for (let attribute of attributes) {
-
-                    attribute = attribute.replace(/[\^\$*\~\[\]\=]/g, '').trim();
-
-                    regex[index] = regex[index].replace(`${attribute}=`, `${attribute}`).
-                        replace(`${attribute}`, `${attribute}=`).
-                        replace(`${attribute}=`, `${attribute}\\s*=\\s*`);
+                    attribute = attribute.trim().replace(/[\^\$*\~\[\]\=]/g, '');
+                    regex[index] = regex[index].replace(new RegExp(`(?<!\\w)${attribute}(?!\\w)=?`, 'g'), `${attribute}\\s*=\\s*`);
                 }
 
                 /*
-                    Generated RegExp for the attribute selectors with endswith($=) and 
-                    startswith(^=) features was wrong. This issue was fixed here
+                    Generated RegExp for the attribute selectors that include endswith($=) and 
+                    startswith(^=) features was wrong. This issue is fixed here
                 */
                 if (query.includes("$=") || query.includes("^=")) {
 
@@ -76,12 +72,10 @@ export function convertToRegex(searchText: string): String {
                     for (let atrQuery of attributeQueries) {
                         let value = atrQuery.slice(atrQuery.indexOf('=') + 1, atrQuery.indexOf(']'));
                         value = value.replace(/"|'/g, '');
-
-                        if (atrQuery.includes("$=")) {
-                            regex[index] = regex[index].replace(`${value}[\\s`, `${value}[`);
-                        } else if (atrQuery.includes("^=")) {
-                            regex[index] = regex[index].replace(`[\\s'"]${value}`, `['"]${value}`);
-                        }
+                        // If includes $= will do this line
+                        regex[index] = regex[index].replace(`${value}[\\s`, `${value}[`);
+                        // If includes ^= will do this line
+                        regex[index] = regex[index].replace(`[\\s'"]${value}`, `['"]${value}`);
                     }
                 }
             }
@@ -94,10 +88,10 @@ export function convertToRegex(searchText: string): String {
 
             // Make the generated RegExp(s) compatible with the RegExp engine of the VS code's sidebar search
             regex[index] = regex[index].replaceAll(`.*[\\s'"]`, `[^=]*[\\s'"]`).replaceAll("\\:", "[:]").
-                replaceAll('_-', "_\\-;").replace('\\s+.*', '.*\\s+').replace(".*\\s*>",".*?>");
+                replaceAll('_-', "_\\-;").replaceAll(".*", ".*?").replace("\\s*>", ">");
 
             if (regex[index].includes('{')) {
-                regex[index] = regex[index].replace(".*\\s+", ".*(\\s+").replace(".*{", ".*){");
+                regex[index] = regex[index].replace("\\s+.*?", "\\s+.*?(").replace(".*?{", ".*?){");;
             }
 
             index++;

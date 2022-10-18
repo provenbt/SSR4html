@@ -35,6 +35,8 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 
+		// Disable interactive UI components during the API progress
+		StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'lockUIComponents' });
 		SEARCH_TEXT = searchText;
 		const isThereAnyMatch = await searchInWorkspace(SEARCH_TEXT);
 
@@ -45,6 +47,8 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.window.showWarningMessage("Nothing found to modify");
 		}
 
+		// Enable interactive UI components after the API progress
+		StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'unlockUIComponents' });
 	});
 
 
@@ -69,6 +73,8 @@ export function activate(context: vscode.ExtensionContext) {
 				return;
 			}
 
+			// Disable interactive UI components during the API progress
+			StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'lockUIComponents' });
 			SEARCH_TEXT = searchText;
 			const isThereAnyMatch = await searchInFile(SEARCH_TEXT, editor.document.fileName);
 
@@ -78,6 +84,9 @@ export function activate(context: vscode.ExtensionContext) {
 			else {
 				vscode.window.showWarningMessage("Nothing found to modify");
 			}
+
+			// Enable interactive UI components after the API progress
+			StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'unlockUIComponents' });
 		});
 	});
 
@@ -109,6 +118,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 		setTimeout(() => {
 			notifyUser("Replacement", processResult, choice);
+
 			// Enable interactive UI components after the API progress
 			StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'unlockUIComponents' });
 		}, 1000);
@@ -148,6 +158,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 			setTimeout(() => {
 				notifyUser("Replacement", processResult, choice);
+
 				// Enable interactive UI components after the API progress
 				StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'unlockUIComponents' });
 			}, 1000);
@@ -167,6 +178,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 		setTimeout(() => {
 			notifyUser("Rollback", processResult, CHOICE);
+
 			// Enable interactive UI components after the API progress
 			StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'unlockUIComponents' });
 		}, 1000);

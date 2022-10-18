@@ -48,6 +48,9 @@ function main() {
         break;
       // This part will lock all UI not to be modified during the API progress
       case "lockUIComponents":
+        SEARCH_BOX.readOnly = true;
+        CHECKBOX.readOnly = true;
+        SEARCH_BUTTON.disabled = true;
         CANCEL_BUTTON.disabled = true;
         SELECTION.disabled = true;
         REVERT_BUTTON.disabled = true;
@@ -55,23 +58,31 @@ function main() {
         REPLACEMENT_BOX.readOnly = true;
 
         break;
-      // This part will unlock all UI after the API progress
+      // This part will unlock the necessary parts of the UI after the API progress
       case "unlockUIComponents":
-        CANCEL_BUTTON.disabled = false;
-        SELECTION.disabled = false;
-        REVERT_BUTTON.disabled = false;
-        
-        // Since the text of the Remove Tag and Remove Upper Tag options is fixed and already written,
-        // replacement box for these choices is always readonly and replace button is always enabled.
-        if (SELECTION.value === "Remove Tag" || SELECTION.value === "Remove Upper Tag"){
-          REPLACE_BUTTON.disabled = false;
-          REPLACEMENT_BOX.readOnly = true;
+        // Unlock search button and search box if no result found for the current search query
+        if (REPLACEMENT_PART.style.display !== "inline") {
+          SEARCH_BOX.readOnly = false;
+          CHECKBOX.readOnly = false;
+          SEARCH_BUTTON.disabled = false;
         }
-        // Replacement box for other choices will be no longer readonly and
-        // replace button is enabled if a replace text has been provided 
+        // Unlock the remain parts of the UI if a result found for the current search query
         else {
-          REPLACEMENT_BOX.readOnly = false;
-          enableReplaceButton();
+          CANCEL_BUTTON.disabled = false;
+          SELECTION.disabled = false;
+          REVERT_BUTTON.disabled = false;
+          // Since the text of the Remove Tag and Remove Upper Tag options is fixed and already written,
+          // replacement box for these choices is always readonly and replace button is always enabled.
+          if (SELECTION.value === "Remove Tag" || SELECTION.value === "Remove Upper Tag"){
+            REPLACE_BUTTON.disabled = false;
+            REPLACEMENT_BOX.readOnly = true;
+          }
+          // Replacement box for other choices will be no longer readonly and
+          // replace button is enabled if a replace text has been provided 
+          else {
+            REPLACEMENT_BOX.readOnly = false;
+            enableReplaceButton();
+          }
         }
 
         break;

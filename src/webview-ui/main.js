@@ -147,56 +147,82 @@ function showReplacementForm() {
   if (choice !== "Unselected") {
     REPLACEMENT_FORM.style.display = "inline";
 
-    if (choice === "Set Class") {
-      REPLACEMENT_BOX.placeholder = "class-name1 class-name2 ...";
-      REPLACE_BUTTON.innerText = "Set";
-    } else if (choice === "Append to Class") {
-      REPLACEMENT_BOX.placeholder = "class-name1 class-name2 ...";
-      REPLACE_BUTTON.innerText = "Append";
-    } else if (choice === "Set Id") {
-      REPLACEMENT_BOX.placeholder = "Id Value";
-      REPLACE_BUTTON.innerText = "Set";
-    } else if (choice === "Set Attribute") {
-      REPLACEMENT_BOX.placeholder = "atr-name value1 value2 ...";
-      REPLACE_BUTTON.innerText = "Set";
-    } else if (choice === "Append to Attribute") {
-      REPLACEMENT_BOX.placeholder = "atr-name value1 value2 ...";
-      REPLACE_BUTTON.innerText = "Append";
-    } else if (choice === "Set Style Property") {
-      REPLACEMENT_BOX.placeholder = "prop-1:value1,prop-2:value2, ...";
-      REPLACE_BUTTON.innerText = "Set";
-    } else if (choice === "Edit Style Property") {
-      REPLACEMENT_BOX.placeholder = "prop-1:value1,prop-2:value2, ...";
-      REPLACE_BUTTON.innerText = "Edit";
-    } else if (choice === "Change Tag Name") {
-      REPLACEMENT_BOX.placeholder = "New Tag Name";
-      REPLACE_BUTTON.innerText = "Change";
-    } else if (choice === "Remove Tag") {
-      REPLACEMENT_BOX.innerText = "Are you sure to remove the tag with its children?";
-      REPLACEMENT_BOX.value = "Click Remove if you are sure";
-      REPLACEMENT_BOX.readOnly = true;
-      REPLACE_BUTTON.disabled = false;
-      REPLACE_BUTTON.innerText = "Remove";
-    } else if (choice === "Remove from Class") {
-      REPLACEMENT_BOX.placeholder = "class-name1 class-name2 ...";
-      REPLACE_BUTTON.innerText = "Remove";
-    } else if (choice === "Remove from Attribute") {
-      REPLACEMENT_BOX.placeholder = "atr-name value1 value2 ...";
-      REPLACE_BUTTON.innerText = "Remove";
-    } else if (choice === "Remove Attribute") {
-      REPLACEMENT_BOX.placeholder = "atr-name value1 value2 ...";
-      REPLACE_BUTTON.innerText = "Remove";
-    } else if (choice === "Add Upper Tag") {
-      REPLACEMENT_BOX.placeholder = "tagname#id.class[attribute='value']";
-      REPLACE_BUTTON.innerText = "Add";
-    } else if (choice === "Remove Upper Tag") {
-      REPLACEMENT_BOX.innerText = "Are you sure to remove the upper tag?";
-      REPLACEMENT_BOX.value = "Click Remove if you are sure";
-      REPLACEMENT_BOX.readOnly = true;
-      REPLACE_BUTTON.disabled = false;
-      REPLACE_BUTTON.innerText = "Remove";
-    } else {
-      REPLACEMENT_FORM.style.display = "none";
+    switch (choice) {
+      case "Set Class":
+        REPLACEMENT_BOX.placeholder = "class-name1 class-name2 ...";
+        REPLACE_BUTTON.innerText = "Set";
+        break;
+
+      case "Append to Class":
+        REPLACEMENT_BOX.placeholder = "class-name1 class-name2 ...";
+        REPLACE_BUTTON.innerText = "Append";
+        break;
+      
+      case "Remove from Class":
+        REPLACEMENT_BOX.placeholder = "class-name1 class-name2 ...";
+        REPLACE_BUTTON.innerText = "Remove";
+        break;
+      
+      case "Set Id":
+        REPLACEMENT_BOX.placeholder = "Id Value";
+        REPLACE_BUTTON.innerText = "Set";
+        break;
+
+      case "Set Style Property":
+        REPLACEMENT_BOX.placeholder = "prop-1:value1,prop-2:value2, ...";
+        REPLACE_BUTTON.innerText = "Set";
+        break;
+      
+      case "Edit Style Property":
+        REPLACEMENT_BOX.placeholder = "prop-1:value1,prop-2:value2, ...";
+        REPLACE_BUTTON.innerText = "Edit";
+        break;
+
+      case "Set Attribute":
+        REPLACEMENT_BOX.placeholder = "atr-name value1 value2 ...";
+        REPLACE_BUTTON.innerText = "Set";
+        break;
+      
+      case "Append to Attribute":
+        REPLACEMENT_BOX.placeholder = "atr-name value1 value2 ...";
+        REPLACE_BUTTON.innerText = "Append";
+        break;
+      
+      case "Remove from Attribute":
+        REPLACEMENT_BOX.placeholder = "atr-name value1 value2 ...";
+        REPLACE_BUTTON.innerText = "Remove";
+        break;
+
+      case "Remove Attribute":
+        REPLACEMENT_BOX.placeholder = "atr-name1 atr-name2 ...";
+        REPLACE_BUTTON.innerText = "Remove";
+        break;
+
+      case "Change Tag Name":
+        REPLACEMENT_BOX.placeholder = "New Tag Name";
+        REPLACE_BUTTON.innerText = "Change";
+        break;
+
+      case "Remove Tag":
+        REPLACEMENT_BOX.innerText = "Are you sure to remove the tag with its children?";
+        REPLACEMENT_BOX.value = "Click Remove if you are sure";
+        REPLACEMENT_BOX.readOnly = true;
+        REPLACE_BUTTON.disabled = false;
+        REPLACE_BUTTON.innerText = "Remove";
+        break;
+
+      case "Add Upper Tag":
+        REPLACEMENT_BOX.placeholder = "tagname#id.class[attribute='value']";
+        REPLACE_BUTTON.innerText = "Add";
+        break;
+      
+      case "Remove Upper Tag":
+        REPLACEMENT_BOX.innerText = "Are you sure to remove the upper tag?";
+        REPLACEMENT_BOX.value = "Click Remove if you are sure";
+        REPLACEMENT_BOX.readOnly = true;
+        REPLACE_BUTTON.disabled = false;
+        REPLACE_BUTTON.innerText = "Remove";
+        break;
     }
   }
   else {

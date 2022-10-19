@@ -13,6 +13,8 @@ export function activate(context: vscode.ExtensionContext) {
 	let SEARCH_TEXT: string;
 	let CHOICE: string;
 	let REPLACE_TEXT: string;
+	// To store the information of the current document, vital to search&replace only within a file
+	let CURRENT_DOCUMENT: vscode.TextDocument; 
 	// To store the previous state of the files, vital to revert the most recent changes made in file(s).
 	const RAW_CONTENTS: Uint8Array[] = [];
 	const FILE_LIST: vscode.Uri[] = [];
@@ -53,19 +55,25 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 	let disposableSearchInFile = vscode.commands.registerCommand('ssr4html.searchInFile', (searchText) => {
-
+		// Open the previously active editor
 		vscode.commands.executeCommand("workbench.action.openPreviousRecentlyUsedEditor").then(async () => {
 
 			const editor = vscode.window.activeTextEditor;
+			// Warn the user when there is not any active text editor
 			if (editor === undefined || editor.document === undefined) {
 				vscode.window.showWarningMessage("Please, open a HTML file");
 				return;
 			}
 
-			if (!(editor.document.uri.toString().endsWith(".html"))) {
+			CURRENT_DOCUMENT = editor.document;
+			// Warn the user and show the document if it is not an HTML file
+			if (!(CURRENT_DOCUMENT.uri.toString().endsWith(".html"))) {
 				vscode.window.showWarningMessage("The current file is not an HTML file");
 				return;
 			}
+
+			// Go back to the UI
+			await vscode.commands.executeCommand("workbench.action.openNextRecentlyUsedEditor");
 
 			const isCssSelectorValid = checkSearchText(searchText);
 			if (isCssSelectorValid !== "Valid") {
@@ -76,7 +84,7 @@ export function activate(context: vscode.ExtensionContext) {
 			// Disable interactive UI components during the API progress
 			StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'lockUIComponents' });
 			SEARCH_TEXT = searchText;
-			const isThereAnyMatch = await searchInFile(SEARCH_TEXT, editor.document.fileName);
+			const isThereAnyMatch = await searchInFile(SEARCH_TEXT, CURRENT_DOCUMENT.fileName);
 
 			if (isThereAnyMatch) {
 				StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'onFoundSearchResult' });
@@ -124,45 +132,37 @@ export function activate(context: vscode.ExtensionContext) {
 		}, 1000);
 	});
 
-	let disposableReplaceInFile = vscode.commands.registerCommand('ssr4html.replaceInFile', (replaceText, choice) => {
+	let disposableReplaceInFile = vscode.commands.registerCommand('ssr4html.replaceInFile', async (replaceText, choice) => {
 
-		vscode.commands.executeCommand("workbench.action.openPreviousRecentlyUsedEditor").then(async () => {
+		const isReplacementTextValid = checkReplacementText(choice, replaceText);
+		if (isReplacementTextValid !== "Valid") {
+			vscode.window.showWarningMessage(isReplacementTextValid);
+			return;
+		}
 
-			const editor = vscode.window.activeTextEditor;
-			if (editor === undefined || editor.document === undefined) {
-				return;
-			}
+		// Disable interactive UI components during the API progress
+		StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'lockUIComponents' });
+		// Since only the effects of the last replacement process will be reverted,
+		// clean up all information of the previosly changed files before a new replacement process
+		RAW_CONTENTS.splice(0, RAW_CONTENTS.length); FILE_LIST.splice(0, FILE_LIST.length);
 
-			const isReplacementTextValid = checkReplacementText(choice, replaceText);
-			if (isReplacementTextValid !== "Valid") {
-				vscode.window.showWarningMessage(isReplacementTextValid);
-				return;
-			}
-
-			// Disable interactive UI components during the API progress
-			StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'lockUIComponents' });
-			// Since only the effects of the last replacement process will be reverted,
-			// clean up all information of the previosly changed files before a new replacement process
-			RAW_CONTENTS.splice(0, RAW_CONTENTS.length); FILE_LIST.splice(0, FILE_LIST.length);
-
-			//Show progress of the replacement process within the file
-			let processResult: string;
-			await vscode.window.withProgress({
-				location: vscode.ProgressLocation.Notification,
-				title: `${choice} process is under the progress`,
-				cancellable: false
-			}, async () => {
-				REPLACE_TEXT = replaceText; CHOICE = choice;
-				processResult = await replaceInFile(editor.document.uri, CHOICE, SEARCH_TEXT, REPLACE_TEXT, FILE_LIST, RAW_CONTENTS);
-			});
-
-			setTimeout(() => {
-				notifyUser("Replacement", processResult, choice);
-
-				// Enable interactive UI components after the API progress
-				StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'unlockUIComponents' });
-			}, 1000);
+		// Show progress of the replacement process
+		let processResult: string;
+		await vscode.window.withProgress({
+			location: vscode.ProgressLocation.Notification,
+			title: `${choice} process is under the progress`,
+			cancellable: false
+		}, async () => {
+			REPLACE_TEXT = replaceText; CHOICE = choice;
+			processResult = await replaceInFile(CURRENT_DOCUMENT.uri, CHOICE, SEARCH_TEXT, REPLACE_TEXT, FILE_LIST, RAW_CONTENTS);
 		});
+
+		setTimeout(() => {
+			notifyUser("Replacement", processResult, choice);
+
+			// Enable interactive UI components after the API progress
+			StructuralSearchPanel.currentPanel?.panel.webview.postMessage({ command: 'unlockUIComponents' });
+		}, 1000);
 	});
 
 	let disposableRevertChanges = vscode.commands.registerCommand('ssr4html.revertChanges', async () => {

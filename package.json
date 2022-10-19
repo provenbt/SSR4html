@@ -1,8 +1,8 @@
 {
-  "name": "tag-manager",
-  "displayName": "tag-manager",
-  "description": "tag-manager",
-  "version": "0.0.1",
+  "name": "ssr4html",
+  "displayName": "SSR4HTML",
+  "description": "Structural Search and Replace for HTML files",
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.69.0"
   },
@@ -10,67 +10,67 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:tag-manager.searchPanelTag",
-    "onCommand:tag-manager.searchInFiles",
-    "onCommand:tag-manager.searchInFile",
-    "onCommand:tag-manager.replaceInFiles",
-    "onCommand:tag-manager.replaceInFile",
-    "onCommand:tag-manager.revertChanges"
+    "onCommand:ssr4html.showUI",
+    "onCommand:ssr4html.searchInFiles",
+    "onCommand:ssr4html.searchInFile",
+    "onCommand:ssr4html.replaceInFiles",
+    "onCommand:ssr4html.replaceInFile",
+    "onCommand:ssr4html.revertChanges"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "tag-manager.searchPanelTag",
+        "command": "ssr4html.showUI",
         "title": "Structural Search and Replace Panel"
       },
       {
-        "command": "tag-manager.searchInFiles",
+        "command": "ssr4html.searchInFiles",
         "title": "Structural Search in All Files"
       },
       {
-        "command": "tag-manager.searchInFile",
+        "command": "ssr4html.searchInFile",
         "title": "Structural Search in Current File"
       },
       {
-        "command": "tag-manager.replaceInFiles",
+        "command": "ssr4html.replaceInFiles",
         "title": "Structural Replace in All Files"
       },
       {
-        "command": "tag-manager.replaceInFile",
+        "command": "ssr4html.replaceInFile",
         "title": "Structural Replace in Current File"
       },
       {
-        "command": "tag-manager.revertChanges",
+        "command": "ssr4html.revertChanges",
         "title": "Revert Changes"
       }
     ],
     "keybindings": [
       {
-        "command": "tag-manager.searchPanelTag",
+        "command": "ssr4html.showUI",
         "key": "ctrl+1"
       }
     ],
     "menus": {
       "commandPalette": [
         {
-          "command": "tag-manager.searchInFiles",
+          "command": "ssr4html.searchInFiles",
           "when": "false"
         },
         {
-          "command": "tag-manager.searchInFile",
+          "command": "ssr4html.searchInFile",
           "when": "false"
         },
         {
-          "command": "tag-manager.replaceInFiles",
+          "command": "ssr4html.replaceInFiles",
           "when": "false"
         },
         {
-          "command": "tag-manager.replaceInFile",
+          "command": "ssr4html.replaceInFile",
           "when": "false"
         },
         {
-          "command": "tag-manager.revertChanges",
+          "command": "ssr4html.revertChanges",
           "when": "false"
         }
       ]

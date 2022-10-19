@@ -62,11 +62,11 @@ export class StructuralSearchPanel {
 
         switch (command) {
           case "searchInFile":
-            vscode.commands.executeCommand("tag-manager.searchInFile", search);
+            vscode.commands.executeCommand("ssr4html.searchInFile", search);
             break;
 
           case "searchInFiles":
-            vscode.commands.executeCommand("tag-manager.searchInFiles", search);
+            vscode.commands.executeCommand("ssr4html.searchInFiles", search);
             break;
 
           case "cancelSearch":
@@ -83,15 +83,15 @@ export class StructuralSearchPanel {
             break;
 
           case "replaceInFile":
-            vscode.commands.executeCommand("tag-manager.replaceInFile", replace, choice);
+            vscode.commands.executeCommand("ssr4html.replaceInFile", replace, choice);
             break;
 
           case "replaceInFiles":
-            vscode.commands.executeCommand("tag-manager.replaceInFiles", replace, choice);
+            vscode.commands.executeCommand("ssr4html.replaceInFiles", replace, choice);
             break;
 
           case "revertChanges":
-            vscode.commands.executeCommand("tag-manager.revertChanges");
+            vscode.commands.executeCommand("ssr4html.revertChanges");
             break;
         }
       },

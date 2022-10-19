@@ -17,11 +17,11 @@ export function activate(context: vscode.ExtensionContext) {
 	const RAW_CONTENTS: Uint8Array[] = [];
 	const FILE_LIST: vscode.Uri[] = [];
 
-	let disposableSearchPanel = vscode.commands.registerCommand('tag-manager.searchPanelTag', () => {
+	let disposableSearchPanel = vscode.commands.registerCommand('ssr4html.showUI', () => {
 		StructuralSearchPanel.render(context.extensionUri);
 	});
 
-	let disposableSearchInFiles = vscode.commands.registerCommand('tag-manager.searchInFiles', async (searchText) => {
+	let disposableSearchInFiles = vscode.commands.registerCommand('ssr4html.searchInFiles', async (searchText) => {
 
 		const files = await vscode.workspace.findFiles('**/*.html');
 		if (files.length === 0) {
@@ -52,7 +52,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 
-	let disposableSearchInFile = vscode.commands.registerCommand('tag-manager.searchInFile', (searchText) => {
+	let disposableSearchInFile = vscode.commands.registerCommand('ssr4html.searchInFile', (searchText) => {
 
 		vscode.commands.executeCommand("workbench.action.openPreviousRecentlyUsedEditor").then(async () => {
 
@@ -90,7 +90,7 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	});
 
-	let disposableReplaceInFiles = vscode.commands.registerCommand('tag-manager.replaceInFiles', async (replaceText, choice) => {
+	let disposableReplaceInFiles = vscode.commands.registerCommand('ssr4html.replaceInFiles', async (replaceText, choice) => {
 
 		const isReplacementTextValid = checkReplacementText(choice, replaceText);
 		if (isReplacementTextValid !== "Valid") {
@@ -124,7 +124,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}, 1000);
 	});
 
-	let disposableReplaceInFile = vscode.commands.registerCommand('tag-manager.replaceInFile', (replaceText, choice) => {
+	let disposableReplaceInFile = vscode.commands.registerCommand('ssr4html.replaceInFile', (replaceText, choice) => {
 
 		vscode.commands.executeCommand("workbench.action.openPreviousRecentlyUsedEditor").then(async () => {
 
@@ -165,7 +165,7 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	});
 
-	let disposableRevertChanges = vscode.commands.registerCommand('tag-manager.revertChanges', async () => {
+	let disposableRevertChanges = vscode.commands.registerCommand('ssr4html.revertChanges', async () => {
 
 		if (FILE_LIST.length === 0 || RAW_CONTENTS.length === 0) {
 			vscode.window.showWarningMessage("Nothing found to revert");

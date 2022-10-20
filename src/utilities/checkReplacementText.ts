@@ -2,7 +2,9 @@ import { isAttributeNameValid } from "./validators/isAttributeNameValid";
 import { isCssValid } from "./validators/isCssValid";
 
 export function checkReplacementText(choice: string, replaceText: string) {
+    // Replace text is innocent until an error found in it
     let result = "Valid";
+    let validatedReplaceText: string | null = replaceText;
 
     try {
         switch (choice) {
@@ -22,15 +24,17 @@ export function checkReplacementText(choice: string, replaceText: string) {
                     throw new Error(`Invalid class-name(s): ${invalidClassValues.join(' , ')}`);
                 }
 
+                validatedReplaceText = classValues.join(' ');
                 break;
 
             case "Set Id":
                 const id = replaceText.trim();
 
                 if (!(new RegExp(/^[A-Za-z]+[\-:_.A-Za-z0-9]*$/, 'g').test(id))) {
-                    throw new Error(`${id} is an invalid id value`);
+                    throw new Error(`"${id}" is an invalid id value`);
                 }
 
+                validatedReplaceText = id;
                 break;
 
             case "Set Attribute":
@@ -41,7 +45,7 @@ export function checkReplacementText(choice: string, replaceText: string) {
                 const attributeName = attributeNameAndValues[0];
 
                 if (isAttributeNameValid(attributeName, "set") !== "Valid") {
-                    throw new Error(`${attributeName} is an invalid attribute name`);
+                    throw new Error(`"${attributeName}" is an invalid attribute name`);
                 }
 
                 if (attributeName === "style") {
@@ -52,7 +56,8 @@ export function checkReplacementText(choice: string, replaceText: string) {
                     throw new Error("Please, provide at least one attribute value");
                 }
 
-                const attributeValues = attributeNameAndValues.splice(1);
+                const attributeValues = attributeNameAndValues.slice(1);
+                console.log(attributeValues);
                 const invalidAttributeValues = [];
 
                 for (let attributeValue of attributeValues) {
@@ -65,15 +70,17 @@ export function checkReplacementText(choice: string, replaceText: string) {
                     throw new Error(`Invalid attribute value(s): ${invalidAttributeValues.join(' , ')}`);
                 }
 
+                validatedReplaceText = attributeNameAndValues.join(' ');
                 break;
 
             case "Change Tag Name":
                 const newTagName = replaceText.trim();
 
                 if (!(new RegExp(/^[a-z]+$/, 'g').test(newTagName))) {
-                    throw new Error("Invalid tag name(only lowercase english letters allowed)");
+                    throw new Error("Invalid tag name (only lowercase english letters allowed)");
                 }
 
+                validatedReplaceText = newTagName;
                 break;
 
             case "Add Upper Tag":
@@ -87,15 +94,15 @@ export function checkReplacementText(choice: string, replaceText: string) {
                 }
 
                 if (matches[1] && !(new RegExp(/^[a-z]+$/, 'g').test(matches[1]))) {
-                    throw new Error("Invalid tag name(only lowercase english letters allowed)");
+                    throw new Error("Invalid tag name (only lowercase english letters allowed)");
                 }
 
                 if (matches[2] && !(new RegExp(/^[A-Za-z]+[\-:_.A-Za-z0-9]*$/, 'g').test(matches[2]))) {
-                    throw new Error(`${matches[2]} is an invalid id value`);
+                    throw new Error(`"${matches[2]}" is an invalid id value`);
                 }
 
                 if (matches[3] && !(new RegExp(/^[A-Za-z]+[\-:_.A-Za-z0-9]*$/, 'g').test(matches[3]))) {
-                    throw new Error(`${matches[3]} is an invalid class-name`);
+                    throw new Error(`"${matches[3]}" is an invalid class-name`);
                 }
 
                 if (matches[4] && matches[5] === undefined) {
@@ -103,13 +110,14 @@ export function checkReplacementText(choice: string, replaceText: string) {
                 }
 
                 if (matches[4] && isAttributeNameValid(matches[4].trim(), "set") !== "Valid") {
-                    throw new Error(`${matches[4].trim()} is an invalid attribute name`);
+                    throw new Error(`"${matches[4].trim()}" is an invalid attribute name`);
                 }
 
                 if (matches[5] && new RegExp(/[&<>]/, 'g').test(matches[5])) {
-                    throw new Error(`${matches[5].trim()} is an invalid attribute value`);
+                    throw new Error(`"${matches[5].trim()}" is an invalid attribute value`);
                 }
 
+                validatedReplaceText = parentInfo;
                 break;
 
             case "Remove Attribute":
@@ -126,6 +134,7 @@ export function checkReplacementText(choice: string, replaceText: string) {
                     throw new Error(`Invalid attribute name(s): ${invalidAttributeNames.join(' , ')}`);
                 }
 
+                validatedReplaceText = attributeNames.join(' ');
                 break;
 
             case "Set Style Property":
@@ -156,13 +165,15 @@ export function checkReplacementText(choice: string, replaceText: string) {
                     throw new Error(`Invalid property-value pair(s): ${invalidStyleProperties.join(' , ')}`);
                 }
 
+                validatedReplaceText = propertiesInfo.join(',');
                 break;
         }
     }
     catch (error: any) {
         console.log(error);
         result = error.message;
+        validatedReplaceText = null;
     }
 
-    return result;
+    return {result, validatedReplaceText};
 }

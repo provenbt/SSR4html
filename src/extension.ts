@@ -101,8 +101,8 @@ export function activate(context: vscode.ExtensionContext) {
 	let disposableReplaceInFiles = vscode.commands.registerCommand('ssr4html.replaceInFiles', async (replaceText, choice) => {
 
 		const isReplacementTextValid = checkReplacementText(choice, replaceText);
-		if (isReplacementTextValid !== "Valid") {
-			vscode.window.showWarningMessage(isReplacementTextValid);
+		if (isReplacementTextValid.result !== "Valid") {
+			vscode.window.showWarningMessage(isReplacementTextValid.result);
 			return;
 		}
 
@@ -112,7 +112,8 @@ export function activate(context: vscode.ExtensionContext) {
 		// clean up all information of the previosly changed files before a new replacement process
 		RAW_CONTENTS.splice(0, RAW_CONTENTS.length); FILE_LIST.splice(0, FILE_LIST.length);
 
-		REPLACE_TEXT = replaceText; CHOICE = choice;
+		REPLACE_TEXT = isReplacementTextValid.validatedReplaceText as string; 
+		CHOICE = choice;
 		const processResults = await replaceInFiles(FILE_LIST, RAW_CONTENTS, CHOICE, SEARCH_TEXT, REPLACE_TEXT);
 
 		let processResult: string;
@@ -135,8 +136,8 @@ export function activate(context: vscode.ExtensionContext) {
 	let disposableReplaceInFile = vscode.commands.registerCommand('ssr4html.replaceInFile', async (replaceText, choice) => {
 
 		const isReplacementTextValid = checkReplacementText(choice, replaceText);
-		if (isReplacementTextValid !== "Valid") {
-			vscode.window.showWarningMessage(isReplacementTextValid);
+		if (isReplacementTextValid.result !== "Valid") {
+			vscode.window.showWarningMessage(isReplacementTextValid.result);
 			return;
 		}
 
@@ -153,7 +154,8 @@ export function activate(context: vscode.ExtensionContext) {
 			title: `${choice} process is under the progress`,
 			cancellable: false
 		}, async () => {
-			REPLACE_TEXT = replaceText; CHOICE = choice;
+			REPLACE_TEXT = isReplacementTextValid.validatedReplaceText as string; 
+			CHOICE = choice;
 			processResult = await replaceInFile(CURRENT_DOCUMENT.uri, CHOICE, SEARCH_TEXT, REPLACE_TEXT, FILE_LIST, RAW_CONTENTS);
 		});
 

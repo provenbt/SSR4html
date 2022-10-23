@@ -2,30 +2,48 @@ import * as vscode from "vscode";
 import { getUri } from "../utilities/getUri";
 
 export class StructuralSearchPanel {
+  // Track the current panel. Only allow a single panel to exist at a time.
   public static currentPanel: StructuralSearchPanel | undefined;
-  public readonly panel: vscode.WebviewPanel;
-  
+
+  public static readonly viewType = "SSR4HTML_UI";
+
+  private readonly panel: vscode.WebviewPanel;
   private readonly extensionUri: vscode.Uri;
   private disposables: vscode.Disposable[] = [];
 
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
     this.panel = panel;
     this.extensionUri = extensionUri;
+
+    // Listen for when the panel is disposed
+    // This happens when the user closes the panel or when the panel is closed programmatically
     this.panel.onDidDispose(() => this.dispose(), null, this.disposables);
+
+    // Set the webview's initial html content
     this.panel.webview.html = this.getWebviewContent(this.panel.webview);
     this.setWebviewMessageListener(this.panel.webview);
   }
 
-  public static render(extensionUri: vscode.Uri) {
+  public static launchOrCloseUI(extensionUri: vscode.Uri) {
+    // Dispose the webview if it is already open
     if (StructuralSearchPanel.currentPanel) {
-      StructuralSearchPanel.currentPanel.panel.reveal(vscode.ViewColumn.Beside);
+      StructuralSearchPanel.currentPanel.panel.dispose();
       return;
     }
 
-    const panel = vscode.window.createWebviewPanel("showPanel", "SSR4HTML", vscode.ViewColumn.Beside, {
-      enableScripts: true,
-      retainContextWhenHidden: true
-    });
+    // Set an editor layout for a better UI representation
+    vscode.commands.executeCommand("vscode.setEditorLayout", { orientation: 0, groups: [{ size: 0.7 }, { size: 0.3 }] });
+
+    // Create a new panel for the webview
+    const panel = vscode.window.createWebviewPanel(
+      StructuralSearchPanel.viewType,
+      "SSR4HTML",
+      vscode.ViewColumn.Beside,
+      { enableScripts: true, retainContextWhenHidden: true }
+    );
+
+    // Lock the editor group of the webview for a better UX
+    vscode.commands.executeCommand("workbench.action.lockEditorGroup");
 
     StructuralSearchPanel.currentPanel = new StructuralSearchPanel(panel, extensionUri);
   }
@@ -41,6 +59,8 @@ export class StructuralSearchPanel {
     vscode.commands.executeCommand("toggleSearchWholeWord");
     // To close the primary sidebar
     vscode.commands.executeCommand("workbench.action.closeSidebar");
+    // To unlock the editor group of the webview
+    vscode.commands.executeCommand("workbench.action.unlockEditorGroup");
 
     StructuralSearchPanel.currentPanel = undefined;
 
@@ -52,6 +72,18 @@ export class StructuralSearchPanel {
         disposable.dispose();
       }
     }
+  }
+
+  public lockUIComponents() {
+    this.panel.webview.postMessage({ command: 'lockUIComponents' });
+  }
+
+  public unlockUIComponents() {
+    this.panel.webview.postMessage({ command: 'unlockUIComponents' });
+  }
+
+  public showReplacementPart() {
+    this.panel.webview.postMessage({ command: 'onFoundSearchResult' });
   }
 
   private setWebviewMessageListener(webview: vscode.Webview) {

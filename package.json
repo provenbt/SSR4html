@@ -10,7 +10,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:ssr4html.showUI",
+    "onCommand:ssr4html.launchUI&closeUI",
     "onCommand:ssr4html.searchInFiles",
     "onCommand:ssr4html.searchInFile",
     "onCommand:ssr4html.replaceInFiles",
@@ -21,7 +21,7 @@
   "contributes": {
     "commands": [
       {
-        "command": "ssr4html.showUI",
+        "command": "ssr4html.launchUI&closeUI",
         "title": "Structural Search and Replace Panel"
       },
       {
@@ -47,7 +47,7 @@
     ],
     "keybindings": [
       {
-        "command": "ssr4html.showUI",
+        "command": "ssr4html.launchUI&closeUI",
         "key": "ctrl+1"
       }
     ],

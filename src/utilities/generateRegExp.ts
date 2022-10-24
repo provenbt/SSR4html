@@ -1,5 +1,6 @@
 /*
-    It generates regular expression from basic CSS selector(s) (type, id, class, & attribute selectors).
+    It generates a regular expression based on the basic CSS selector(s). Type, id, class, 
+    and attribute selectors, as well as their combinations, are the supported CSS selectors.
 
     The generated regular expressions meet the structure of single line HTML elements that have
     specified features that is defined in the provided CSS selector(s).
@@ -13,7 +14,7 @@
 
 const s2r = require("selector-2-regexp");
 
-export function convertToRegex(searchText: string): String {
+export function generateRegExp(searchText: string) {
     // To store RegExp(s)
     let regex: string[] = [];
 

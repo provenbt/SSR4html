@@ -28,7 +28,7 @@ export function checkReplacementText(choice: string, replaceText: string) {
                 break;
 
             case "Set Id":
-                const id = replaceText.trim();
+                const id = replaceText;
 
                 if (!(new RegExp(/^[A-Za-z]+[\-:_.A-Za-z0-9]*$/, 'g').test(id))) {
                     throw new Error(`"${id}" is an invalid id value`);
@@ -57,7 +57,6 @@ export function checkReplacementText(choice: string, replaceText: string) {
                 }
 
                 const attributeValues = attributeNameAndValues.slice(1);
-                console.log(attributeValues);
                 const invalidAttributeValues = [];
 
                 for (let attributeValue of attributeValues) {
@@ -74,7 +73,7 @@ export function checkReplacementText(choice: string, replaceText: string) {
                 break;
 
             case "Change Tag Name":
-                const newTagName = replaceText.trim();
+                const newTagName = replaceText;
 
                 if (!(new RegExp(/^[a-z]+$/, 'g').test(newTagName))) {
                     throw new Error("Invalid tag name (only lowercase english letters allowed)");
@@ -84,7 +83,7 @@ export function checkReplacementText(choice: string, replaceText: string) {
                 break;
 
             case "Add Upper Tag":
-                const parentInfo = replaceText.trim();
+                const parentInfo = replaceText;
 
                 const pattern = /^(.+?)(?:#(.+?))?(?:\.(.+?))?(?:\[(.+?)(?:[='"]{2}([^'"]+?)["']\])?)?$/;
                 const matches = parentInfo.match(pattern);

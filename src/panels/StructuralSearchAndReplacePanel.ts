@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
 import { getUri } from "../utilities/getUri";
 
-export class StructuralSearchPanel {
+export class StructuralSearchAndReplacePanel {
   // Track the current panel. Only allow a single panel to exist at a time.
-  public static currentPanel: StructuralSearchPanel | undefined;
+  public static currentPanel: StructuralSearchAndReplacePanel | undefined;
 
   public static readonly viewType = "SSR4HTML_UI";
 
@@ -25,9 +25,9 @@ export class StructuralSearchPanel {
   }
 
   public static launchOrCloseUI(extensionUri: vscode.Uri) {
-    // Dispose the webview if it is already open
-    if (StructuralSearchPanel.currentPanel) {
-      StructuralSearchPanel.currentPanel.panel.dispose();
+    // Dispose the webview and close the UI if it is already open
+    if (StructuralSearchAndReplacePanel.currentPanel) {
+      StructuralSearchAndReplacePanel.currentPanel.panel.dispose();
       return;
     }
 
@@ -36,7 +36,7 @@ export class StructuralSearchPanel {
 
     // Create a new panel for the webview
     const panel = vscode.window.createWebviewPanel(
-      StructuralSearchPanel.viewType,
+      StructuralSearchAndReplacePanel.viewType,
       "SSR4HTML",
       vscode.ViewColumn.Beside,
       { enableScripts: true, retainContextWhenHidden: true }
@@ -45,7 +45,7 @@ export class StructuralSearchPanel {
     // Lock the editor group of the webview for a better UX
     vscode.commands.executeCommand("workbench.action.lockEditorGroup");
 
-    StructuralSearchPanel.currentPanel = new StructuralSearchPanel(panel, extensionUri);
+    StructuralSearchAndReplacePanel.currentPanel = new StructuralSearchAndReplacePanel(panel, extensionUri);
   }
 
   public dispose() {
@@ -62,7 +62,7 @@ export class StructuralSearchPanel {
     // To unlock the editor group of the webview
     vscode.commands.executeCommand("workbench.action.unlockEditorGroup");
 
-    StructuralSearchPanel.currentPanel = undefined;
+    StructuralSearchAndReplacePanel.currentPanel = undefined;
 
     this.panel.dispose();
 
@@ -84,6 +84,20 @@ export class StructuralSearchPanel {
 
   public showReplacementPart() {
     this.panel.webview.postMessage({ command: 'onFoundSearchResult' });
+  }
+
+  public notifyUser(processName: string, processResult: string, choice: string) {
+    if (processResult === "Success") {
+      vscode.commands.executeCommand("search.action.refreshSearchResults").then(() => {
+          vscode.window.showInformationMessage(`${processName} process for "${choice.toLowerCase()}" successful`);
+      });
+    }
+    else if (processResult === "No modifications required for the desired change") {
+      vscode.window.showWarningMessage(processResult);
+    }
+    else {
+      vscode.window.showErrorMessage(`An error occured during the ${processName} process`);
+    }
   }
 
   private setWebviewMessageListener(webview: vscode.Webview) {

@@ -3,7 +3,6 @@ const s2r = require("selector-2-regexp");
 
 export function checkSearchText(searchText: string) {
     let result: string = "Valid";
-    searchText = searchText.trim();
 
     try {
         const dom = new jsdom.JSDOM(`<!DOCTYPE html><div>Test Object to validate CSS selector</div>`);

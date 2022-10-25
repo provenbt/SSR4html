@@ -1,277 +1,101 @@
 import * as vscode from 'vscode';
-import { createElementFromSelector } from './createElementFromSelector';
-const pretty = require('pretty');
+import { setClass } from './replacement-operations/setClass';
+import { appendToClass } from './replacement-operations/appendToClass';
+import { removeFromClass } from './replacement-operations/removeFromClass';
+import { setId } from './replacement-operations/setId';
+import { setAttribute } from './replacement-operations/setAttribute';
+import { appendToAttribute } from './replacement-operations/appendToAttribute';
+import { removeFromAttribute } from './replacement-operations/removeFromAttribute';
+import { removeAttribute } from './replacement-operations/removeAttribute';
+import { setStyleProperty } from './replacement-operations/setStyleProperty';
+import { editStyleProperty } from './replacement-operations/editStyleProperty';
+import { changeTagName } from './replacement-operations/changeTagName';
+import { removeTag } from './replacement-operations/removeTag';
+import { addUpperTag } from './replacement-operations/addUpperTag';
+import { removeUpperTag } from './replacement-operations/removeUpperTag';
 const jsdom = require("jsdom");
+const pretty = require('pretty');
 
 export async function replaceInFile(file: vscode.Uri, choice: string, searchText: string, replaceText: string, fileList: vscode.Uri[], rawContents: Uint8Array[]) {
     let processResult: string;
 
     try {
-        let changeFile: boolean = false;
-
         const rawContent: Uint8Array = await vscode.workspace.fs.readFile(file);
-        const htmlText: string = new TextDecoder().decode(rawContent);
+        const oldHtmlText: string = new TextDecoder().decode(rawContent);
 
-        const dom = new jsdom.JSDOM(htmlText);
-        const results = dom.window.document.querySelectorAll(searchText);
+        const domToModify = new jsdom.JSDOM(oldHtmlText);
+
+        const querySelectorResults = domToModify.window.document.querySelectorAll(searchText);
 
         switch (choice) {
             case "Set Class":
-                const className: string = replaceText;
-
-                for (let result of results) {
-                    result.className = className;
-                }
-
-                changeFile = true;
+                setClass(querySelectorResults, replaceText);
                 break;
 
             case "Append to Class":
-                const classNamesToAppend: string[] = replaceText.split(/\s/);
-
-                for (let result of results) {
-                    if (result.hasAttribute("class")) {
-                        for (let className of classNamesToAppend) {
-                            // Append a classname if the name does not exist in the classname
-                            if (!(result.classList.contains(className))) {
-                                result.classList.add(className);
-                                changeFile = true;
-                            }
-                        }
-                    }
-                }
-
-                break;
-
-            case "Set Id":
-                const id: string = replaceText;
-
-                for (let result of results) {
-                    result.id = id;
-                }
-
-                changeFile = true;
-                break;
-
-            case "Set Attribute":
-                const attributeNameAndValuesToSet: string[] = replaceText.split(/\s/);
-                const attributeNameToSet: string = attributeNameAndValuesToSet[0];
-                const valuesToSet: string[] = attributeNameAndValuesToSet.slice(1);
-
-                for (let result of results) {
-                    result.setAttribute(attributeNameToSet, valuesToSet.join(' '));
-                }
-
-                changeFile = true;
-                break;
-
-            case "Append to Attribute":
-                const attributeNameAndValuesToAppend: string[] = replaceText.split(/\s/);
-                const attributeNameToAppend: string = attributeNameAndValuesToAppend[0];
-                const valuesToAppend: string[] = attributeNameAndValuesToAppend.slice(1);
-
-                for (let result of results) {
-                    const oldValue: string = result.getAttribute(attributeNameToAppend);
-
-                    if (oldValue !== null) {
-                        let newValue: string = oldValue;
-                        // Seperate each attribute value
-                        const oldValues = oldValue.split(/\s/).map(v => (v.trim())).filter(e => (e !== ""));
-
-                        // Append a value if the value do not already exists in the attribute
-                        for (let value of valuesToAppend) {
-                            if (!(oldValues.includes(value))) {
-                                newValue = !(oldValue.endsWith(' ')) ? newValue + ' ' + value : newValue + value;
-                                result.setAttribute(attributeNameToAppend, newValue);
-                                changeFile = true;
-                            }
-                        }
-                    }
-                }
-
-                break;
-
-            case "Set Style Property":
-                const propertiesInfoToSet: string[] = replaceText.split(',');
-
-                for (let result of results) {
-                    // Overwrite style attribute if it is already defined in the element
-                    if (result.hasAttribute("style")) {
-                        result.removeAttribute("style");
-                    }
-
-                    const propertiesAndValues: string[][] = propertiesInfoToSet.map(v => (v.split(':').map(a => (a.trim()))));
-                    for (let propertyAndValue of propertiesAndValues) {
-                        // Change null(string value) with empty string value to delete the property
-                        if (propertyAndValue[1] === "null") {
-                            propertyAndValue[1] = "";
-                        }
-
-                        result.style.setProperty(propertyAndValue[0], propertyAndValue[1]);
-                    }
-                }
-
-                changeFile = true;
-                break;
-
-            case "Edit Style Property":
-                const propertiesInfoToEdit: string[] = replaceText.split(',');
-
-                for (let result of results) {
-                    // Edit style properties if and only if the tag has style attribute defined
-                    if (result.hasAttribute("style")) {
-                        const propertiesAndValues: string[][] = propertiesInfoToEdit.map(v => (v.split(':').map(a => (a.trim()))));
-                        for (let propertyAndValue of propertiesAndValues) {
-                            // Change null(string value) with empty string value to delete the property
-                            if (propertyAndValue[1] === "null") {
-                                propertyAndValue[1] = "";
-                            }
-                            // Append a property if it has a different value
-                            if (result.style.getPropertyValue(propertyAndValue[0]) !== propertyAndValue[1]) {
-                                result.style.setProperty(propertyAndValue[0], propertyAndValue[1]);
-                                changeFile = true;
-                            }
-                        }
-                    }
-                }
-
-                break;
-
-            case "Change Tag Name":
-                const newTagName: string = replaceText;
-                const { document } = (new jsdom.JSDOM()).window;
-
-                for (let result of results) {
-                    // Create the document fragment 
-                    const frag = document.createDocumentFragment();
-
-                    // Fill it with what's in the source element 
-                    while (result.firstChild) {
-                        frag.appendChild(result.firstChild);
-                    }
-                    // Create the new element 
-                    const newElem = document.createElement(newTagName);
-                    // Empty the document fragment into it 
-                    newElem.appendChild(frag);
-                    //Get all attribute-value pairs
-                    const attributeNames = result.getAttributeNames();
-                    for (let name of attributeNames) {
-                        let value = result.getAttribute(name);
-                        newElem.setAttribute(name, value);
-                    }
-                    // Replace the source element with the new element on the page 
-                    result.parentNode.replaceChild(newElem, result);
-                }
-
-                changeFile = true;
-                break;
-
-            case "Add Upper Tag":
-                const parentInfo: string = replaceText;
-
-                for (let result of results) {
-                    // Create HTML element that will be upper tag
-                    const newParent = createElementFromSelector(parentInfo);
-                    // Insert before the matched node(result)
-                    result.parentNode.insertBefore(newParent, result);
-                    // Append the matched node(result) as the child of the created HTML element
-                    newParent.appendChild(result);
-                }
-
-                changeFile = true;
-                break;
-
-            case "Remove Tag":
-                for (let result of results) {
-                    result.remove();
-                    changeFile = true;
-                }
-
+                appendToClass(querySelectorResults, replaceText);
                 break;
 
             case "Remove from Class":
-                const classNamesToRemove: string[] = replaceText.split(/\s/);
+                removeFromClass(querySelectorResults, replaceText);
+                break;
 
-                for (let result of results) {
-                    if (result.hasAttribute("class")) {
-                        for (let className of classNamesToRemove) {
-                            // Remove a classname if the name really exists in the classname
-                            if (result.classList.contains(className)) {
-                                result.classList.remove(className);
-                                changeFile = true;
-                            }
-                        }
-                    }
-                }
+            case "Set Id":
+                setId(querySelectorResults, replaceText);
+                break;
 
+            case "Set Attribute":
+                setAttribute(querySelectorResults, replaceText);
+                break;
+
+            case "Append to Attribute":
+                appendToAttribute(querySelectorResults, replaceText);
                 break;
 
             case "Remove from Attribute":
-                const attributeNameAndValuesToRemove: string[] = replaceText.split(/\s/);
-                const attributeNameToRemove: string = attributeNameAndValuesToRemove[0];
-                const valuesToRemove: string[] = attributeNameAndValuesToRemove.slice(1);
-
-                for (let result of results) {
-                    const oldValue: string = result.getAttribute(attributeNameToRemove);
-
-                    if (oldValue !== null) {
-                        let newValue: string = oldValue;
-                        // Seperate each attribute value
-                        const oldValues = oldValue.split(/\s/).map(v => (v.trim())).filter(e => (e !== ""));
-
-                        // Remove a value if the value really exists in the attribute
-                        for (let value of valuesToRemove) {
-                            if (oldValues.includes(value)) {
-                                newValue = newValue.replace(new RegExp(`(?:^|[\\s])${value}(?:$|[\\s])`, 'g'), ' ');
-                                result.setAttribute(attributeNameToRemove, newValue.trim());
-                                changeFile = true;
-                            }
-                        }
-                    }
-                }
-
+                removeFromAttribute(querySelectorResults, replaceText);
                 break;
 
             case "Remove Attribute":
-                const attributesToRemove: string[] = replaceText.split(/\s/);
+                removeAttribute(querySelectorResults, replaceText);
+                break;
 
-                for (let result of results) {
-                    for (let attributeName of attributesToRemove) {
-                        // Remove only exist attributes in the element
-                        if (result.hasAttribute(attributeName)) {
-                            result.removeAttribute(attributeName);
-                            changeFile = true;
-                        }
-                    }
-                }
+            case "Set Style Property":
+                setStyleProperty(querySelectorResults, replaceText);
+                break;
 
+            case "Edit Style Property":
+                editStyleProperty(querySelectorResults, replaceText);
+                break;
+
+            case "Change Tag Name":
+                changeTagName(querySelectorResults, replaceText);
+                break;
+
+            case "Remove Tag":
+                removeTag(querySelectorResults);
+                break;
+
+            case "Add Upper Tag":
+                addUpperTag(querySelectorResults, replaceText);
                 break;
 
             case "Remove Upper Tag":
-                for (let result of results) {
-                    if (result.parentElement === null) {
-                        throw new Error(`${result.tagName.toLowerCase()} tag doesn't have an upper tag`);
-                    }
-
-                    //Remove any upper tag except HTML, HEAD and BODY tags
-                    if (result.parentElement.tagName !== "HTML" && result.parentElement.tagName !== "HEAD" && result.parentElement.tagName !== "BODY") {
-                        result.parentElement.replaceWith(...result.parentElement.childNodes);
-                        changeFile = true;
-                    }
-                }
-
+                removeUpperTag(querySelectorResults);
                 break;
 
             default:
                 throw new Error("Undefined Operation");
         }
 
-        if (changeFile) {
+        const newHtmlText = pretty(domToModify.serialize(), { ocd: true });
+
+        if (oldHtmlText !== newHtmlText) {
             // Store the old state of the file 
             rawContents.push(rawContent);
             fileList.push(file);
             // Overwrite the manipulated version of the file
-            await vscode.workspace.fs.writeFile(file, new TextEncoder().encode(pretty(dom.serialize(), { ocd: true })));
+            await vscode.workspace.fs.writeFile(file, new TextEncoder().encode(newHtmlText));
             processResult = "Success";
         }
         else {

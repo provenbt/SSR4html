@@ -2,12 +2,13 @@ import * as vscode from 'vscode';
 import { StructuralSearchAndReplacePanel } from './panels/StructuralSearchAndReplacePanel';
 import { StructuralSearchAndReplaceController } from './controllers/StructuralSearchAndReplaceController';
 
+// A controller is created to manage the services of the extension
+const controller: StructuralSearchAndReplaceController = StructuralSearchAndReplaceController.getInstance();
+
+// The extension's user interface will be assigned when it is launched or closed by the user
+let extensionUI: StructuralSearchAndReplacePanel | undefined;
+
 export function activate(context: vscode.ExtensionContext) {
-	// A controller is created to manage the services of the extension
-	const controller: StructuralSearchAndReplaceController = StructuralSearchAndReplaceController.getInstance();
-	
-	// The extension's user interface will be assigned when it is launched or closed by the user
-	let extensionUI: StructuralSearchAndReplacePanel | undefined;
 
 	let disposableSearchPanel = vscode.commands.registerCommand('ssr4html.launchUI&closeUI', () => {
 		// If the UI is not shown, it will be launched (created); otherwise, it will be closed (disposed)
@@ -18,15 +19,15 @@ export function activate(context: vscode.ExtensionContext) {
 	let disposableSearchInFiles = vscode.commands.registerCommand('ssr4html.searchInFiles', async (searchText) => {
 		controller.setSearchText(searchText);
 
-		const files = await vscode.workspace.findFiles('**/*.html');
-		if (files.length === 0) {
-			vscode.window.showWarningMessage("There is not any HTML file in the workspace");
-			return;
-		}
-
 		const isCssSelectorValid = controller.checkSearchText();
 		if (isCssSelectorValid !== "Valid") {
 			vscode.window.showWarningMessage(isCssSelectorValid);
+			return;
+		}
+
+		const files = await controller.findHtmlFiles();
+		if (files.length === 0) {
+			vscode.window.showWarningMessage("There is not any HTML file in the workspace");
 			return;
 		}
 
@@ -49,6 +50,12 @@ export function activate(context: vscode.ExtensionContext) {
 	let disposableSearchInFile = vscode.commands.registerCommand('ssr4html.searchInFile', async (searchText) => {
 		controller.setSearchText(searchText);
 
+		const isCssSelectorValid = controller.checkSearchText();
+		if (isCssSelectorValid !== "Valid") {
+			vscode.window.showWarningMessage(isCssSelectorValid);
+			return;
+		}
+
 		// Open the previously active editor
 		await vscode.commands.executeCommand("workbench.action.openPreviousRecentlyUsedEditor").then(() => {
 			const editor = vscode.window.activeTextEditor;
@@ -65,12 +72,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 		if (controller.getCurrentDocument() === undefined) {
 			vscode.window.showWarningMessage("Ensure that an HTML file has been opened in the active text editor");
-			return;
-		}
-
-		const isCssSelectorValid = controller.checkSearchText();
-		if (isCssSelectorValid !== "Valid") {
-			vscode.window.showWarningMessage(isCssSelectorValid);
 			return;
 		}
 
@@ -185,4 +186,11 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(disposableReplaceInFiles);
 	context.subscriptions.push(disposableReplaceInFile);
 	context.subscriptions.push(disposableRevertChanges);
+}
+
+export function deactivate() {
+	// If the extension UI is still active when the extension is deactivated, dispose the extension UI
+	if (extensionUI) {
+		extensionUI.dispose();
+	}
 }

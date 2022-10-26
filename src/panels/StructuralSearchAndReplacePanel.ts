@@ -49,18 +49,7 @@ export class StructuralSearchAndReplacePanel {
   }
 
   public dispose() {
-    // To clear Search Query/Results fields
-    vscode.commands.executeCommand("search.action.clearSearchResults");
-    // To clear Files to Include/Exclude fields
-    vscode.commands.executeCommand("search.action.clearSearchResults");
-    // To make the search settings default
-    vscode.commands.executeCommand("toggleSearchCaseSensitive");
-    vscode.commands.executeCommand("toggleSearchRegex");
-    vscode.commands.executeCommand("toggleSearchWholeWord");
-    // To close the primary sidebar
-    vscode.commands.executeCommand("workbench.action.closeSidebar");
-    // To unlock the editor group of the webview
-    vscode.commands.executeCommand("workbench.action.unlockEditorGroup");
+    this.cleanUpSidebarSearchAndCloseSidebar();
 
     StructuralSearchAndReplacePanel.currentPanel = undefined;
 
@@ -89,7 +78,7 @@ export class StructuralSearchAndReplacePanel {
   public notifyUser(processName: string, processResult: string, choice: string) {
     if (processResult === "Success") {
       vscode.commands.executeCommand("search.action.refreshSearchResults").then(() => {
-          vscode.window.showInformationMessage(`${processName} process for "${choice.toLowerCase()}" successful`);
+        vscode.window.showInformationMessage(`${processName} process for "${choice.toLowerCase()}" successful`);
       });
     }
     else if (processResult === "No modifications required for the desired change") {
@@ -98,6 +87,19 @@ export class StructuralSearchAndReplacePanel {
     else {
       vscode.window.showErrorMessage(`An error occured during the ${processName} process`);
     }
+  }
+
+  private cleanUpSidebarSearchAndCloseSidebar() {
+    // Clear Search Query/Results fields
+    vscode.commands.executeCommand("search.action.clearSearchResults");
+    // Clear Files to Include/Exclude fields
+    vscode.commands.executeCommand("search.action.clearSearchResults");
+    // Make the search settings default
+    vscode.commands.executeCommand("toggleSearchCaseSensitive");
+    vscode.commands.executeCommand("toggleSearchRegex");
+    vscode.commands.executeCommand("toggleSearchWholeWord");
+    // Close the primary sidebar
+    vscode.commands.executeCommand("workbench.action.closeSidebar");
   }
 
   private setWebviewMessageListener(webview: vscode.Webview) {
@@ -116,16 +118,7 @@ export class StructuralSearchAndReplacePanel {
             break;
 
           case "cancelSearch":
-            // To clear Search Query/Results fields
-            vscode.commands.executeCommand("search.action.clearSearchResults");
-            // To clear Files to Include/Exclude fields
-            vscode.commands.executeCommand("search.action.clearSearchResults");
-            // To make the search settings default
-            vscode.commands.executeCommand("toggleSearchCaseSensitive");
-            vscode.commands.executeCommand("toggleSearchRegex");
-            vscode.commands.executeCommand("toggleSearchWholeWord");
-            // To close the primary sidebar
-            vscode.commands.executeCommand("workbench.action.closeSidebar");
+            this.cleanUpSidebarSearchAndCloseSidebar();
             break;
 
           case "replaceInFile":

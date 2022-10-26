@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { replaceInFile } from './replaceInFile';
 
-export async function replaceInFiles(fileList: vscode.Uri[], rawContents: Uint8Array[], choice: string, searchText: string, replaceText: string) {
+export async function replaceInFiles(files: vscode.Uri[], choice: string, searchText: string, replaceText: string, fileList: vscode.Uri[], rawContents: Uint8Array[]) {
     let processResults: string[] = [];
 
     await vscode.window.withProgress({
@@ -9,7 +9,6 @@ export async function replaceInFiles(fileList: vscode.Uri[], rawContents: Uint8A
         title: `${choice} process is under the progress`,
         cancellable: false
     }, async (progress) => {
-        const files = await vscode.workspace.findFiles('**/*.html');
         let inc = Math.round(100 / files.length);
         let progressCounter = 0;
 

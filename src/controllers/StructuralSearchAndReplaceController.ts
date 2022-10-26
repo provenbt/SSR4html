@@ -14,10 +14,13 @@ export class StructuralSearchAndReplaceController {
     private choice: string;
     private replaceText: string;
 
+    // To store all HTML files found in the workspace
+    private files: vscode.Uri[]; 
+
     // To store the information of the current document, vital to search&replace only within a file
     private currentDocument: vscode.TextDocument | undefined;
 
-    // To store the previous state of the files, vital to revert the most recent changes made in file(s).
+    // To store the previous state of the changed file(s), vital to revert the most recent changes made in file(s).
     private rawContents: Uint8Array[];
     private fileList: vscode.Uri[];
 
@@ -25,6 +28,7 @@ export class StructuralSearchAndReplaceController {
         this.searchText = "";
         this.choice = "Unselected";
         this.replaceText = "";
+        this.files = [];
         this.currentDocument = undefined;
         this.rawContents = [];
         this.fileList = [];
@@ -79,6 +83,11 @@ export class StructuralSearchAndReplaceController {
         return checkSearchText(this.searchText);
     }
 
+    public async findHtmlFiles(): Promise<vscode.Uri[]> {
+        this.files = await vscode.workspace.findFiles('**/*.html');
+        return this.files;
+    }
+
     public searchInWorkspace(): Promise<boolean> {
         return searchInWorkspace(this.searchText);
     }
@@ -102,7 +111,7 @@ export class StructuralSearchAndReplaceController {
     }
 
     public replaceInFiles(): Promise<string[]> {
-        return replaceInFiles(this.fileList, this.rawContents, this.choice, this.searchText, this.replaceText);
+        return replaceInFiles(this.files, this.choice, this.searchText, this.replaceText, this.fileList, this.rawContents);
     }
 
     public isThereAnyFileToRevertChanges() {

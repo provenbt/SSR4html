@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { UserInput, FileAndContent } from '../controllers/StructuralSearchAndReplaceController';
 import { setClass } from './replacement-operations/setClass';
 import { appendToClass } from './replacement-operations/appendToClass';
 import { removeFromClass } from './replacement-operations/removeFromClass';
@@ -16,10 +17,12 @@ import { removeUpperTag } from './replacement-operations/removeUpperTag';
 const jsdom = require("jsdom");
 const pretty = require('pretty');
 
-export async function replaceInFile(file: vscode.Uri, choice: string, searchText: string, replaceText: string, fileList: vscode.Uri[], rawContents: Uint8Array[]) {
+export async function replaceInFile(file: vscode.Uri, replacementParameters: UserInput, filesAndContents: FileAndContent[]) {
     let processResult: string;
 
     try {
+        const { searchText, replaceText, choice } = replacementParameters;
+
         const rawContent: Uint8Array = await vscode.workspace.fs.readFile(file);
         const oldHtmlText: string = new TextDecoder().decode(rawContent);
 
@@ -92,10 +95,14 @@ export async function replaceInFile(file: vscode.Uri, choice: string, searchText
 
         if (oldHtmlText !== newHtmlText) {
             // Store the old state of the file 
-            rawContents.push(rawContent);
-            fileList.push(file);
+            filesAndContents.push({
+                file,
+                rawContent
+            });
+
             // Overwrite the manipulated version of the file
             await vscode.workspace.fs.writeFile(file, new TextEncoder().encode(newHtmlText));
+
             processResult = "Success";
         }
         else {

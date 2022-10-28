@@ -6,6 +6,17 @@ import { replaceInFiles } from '../utilities/replaceInFiles';
 import { replaceInFile } from '../utilities/replaceInFile';
 import { revertChanges } from '../utilities/revertChanges';
 
+export interface UserInput {
+    searchText: string,
+    replaceText: string,
+    choice: string
+}
+
+export interface FileAndContent {
+    file: vscode.Uri,
+    rawContent: Uint8Array
+}
+
 export class StructuralSearchAndReplaceController {
     // Track the current controller. Only allow a single controller to exist at a time.
     public static currentController: StructuralSearchAndReplaceController;
@@ -15,14 +26,13 @@ export class StructuralSearchAndReplaceController {
     private replaceText: string;
 
     // To store all HTML files found in the workspace
-    private files: vscode.Uri[]; 
+    private files: vscode.Uri[];
 
     // To store the information of the current document, vital to search&replace only within a file
     private currentDocument: vscode.TextDocument | undefined;
 
     // To store the previous state of the changed file(s), vital to revert the most recent changes made in file(s).
-    private rawContents: Uint8Array[];
-    private fileList: vscode.Uri[];
+    private filesAndContents: FileAndContent[];
 
     private constructor() {
         this.searchText = "";
@@ -30,8 +40,7 @@ export class StructuralSearchAndReplaceController {
         this.replaceText = "";
         this.files = [];
         this.currentDocument = undefined;
-        this.rawContents = [];
-        this.fileList = [];
+        this.filesAndContents = [];
     }
 
     public static getInstance(): StructuralSearchAndReplaceController {
@@ -75,8 +84,7 @@ export class StructuralSearchAndReplaceController {
     }
 
     public cleanUpInformationOfPreviouslyChangedFiles() {
-        this.rawContents = [];
-        this.fileList = [];
+        this.filesAndContents = [];
     }
 
     public checkSearchText(): string {
@@ -107,18 +115,32 @@ export class StructuralSearchAndReplaceController {
     }
 
     public replaceInFile(): Promise<string> {
-        return replaceInFile(this.currentDocument?.uri as vscode.Uri, this.choice, this.searchText, this.replaceText, this.fileList, this.rawContents);
+        const currentDocument = this.currentDocument?.uri as vscode.Uri;
+
+        const replacementParameters: UserInput = {
+            searchText: this.searchText,
+            replaceText: this.replaceText,
+            choice: this.choice
+        };
+
+        return replaceInFile(currentDocument, replacementParameters, this.filesAndContents);
     }
 
     public replaceInFiles(): Promise<string[]> {
-        return replaceInFiles(this.files, this.choice, this.searchText, this.replaceText, this.fileList, this.rawContents);
+        const replacementParameters: UserInput = {
+            searchText: this.searchText,
+            replaceText: this.replaceText,
+            choice: this.choice
+        };
+
+        return replaceInFiles(this.files, replacementParameters, this.filesAndContents);
     }
 
     public isThereAnyFileToRevertChanges() {
-        return this.fileList.length !== 0;
+        return this.filesAndContents.length !== 0;
     }
 
     public revertChanges(): Promise<string> {
-        return revertChanges(this.fileList, this.rawContents);
+        return revertChanges(this.filesAndContents);
     }
 }

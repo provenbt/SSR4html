@@ -136,7 +136,7 @@ export class StructuralSearchAndReplaceController {
         return replaceInFiles(this.files, replacementParameters, this.filesAndContents);
     }
 
-    public isThereAnyFileToRevertChanges() {
+    public isThereAnyFileToRevertChanges(): boolean {
         return this.filesAndContents.length !== 0;
     }
 

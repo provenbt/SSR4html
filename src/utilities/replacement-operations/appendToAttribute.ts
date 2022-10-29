@@ -9,15 +9,15 @@ export function appendToAttribute(querySelectorResults: any, replaceText: string
         if (oldValue !== null) {
             let newValue: string = oldValue;
             // Seperate each attribute value
-            const oldValues = oldValue.split(/\s/).map(v => (v.trim())).filter(e => (e !== ""));
+            const oldValues: string[] = oldValue.split(/\s/).map(v => (v.trim())).filter(e => (e !== ""));
 
             // Append a value if the value do not already exists in the attribute
             for (let value of valuesToAppend) {
                 if (!(oldValues.includes(value))) {
                     newValue = !(oldValue.endsWith(' ')) ? newValue + ' ' + value : newValue + value;
-                    result.setAttribute(attributeNameToAppend, newValue);
                 }
             }
+            result.setAttribute(attributeNameToAppend, newValue);
         }
     }
 }

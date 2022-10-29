@@ -9,15 +9,15 @@ export function removeFromAttribute(querySelectorResults: any, replaceText: stri
         if (oldValue !== null) {
             let newValue: string = oldValue;
             // Seperate each attribute value
-            const oldValues = oldValue.split(/\s/).map(v => (v.trim())).filter(e => (e !== ""));
+            const oldValues: string[] = oldValue.split(/\s/).map(v => (v.trim())).filter(e => (e !== ""));
 
             // Remove a value if the value really exists in the attribute
             for (let value of valuesToRemove) {
                 if (oldValues.includes(value)) {
                     newValue = newValue.replace(new RegExp(`(?:^|[\\s])${value}(?:$|[\\s])`, 'g'), ' ');
-                    result.setAttribute(attributeNameToRemove, newValue.trim());
                 }
             }
+            result.setAttribute(attributeNameToRemove, newValue.trim());
         }
     }
 }

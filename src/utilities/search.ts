@@ -1,10 +1,9 @@
 import * as vscode from 'vscode';
-import { generateRegExp } from './generateRegExp';
 
-export async function searchInWorkspace(searchText: string) {
+export async function searchInWorkspace(searchQuery: string) {
     await vscode.commands.executeCommand("workbench.action.findInFiles", {
         // Send the generated regular expression to query
-        query: generateRegExp(searchText),
+        query: searchQuery,
         // Search only in HTML files
         filesToInclude: "*.html",
         triggerSearch: true,
@@ -16,10 +15,10 @@ export async function searchInWorkspace(searchText: string) {
     return await isThereAnyMatch();
 }
 
-export async function searchInFile(searchText: string, filePath: string) {
+export async function searchInFile(searchQuery: string, filePath: string) {
     await vscode.commands.executeCommand("workbench.action.findInFiles", {
         // Send the generated regular expression to query
-        query: generateRegExp(searchText),
+        query: searchQuery,
         // Search only in the current file
         filesToInclude: `*${filePath}`,
         triggerSearch: true,

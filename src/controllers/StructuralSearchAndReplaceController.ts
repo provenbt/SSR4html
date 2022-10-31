@@ -5,6 +5,7 @@ import { checkReplacementText } from '../utilities/checkReplacementText';
 import { replaceInFiles } from '../utilities/replaceInFiles';
 import { replaceInFile } from '../utilities/replaceInFile';
 import { revertChanges } from '../utilities/revertChanges';
+import { generateRegExp } from "../utilities/generateRegExp";
 
 export interface UserInput {
     searchText: string,
@@ -93,15 +94,25 @@ export class StructuralSearchAndReplaceController {
 
     public async findHtmlFiles(): Promise<vscode.Uri[]> {
         this.files = await vscode.workspace.findFiles('**/*.html');
+
         return this.files;
     }
 
+    private generateRegExp() {
+        return generateRegExp(this.searchText);
+    }
+
     public searchInWorkspace(): Promise<boolean> {
-        return searchInWorkspace(this.searchText);
+        const searchQuery = this.generateRegExp();
+
+        return searchInWorkspace(searchQuery);
     }
 
     public searchInFile(): Promise<boolean> {
-        return searchInFile(this.searchText, this.currentDocument?.fileName as string);
+        const searchQuery = this.generateRegExp();
+        const currentDocument = this.currentDocument?.fileName as string;
+
+        return searchInFile(searchQuery, currentDocument);
     }
 
     public checkReplacementText(): string {

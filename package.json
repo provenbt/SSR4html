@@ -11,6 +11,7 @@
   ],
   "activationEvents": [
     "onCommand:ssr4html.launchUI&closeUI",
+    "onCommand:ssr4html.formatFiles",
     "onCommand:ssr4html.searchInFiles",
     "onCommand:ssr4html.searchInFile",
     "onCommand:ssr4html.replaceInFiles",
@@ -23,6 +24,10 @@
       {
         "command": "ssr4html.launchUI&closeUI",
         "title": "Structural Search and Replace Panel"
+      },
+      {
+        "command": "ssr4html.formatFiles",
+        "title": "Format HTML Files"
       },
       {
         "command": "ssr4html.searchInFiles",
@@ -110,5 +115,9 @@
     "jsdom": "^20.0.0",
     "pretty": "^2.0.0",
     "selector-2-regexp": "^1.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mainIdal/SSR4HTML-Extension"
   }
 }

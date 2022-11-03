@@ -2,18 +2,34 @@ import * as vscode from 'vscode';
 import { StructuralSearchAndReplacePanel } from './panels/StructuralSearchAndReplacePanel';
 import { StructuralSearchAndReplaceController } from './controllers/StructuralSearchAndReplaceController';
 
-// A controller is created to manage the services of the extension
-const controller: StructuralSearchAndReplaceController = StructuralSearchAndReplaceController.getInstance();
+// A controller will be created to manage the services of the extension
+let controller: StructuralSearchAndReplaceController;
 
 // The extension's user interface will be assigned when it is launched or closed by the user
 let extensionUI: StructuralSearchAndReplacePanel | undefined;
 
 export function activate(context: vscode.ExtensionContext) {
+	controller = StructuralSearchAndReplaceController.getInstance(context.workspaceState);
 
-	let disposableSearchPanel = vscode.commands.registerCommand('ssr4html.launchUI&closeUI', () => {
+	let disposableSearchPanel = vscode.commands.registerCommand('ssr4html.launchUI&closeUI', async () => {
+		const files = await controller.findHtmlFiles();;
+		if (files.length === 0) {
+			vscode.window.showWarningMessage("UI is not launched since there is not any HTML file in the workspace");
+			return;
+		}
+
 		// If the UI is not shown, it will be launched (created); otherwise, it will be closed (disposed)
 		StructuralSearchAndReplacePanel.launchOrCloseUI(context.extensionUri);
 		extensionUI = StructuralSearchAndReplacePanel.currentPanel;
+
+		// If UI is shown, ask to format HTML files (only once for a workspace)
+		if (extensionUI && context.workspaceState.get("formatHtmlFiles") === undefined) {
+			controller.askToFormatHtmlFiles();
+		}
+	});
+
+	let disposablesFormatFiles = vscode.commands.registerCommand('ssr4html.formatFiles', () => {
+		controller.formatHtmlFiles();
 	});
 
 	let disposableSearchInFiles = vscode.commands.registerCommand('ssr4html.searchInFiles', async (searchText) => {
@@ -22,12 +38,6 @@ export function activate(context: vscode.ExtensionContext) {
 		const isCssSelectorValid = controller.checkSearchText();
 		if (isCssSelectorValid !== "Valid") {
 			vscode.window.showWarningMessage(isCssSelectorValid);
-			return;
-		}
-
-		const files = await controller.findHtmlFiles();
-		if (files.length === 0) {
-			vscode.window.showWarningMessage("There is not any HTML file in the workspace");
 			return;
 		}
 
@@ -57,23 +67,19 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 
 		// Open the previously active editor
-		await vscode.commands.executeCommand("workbench.action.openPreviousRecentlyUsedEditor").then(() => {
-			const editor = vscode.window.activeTextEditor;
-			if (editor === undefined || editor.document === undefined || !(editor.document.uri.toString().endsWith(".html"))) {
-				controller.setCurrentDocument(undefined);
-				return;
-			}
+		await vscode.commands.executeCommand("workbench.action.openPreviousRecentlyUsedEditor");
 
-			controller.setCurrentDocument(editor.document);
-		});
-
-		// Go back to the extension UI
-		await vscode.commands.executeCommand("workbench.action.openNextRecentlyUsedEditor");
-
-		if (controller.getCurrentDocument() === undefined) {
+		const editor = vscode.window.activeTextEditor;
+		if (editor === undefined || editor.document === undefined || !(editor.document.uri.toString().endsWith(".html"))) {
+			controller.setCurrentDocument(undefined);
 			vscode.window.showWarningMessage("Ensure that an HTML file has been opened in the active text editor");
 			return;
 		}
+
+		controller.setCurrentDocument(editor.document);
+
+		// Go back to the extension UI
+		await vscode.commands.executeCommand("workbench.action.openNextRecentlyUsedEditor");
 
 		// Disable interactive UI components during the API progress
 		extensionUI?.lockUIComponents();
@@ -119,7 +125,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 
 		setTimeout(() => {
-			extensionUI?.notifyUser("Replacement", processResult, choice);
+			controller.notifyUser("Replacement", processResult);
 
 			// Enable interactive UI components after the API progress
 			extensionUI?.unlockUIComponents();
@@ -154,7 +160,7 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 
 		setTimeout(() => {
-			extensionUI?.notifyUser("Replacement", processResult, choice);
+			controller.notifyUser("Replacement", processResult);
 
 			// Enable interactive UI components after the API progress
 			extensionUI?.unlockUIComponents();
@@ -173,7 +179,7 @@ export function activate(context: vscode.ExtensionContext) {
 		const processResult = await controller.revertChanges();
 
 		setTimeout(() => {
-			extensionUI?.notifyUser("Rollback", processResult, controller.getChoice());
+			controller.notifyUser("Rollback", processResult);
 
 			// Enable interactive UI components after the API progress
 			extensionUI?.unlockUIComponents();
@@ -181,6 +187,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	context.subscriptions.push(disposableSearchPanel);
+	context.subscriptions.push(disposablesFormatFiles);
 	context.subscriptions.push(disposableSearchInFiles);
 	context.subscriptions.push(disposableSearchInFile);
 	context.subscriptions.push(disposableReplaceInFiles);
@@ -193,4 +200,5 @@ export function deactivate() {
 	if (extensionUI) {
 		extensionUI.dispose();
 	}
+
 }

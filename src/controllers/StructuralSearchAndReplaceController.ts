@@ -6,6 +6,7 @@ import { replaceInFiles } from '../utilities/replaceInFiles';
 import { replaceInFile } from '../utilities/replaceInFile';
 import { revertChanges } from '../utilities/revertChanges';
 import { generateRegExp } from "../utilities/generateRegExp";
+const pretty = require('pretty');
 
 export interface UserInput {
     searchText: string,
@@ -22,6 +23,8 @@ export class StructuralSearchAndReplaceController {
     // Track the current controller. Only allow a single controller to exist at a time.
     public static currentController: StructuralSearchAndReplaceController;
 
+    private workspaceState: vscode.Memento;
+
     private searchText: string;
     private choice: string;
     private replaceText: string;
@@ -35,7 +38,8 @@ export class StructuralSearchAndReplaceController {
     // To store the previous state of the changed file(s), vital to revert the most recent changes made in file(s).
     private filesAndContents: FileAndContent[];
 
-    private constructor() {
+    private constructor(workspaceState: vscode.Memento) {
+        this.workspaceState = workspaceState;
         this.searchText = "";
         this.choice = "Unselected";
         this.replaceText = "";
@@ -44,12 +48,24 @@ export class StructuralSearchAndReplaceController {
         this.filesAndContents = [];
     }
 
-    public static getInstance(): StructuralSearchAndReplaceController {
+    public static getInstance(workspaceState: vscode.Memento): StructuralSearchAndReplaceController {
         if (!StructuralSearchAndReplaceController.currentController) {
-            StructuralSearchAndReplaceController.currentController = new StructuralSearchAndReplaceController();
+            StructuralSearchAndReplaceController.currentController = new StructuralSearchAndReplaceController(workspaceState);
         }
 
         return StructuralSearchAndReplaceController.currentController;
+    }
+
+    public async askToFormatHtmlFiles() {
+        const answer = await vscode.window.showInformationMessage("Do you want to format all HTML files in the workspace for more accurate search results", "Format", "Nevermind");
+
+        if (answer === "Format") {
+            this.formatHtmlFiles();
+        }
+        else {
+            vscode.window.showInformationMessage("Execute 'Format HTML Files' command if you change your mind");
+            this.workspaceState.update("formatHtmlFiles", false);
+        }
     }
 
     public setSearchText(searchText: string) {
@@ -68,20 +84,27 @@ export class StructuralSearchAndReplaceController {
         this.currentDocument = currentDocument;
     }
 
-    public getSearchText(): string {
-        return this.searchText;
-    }
-
-    public getChoice(): string {
-        return this.choice;
-    }
-
-    public getReplaceText(): string {
-        return this.replaceText;
-    }
-
     public getCurrentDocument(): vscode.TextDocument | undefined {
         return this.currentDocument;
+    }
+
+    public async formatHtmlFiles() {
+        if (this.files.length === 0) {
+            return;
+        }
+
+        const decoder = new TextDecoder();
+        const encoder = new TextEncoder();
+
+        for (let file of this.files) {
+            const rawContent: Uint8Array = await vscode.workspace.fs.readFile(file);
+            const oldHtmlText: string = decoder.decode(rawContent);
+            const newHtmlText: string = pretty(oldHtmlText, { ocd: true });
+
+            await vscode.workspace.fs.writeFile(file, encoder.encode(newHtmlText));
+        }
+
+        this.workspaceState.update("formatHtmlFiles", true);
     }
 
     public cleanUpInformationOfPreviouslyChangedFiles() {
@@ -153,5 +176,19 @@ export class StructuralSearchAndReplaceController {
 
     public revertChanges(): Promise<string> {
         return revertChanges(this.filesAndContents);
+    }
+
+    public notifyUser(processName: string, processResult: string) {
+        if (processResult === "Success") {
+            vscode.commands.executeCommand("search.action.refreshSearchResults").then(() => {
+                vscode.window.showInformationMessage(`${processName} process for "${this.choice.toLowerCase()}" successful`);
+            });
+        }
+        else if (processResult === "No modifications required for the desired change") {
+            vscode.window.showWarningMessage(processResult);
+        }
+        else {
+            vscode.window.showErrorMessage(`An error occured during the ${processName} process`);
+        }
     }
 }

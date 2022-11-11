@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { StructuralSearchAndReplacePanel } from './panels/StructuralSearchAndReplacePanel';
 import { StructuralSearchAndReplaceController } from './controllers/StructuralSearchAndReplaceController';
+import strings from './stringVariables.json';
 
 // A controller will be created to manage the services of the extension
 let controller: StructuralSearchAndReplaceController;
@@ -11,10 +12,10 @@ let extensionUI: StructuralSearchAndReplacePanel | undefined;
 export function activate(context: vscode.ExtensionContext) {
 	controller = StructuralSearchAndReplaceController.getInstance(context.workspaceState);
 
-	let disposableSearchPanel = vscode.commands.registerCommand('ssr4html.launchUI&closeUI', async () => {
+	let disposableSearchPanel = vscode.commands.registerCommand(strings.launchOrCloseUIcommand, async () => {
 		const files = await controller.findHtmlFiles();;
 		if (files.length === 0) {
-			vscode.window.showWarningMessage("UI is not launched since there is not any HTML file in the workspace");
+			vscode.window.showWarningMessage(strings.UIWarningMessage);
 			return;
 		}
 
@@ -28,11 +29,11 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	let disposablesFormatFiles = vscode.commands.registerCommand('ssr4html.formatFiles', () => {
+	let disposablesFormatFiles = vscode.commands.registerCommand(strings.formatFilesCommand, () => {
 		controller.formatHtmlFiles();
 	});
 
-	let disposableSearchInFiles = vscode.commands.registerCommand('ssr4html.searchInFiles', async (searchText) => {
+	let disposableSearchInFiles = vscode.commands.registerCommand(strings.searchInFilesCommand, async (searchText) => {
 		controller.setSearchText(searchText);
 
 		const isCssSelectorValid = controller.checkSearchText();
@@ -49,7 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
 			extensionUI?.showReplacementPart();
 		}
 		else {
-			vscode.window.showWarningMessage("Nothing found to modify in the workspace");
+			vscode.window.showWarningMessage(strings.nothingFoundToModifyInWorkspaceMessage);
 		}
 
 		// Enable interactive UI components after the API progress
@@ -57,7 +58,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 
-	let disposableSearchInFile = vscode.commands.registerCommand('ssr4html.searchInFile', async (searchText) => {
+	let disposableSearchInFile = vscode.commands.registerCommand(strings.searchInFileCommand, async (searchText) => {
 		controller.setSearchText(searchText);
 
 		const isCssSelectorValid = controller.checkSearchText();
@@ -72,7 +73,7 @@ export function activate(context: vscode.ExtensionContext) {
 		const editor = vscode.window.activeTextEditor;
 		if (editor === undefined || editor.document === undefined || !(editor.document.uri.toString().endsWith(".html"))) {
 			controller.setCurrentDocument(undefined);
-			vscode.window.showWarningMessage("Ensure that an HTML file has been opened in the active text editor");
+			vscode.window.showWarningMessage(strings.invalidDocumentIsOpenedMessage);
 			return;
 		}
 
@@ -89,14 +90,14 @@ export function activate(context: vscode.ExtensionContext) {
 			extensionUI?.showReplacementPart();
 		}
 		else {
-			vscode.window.showWarningMessage(`Nothing found to modify in ${controller.getCurrentDocument()?.fileName}`);
+			vscode.window.showWarningMessage(`${strings.nothingFoundToModifyInFileMessage} ${controller.getCurrentDocument()?.fileName}`);
 		}
 
 		// Enable interactive UI components after the API progress
 		extensionUI?.unlockUIComponents();
 	});
 
-	let disposableReplaceInFiles = vscode.commands.registerCommand('ssr4html.replaceInFiles', async (replaceText, choice) => {
+	let disposableReplaceInFiles = vscode.commands.registerCommand(strings.replaceInFilesCommand, async (replaceText, choice) => {
 		controller.setReplaceText(replaceText);
 		controller.setChoice(choice);
 
@@ -121,18 +122,19 @@ export function activate(context: vscode.ExtensionContext) {
 		} else if (processResults.includes("Success")) {
 			processResult = "Success";
 		} else {
-			processResult = "No modifications required for the desired change";
+			// Nothing changed in files
+			processResult = "NC";
 		}
 
 		setTimeout(() => {
-			controller.notifyUser("Replacement", processResult);
+			extensionUI?.notifyUser(strings.replacementProcessName, processResult);
 
 			// Enable interactive UI components after the API progress
 			extensionUI?.unlockUIComponents();
 		}, 1000);
 	});
 
-	let disposableReplaceInFile = vscode.commands.registerCommand('ssr4html.replaceInFile', async (replaceText, choice) => {
+	let disposableReplaceInFile = vscode.commands.registerCommand(strings.replaceInFileCommand, async (replaceText, choice) => {
 		controller.setReplaceText(replaceText);
 		controller.setChoice(choice);
 
@@ -149,28 +151,28 @@ export function activate(context: vscode.ExtensionContext) {
 		// clean up all information of the previosly changed files before a new replacement process
 		controller.cleanUpInformationOfPreviouslyChangedFiles();
 
-		// Show progress of the replacement process
 		let processResult: string;
+		// Show progress of the replacement process
 		await vscode.window.withProgress({
 			location: vscode.ProgressLocation.Notification,
-			title: `${choice} process is under the progress`,
+			title: `${choice} ${strings.processProgressMessage}`,
 			cancellable: false
 		}, async () => {
 			processResult = await controller.replaceInFile();
 		});
 
 		setTimeout(() => {
-			controller.notifyUser("Replacement", processResult);
+			extensionUI?.notifyUser(strings.replacementProcessName, processResult);
 
 			// Enable interactive UI components after the API progress
 			extensionUI?.unlockUIComponents();
 		}, 1000);
 	});
 
-	let disposableRevertChanges = vscode.commands.registerCommand('ssr4html.revertChanges', async () => {
+	let disposableRevertChanges = vscode.commands.registerCommand(strings.revertChangesCommand, async () => {
 
 		if (!controller.isThereAnyFileToRevertChanges()) {
-			vscode.window.showWarningMessage("Nothing found to revert");
+			vscode.window.showWarningMessage(strings.nothingFoundToRevertMessage);
 			return;
 		}
 
@@ -179,7 +181,7 @@ export function activate(context: vscode.ExtensionContext) {
 		const processResult = await controller.revertChanges();
 
 		setTimeout(() => {
-			controller.notifyUser("Rollback", processResult);
+			extensionUI?.notifyUser(strings.revertProcessName, processResult);
 
 			// Enable interactive UI components after the API progress
 			extensionUI?.unlockUIComponents();

@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { UserInput, FileAndContent } from '../controllers/StructuralSearchAndReplaceController';
 import { HtmlDom } from './HtmlDom';
+import strings from '../stringVariables.json';
 const pretty = require('pretty');
 
 export async function replaceInFile(file: vscode.Uri, replacementParameters: UserInput, filesAndContents: FileAndContent[]) {
@@ -15,59 +16,59 @@ export async function replaceInFile(file: vscode.Uri, replacementParameters: Use
         const htmlDom: HtmlDom = new HtmlDom(oldHtmlText, searchText);
 
         switch (choice) {
-            case "Set Class":
+            case strings.setClassNameText:
                 htmlDom.setClass(replaceText);
                 break;
 
-            case "Append to Class":
+            case strings.appendClassNameText:
                 htmlDom.appendToClass(replaceText);
                 break;
 
-            case "Remove from Class":
+            case strings.removeClassNameText:
                 htmlDom.removeFromClass(replaceText);
                 break;
 
-            case "Set Id":
+            case strings.setIdValueText:
                 htmlDom.setId(replaceText);
                 break;
 
-            case "Set Attribute":
+            case strings.setAttributeText:
                 htmlDom.setAttribute(replaceText);
                 break;
 
-            case "Append to Attribute":
+            case strings.appendAttributeValueText:
                 htmlDom.appendToAttribute(replaceText);
                 break;
 
-            case "Remove from Attribute":
+            case strings.removeAttributeValueText:
                 htmlDom.removeFromAttribute(replaceText);
                 break;
 
-            case "Remove Attribute":
+            case strings.removeAttributeText:
                 htmlDom.removeAttribute(replaceText);
                 break;
 
-            case "Set Style Property":
+            case strings.setStylePropertyText:
                 htmlDom.setStyleProperty(replaceText);
                 break;
 
-            case "Edit Style Property":
+            case strings.editStylePropertyText:
                 htmlDom.editStyleProperty(replaceText);
                 break;
 
-            case "Change Tag Name":
+            case strings.editTagNameText:
                 htmlDom.changeTagName(replaceText);
                 break;
 
-            case "Remove Tag":
+            case strings.removeTagText:
                 htmlDom.removeTag();
                 break;
 
-            case "Add Upper Tag":
+            case strings.addUpperTagText:
                 htmlDom.addUpperTag(replaceText);
                 break;
 
-            case "Remove Upper Tag":
+            case strings.removeUpperTagText:
                 htmlDom.removeUpperTag();
                 break;
 
@@ -90,7 +91,8 @@ export async function replaceInFile(file: vscode.Uri, replacementParameters: Use
             processResult = "Success";
         }
         else {
-            processResult = "No modifications required for the desired change";
+            // Nothing Changed
+            processResult = "NC";
         }
     }
     catch (error) {

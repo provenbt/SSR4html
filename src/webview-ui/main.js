@@ -1,3 +1,5 @@
+import strings from '../stringVariables.json' assert {type: 'json'};
+
 const vscode = acquireVsCodeApi();
 
 window.addEventListener("load", main);
@@ -37,17 +39,17 @@ function main() {
 
     switch (command) {
       // Lock the search part not to be modified and display the replacement part 
-      case "onFoundSearchResult":
+      case strings.onFoundSearchResultWebviewCommand:
         SEARCH_BOX.readOnly = true;
         CHECKBOX.readOnly = true;
         SEARCH_BUTTON.disabled = true;
         CANCEL_BUTTON.disabled = false;
         REPLACEMENT_PART.style.display = "inline";
-        SELECTION.value = "Unselected";
+        SELECTION.value = strings.replacementOperationDefaultText;
 
         break;
       // This part will lock all UI not to be modified during the API progress
-      case "lockUIComponents":
+      case strings.lockUIComponentsWebviewCommand:
         SEARCH_BOX.readOnly = true;
         CHECKBOX.readOnly = true;
         SEARCH_BUTTON.disabled = true;
@@ -59,7 +61,7 @@ function main() {
 
         break;
       // This part will unlock the necessary parts of the UI after the API progress
-      case "unlockUIComponents":
+      case strings.unlockUIComponentsWebviewCommand:
         // Unlock search button and search box if no result found for the current search query
         if (REPLACEMENT_PART.style.display !== "inline") {
           SEARCH_BOX.readOnly = false;
@@ -73,7 +75,7 @@ function main() {
           REVERT_BUTTON.disabled = false;
           // Since the text of the Remove Tag and Remove Upper Tag options is fixed and already written,
           // replacement box for these choices is always readonly and replace button is always enabled.
-          if (SELECTION.value === "Remove Tag" || SELECTION.value === "Remove Upper Tag"){
+          if (SELECTION.value === strings.removeTagText || SELECTION.value === strings.removeUpperTagText) {
             REPLACE_BUTTON.disabled = false;
             REPLACEMENT_BOX.readOnly = true;
           }
@@ -93,7 +95,7 @@ function main() {
 function onClickSearchButton() {
 
   vscode.postMessage({
-    command: CHECKBOX.checked ? "searchInFiles" : "searchInFile",
+    command: CHECKBOX.checked ? strings.searchInFilesWebviewCommand : strings.searchInFilesWebviewCommand,
     search: SEARCH_BOX.value
   });
 }
@@ -108,14 +110,14 @@ function onClickCancelButton() {
   SELECTION.value = "";
 
   vscode.postMessage({
-    command: "cancelSearch"
+    command: strings.cancelSearchWebviewCommand
   });
 }
 
 function onClickReplaceButton() {
 
   vscode.postMessage({
-    command: CHECKBOX.checked ? "replaceInFiles" : "replaceInFile",
+    command: CHECKBOX.checked ? strings.replaceInFilesWebviewCommand : strings.replaceInFileWebviewCommand,
     search: SEARCH_BOX.value,
     replace: REPLACEMENT_BOX.value,
     choice: SELECTION.value
@@ -125,7 +127,7 @@ function onClickReplaceButton() {
 function onClickRevertButton() {
 
   vscode.postMessage({
-    command: "revertChanges",
+    command: strings.revertChangesWebviewCommand,
     choice: SELECTION.value
   });
 }
@@ -150,89 +152,89 @@ function enableReplaceButton() {
 
 function showReplacementForm() {
   const choice = SELECTION.value;
-  REPLACEMENT_BOX.innerText = "Replace Text";
+  REPLACEMENT_BOX.innerText = strings.replaceTextAreaDefaultTitle;
   REPLACEMENT_BOX.value = "";
   REPLACE_BUTTON.disabled = true;
   REPLACEMENT_BOX.readOnly = false;
-  
-  if (choice !== "Unselected") {
+
+  if (choice !== strings.replacementOperationDefaultText) {
     REPLACEMENT_FORM.style.display = "inline";
 
     switch (choice) {
-      case "Set Class":
-        REPLACEMENT_BOX.placeholder = "class-name1 class-name2 ...";
-        REPLACE_BUTTON.innerText = "Set";
+      case strings.setClassNameText:
+        REPLACEMENT_BOX.placeholder = strings.replaceTextAreaPlaceholderForClassOperations;
+        REPLACE_BUTTON.innerText = strings.replaceButtonSetOperationText;
         break;
 
-      case "Append to Class":
-        REPLACEMENT_BOX.placeholder = "class-name1 class-name2 ...";
-        REPLACE_BUTTON.innerText = "Append";
-        break;
-      
-      case "Remove from Class":
-        REPLACEMENT_BOX.placeholder = "class-name1 class-name2 ...";
-        REPLACE_BUTTON.innerText = "Remove";
-        break;
-      
-      case "Set Id":
-        REPLACEMENT_BOX.placeholder = "Id Value";
-        REPLACE_BUTTON.innerText = "Set";
+      case strings.appendClassNameText:
+        REPLACEMENT_BOX.placeholder = strings.replaceTextAreaPlaceholderForClassOperations;
+        REPLACE_BUTTON.innerText = strings.replaceButtonAppendOperationText;
         break;
 
-      case "Set Style Property":
-        REPLACEMENT_BOX.placeholder = "prop-1:value1,prop-2:value2, ...";
-        REPLACE_BUTTON.innerText = "Set";
-        break;
-      
-      case "Edit Style Property":
-        REPLACEMENT_BOX.placeholder = "prop-1:value1,prop-2:value2, ...";
-        REPLACE_BUTTON.innerText = "Edit";
+      case strings.removeClassNameText:
+        REPLACEMENT_BOX.placeholder = strings.replaceTextAreaPlaceholderForClassOperations;
+        REPLACE_BUTTON.innerText = strings.replaceButtonRemoveOperationText;
         break;
 
-      case "Set Attribute":
-        REPLACEMENT_BOX.placeholder = "atr-name value1 value2 ...";
-        REPLACE_BUTTON.innerText = "Set";
-        break;
-      
-      case "Append to Attribute":
-        REPLACEMENT_BOX.placeholder = "atr-name value1 value2 ...";
-        REPLACE_BUTTON.innerText = "Append";
-        break;
-      
-      case "Remove from Attribute":
-        REPLACEMENT_BOX.placeholder = "atr-name value1 value2 ...";
-        REPLACE_BUTTON.innerText = "Remove";
+      case strings.setIdValueText:
+        REPLACEMENT_BOX.placeholder = strings.replaceTextAreaPlaceholderForSetIdOperation;
+        REPLACE_BUTTON.innerText = strings.replaceButtonSetOperationText;
         break;
 
-      case "Remove Attribute":
-        REPLACEMENT_BOX.placeholder = "atr-name1 atr-name2 ...";
-        REPLACE_BUTTON.innerText = "Remove";
+      case strings.setStylePropertyText:
+        REPLACEMENT_BOX.placeholder = strings.replaceTextAreaPlaceholderForStyleOperations;
+        REPLACE_BUTTON.innerText = strings.replaceButtonSetOperationText;
         break;
 
-      case "Change Tag Name":
-        REPLACEMENT_BOX.placeholder = "New Tag Name";
-        REPLACE_BUTTON.innerText = "Change";
+      case strings.editStylePropertyText:
+        REPLACEMENT_BOX.placeholder = strings.replaceTextAreaPlaceholderForStyleOperations;
+        REPLACE_BUTTON.innerText = strings.replaceButtonEditOperationText;
         break;
 
-      case "Remove Tag":
-        REPLACEMENT_BOX.innerText = "Are you sure to remove the tag with its children?";
-        REPLACEMENT_BOX.value = "Click Remove if you are sure";
+      case strings.setAttributeText:
+        REPLACEMENT_BOX.placeholder = strings.replaceTextAreaPlaceholderForAttributeValueOperations;
+        REPLACE_BUTTON.innerText = strings.replaceButtonSetOperationText;
+        break;
+
+      case strings.appendAttributeValueText:
+        REPLACEMENT_BOX.placeholder = strings.replaceTextAreaPlaceholderForAttributeValueOperations;
+        REPLACE_BUTTON.innerText = strings.replaceButtonAppendOperationText;
+        break;
+
+      case strings.removeAttributeValueText:
+        REPLACEMENT_BOX.placeholder = strings.replaceTextAreaPlaceholderForAttributeValueOperations;
+        REPLACE_BUTTON.innerText = strings.replaceButtonRemoveOperationText;
+        break;
+
+      case strings.removeAttributeText:
+        REPLACEMENT_BOX.placeholder = strings.replaceTextAreaPlaceholderForRemoveAttributeOperation;
+        REPLACE_BUTTON.innerText = strings.replaceButtonRemoveOperationText;
+        break;
+
+      case strings.editTagNameText:
+        REPLACEMENT_BOX.placeholder = strings.replaceTextAreaPlaceholderForEditTagNameOperation;
+        REPLACE_BUTTON.innerText = strings.replaceButtonEditOperationText;
+        break;
+
+      case strings.removeTagText:
+        REPLACEMENT_BOX.innerText = strings.replaceTextAreaTitleForRemoveTagOperation;
+        REPLACEMENT_BOX.value = strings.confirmationTextForRemoveTagOperations;
         REPLACEMENT_BOX.readOnly = true;
         REPLACE_BUTTON.disabled = false;
-        REPLACE_BUTTON.innerText = "Remove";
+        REPLACE_BUTTON.innerText = strings.replaceButtonRemoveOperationText;
         break;
 
-      case "Add Upper Tag":
-        REPLACEMENT_BOX.placeholder = "tagname#id.class[attribute='value']";
-        REPLACE_BUTTON.innerText = "Add";
+      case strings.addUpperTagText:
+        REPLACEMENT_BOX.placeholder = strings.replaceTextAreaPlaceholderForAddUpperTagOperation;
+        REPLACE_BUTTON.innerText = strings.replaceButtonAddOperationText;
         break;
-      
-      case "Remove Upper Tag":
-        REPLACEMENT_BOX.innerText = "Are you sure to remove the upper tag?";
-        REPLACEMENT_BOX.value = "Click Remove if you are sure";
+
+      case strings.removeUpperTagText:
+        REPLACEMENT_BOX.innerText = strings.replaceTextAreaTitleForRemoveUpperTagOperation;
+        REPLACEMENT_BOX.value = strings.confirmationTextForRemoveTagOperations;
         REPLACEMENT_BOX.readOnly = true;
         REPLACE_BUTTON.disabled = false;
-        REPLACE_BUTTON.innerText = "Remove";
+        REPLACE_BUTTON.innerText = strings.replaceButtonRemoveOperationText;
         break;
     }
   }

@@ -6,6 +6,7 @@ import { replaceInFiles } from '../utilities/replaceInFiles';
 import { replaceInFile } from '../utilities/replaceInFile';
 import { revertChanges } from '../utilities/revertChanges';
 import { generateRegExp } from "../utilities/generateRegExp";
+import strings from '../stringVariables.json';
 const pretty = require('pretty');
 
 export interface UserInput {
@@ -41,7 +42,7 @@ export class StructuralSearchAndReplaceController {
     private constructor(workspaceState: vscode.Memento) {
         this.workspaceState = workspaceState;
         this.searchText = "";
-        this.choice = "Unselected";
+        this.choice = strings.replacementOperationDefaultText;
         this.replaceText = "";
         this.files = [];
         this.currentDocument = undefined;
@@ -57,13 +58,13 @@ export class StructuralSearchAndReplaceController {
     }
 
     public async askToFormatHtmlFiles() {
-        const answer = await vscode.window.showInformationMessage("Do you want to format all HTML files in the workspace for more accurate search results", "Format", "Nevermind");
+        const answer = await vscode.window.showInformationMessage(strings.formatHtmlFilesQuestion, strings.formatHtmlFilesPositiveAnswer, strings.formatHtmlFilesNegativeAnswer);
 
-        if (answer === "Format") {
+        if (answer === strings.formatHtmlFilesPositiveAnswer) {
             this.formatHtmlFiles();
         }
         else {
-            vscode.window.showInformationMessage("Execute 'Format HTML Files' command if you change your mind");
+            vscode.window.showInformationMessage(strings.onRejectFormatHtmlFilesMessage);
             this.workspaceState.update("formatHtmlFiles", false);
         }
     }
@@ -125,13 +126,13 @@ export class StructuralSearchAndReplaceController {
         return generateRegExp(this.searchText);
     }
 
-    public searchInWorkspace(): Promise<boolean> {
+    public async searchInWorkspace(): Promise<boolean> {
         const searchQuery = this.generateRegExp();
 
         return searchInWorkspace(searchQuery);
     }
 
-    public searchInFile(): Promise<boolean> {
+    public async searchInFile(): Promise<boolean> {
         const searchQuery = this.generateRegExp();
         const currentDocument = this.currentDocument?.fileName as string;
 
@@ -148,7 +149,7 @@ export class StructuralSearchAndReplaceController {
         return result;
     }
 
-    public replaceInFile(): Promise<string> {
+    public async replaceInFile(): Promise<string> {
         const currentDocument = this.currentDocument?.uri as vscode.Uri;
 
         const replacementParameters: UserInput = {
@@ -160,7 +161,9 @@ export class StructuralSearchAndReplaceController {
         return replaceInFile(currentDocument, replacementParameters, this.filesAndContents);
     }
 
-    public replaceInFiles(): Promise<string[]> {
+    public async replaceInFiles(): Promise<string[]> {
+        this.files = await this.findHtmlFiles();
+
         const replacementParameters: UserInput = {
             searchText: this.searchText,
             replaceText: this.replaceText,
@@ -174,21 +177,7 @@ export class StructuralSearchAndReplaceController {
         return this.filesAndContents.length !== 0;
     }
 
-    public revertChanges(): Promise<string> {
+    public async revertChanges(): Promise<string> {
         return revertChanges(this.filesAndContents);
-    }
-
-    public notifyUser(processName: string, processResult: string) {
-        if (processResult === "Success") {
-            vscode.commands.executeCommand("search.action.refreshSearchResults").then(() => {
-                vscode.window.showInformationMessage(`${processName} process for "${this.choice.toLowerCase()}" successful`);
-            });
-        }
-        else if (processResult === "No modifications required for the desired change") {
-            vscode.window.showWarningMessage(processResult);
-        }
-        else {
-            vscode.window.showErrorMessage(`An error occured during the ${processName} process`);
-        }
     }
 }

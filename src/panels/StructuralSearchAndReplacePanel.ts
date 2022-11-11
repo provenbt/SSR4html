@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { getUri } from "../utilities/getUri";
+import strings from "../stringVariables.json";
 
 export class StructuralSearchAndReplacePanel {
   // Track the current panel. Only allow a single panel to exist at a time.
@@ -37,7 +38,7 @@ export class StructuralSearchAndReplacePanel {
     // Create a new panel for the webview
     const panel = vscode.window.createWebviewPanel(
       StructuralSearchAndReplacePanel.viewType,
-      "SSR4HTML",
+      strings.extensionShortName,
       vscode.ViewColumn.Beside,
       { enableScripts: true, retainContextWhenHidden: true }
     );
@@ -64,16 +65,30 @@ export class StructuralSearchAndReplacePanel {
   }
 
   public lockUIComponents() {
-    this.panel.webview.postMessage({ command: 'lockUIComponents' });
+    this.panel.webview.postMessage({ command: strings.lockUIComponentsWebviewCommand });
   }
 
   public unlockUIComponents() {
-    this.panel.webview.postMessage({ command: 'unlockUIComponents' });
+    this.panel.webview.postMessage({ command: strings.unlockUIComponentsWebviewCommand });
   }
 
   public showReplacementPart() {
-    this.panel.webview.postMessage({ command: 'onFoundSearchResult' });
+    this.panel.webview.postMessage({ command: strings.onFoundSearchResultWebviewCommand });
   }
+
+  public notifyUser(processName: string, processResult: string) {
+    if (processResult === "Success") {
+        vscode.commands.executeCommand("search.action.refreshSearchResults").then(() => {
+            vscode.window.showInformationMessage(`${processName} ${strings.successfulProcessMessage}`);
+        });
+    }
+    else if (processResult === "NC") {
+        vscode.window.showWarningMessage(strings.noChangeRequiredMessage);
+    }
+    else {
+        vscode.window.showErrorMessage(`${strings.faultyProcessMessage} ${processName.toLowerCase()}`);
+    }
+}
 
   private cleanUpSidebarSearchAndCloseSidebar() {
     // Clear Search Query/Results fields
@@ -95,28 +110,28 @@ export class StructuralSearchAndReplacePanel {
         const { command, search, replace, choice } = message;
 
         switch (command) {
-          case "searchInFile":
-            vscode.commands.executeCommand("ssr4html.searchInFile", search);
+          case strings.searchInFileWebviewCommand:
+            vscode.commands.executeCommand(strings.searchInFileCommand, search);
             break;
 
-          case "searchInFiles":
-            vscode.commands.executeCommand("ssr4html.searchInFiles", search);
+          case strings.searchInFilesWebviewCommand:
+            vscode.commands.executeCommand(strings.searchInFilesCommand, search);
             break;
 
-          case "cancelSearch":
+          case strings.cancelSearchWebviewCommand:
             this.cleanUpSidebarSearchAndCloseSidebar();
             break;
 
-          case "replaceInFile":
-            vscode.commands.executeCommand("ssr4html.replaceInFile", replace, choice);
+          case strings.replaceInFileWebviewCommand:
+            vscode.commands.executeCommand(strings.replaceInFileCommand, replace, choice);
             break;
 
-          case "replaceInFiles":
-            vscode.commands.executeCommand("ssr4html.replaceInFiles", replace, choice);
+          case strings.replaceInFilesWebviewCommand:
+            vscode.commands.executeCommand(strings.replaceInFilesCommand, replace, choice);
             break;
 
-          case "revertChanges":
-            vscode.commands.executeCommand("ssr4html.revertChanges");
+          case strings.revertChangesWebviewCommand:
+            vscode.commands.executeCommand(strings.revertChangesCommand);
             break;
         }
       },
@@ -143,61 +158,61 @@ export class StructuralSearchAndReplacePanel {
           <meta charset="UTF-8">
           <meta http-equiv="Content-Security-Policy">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>SSR4HTML</title>
+          <title>${strings.extensionShortName}</title>
           <script type = "module" src = "${toolkitUri}"></script>
           <script type = "module" src = "${mainUri}"></script>
         </head>
         <body>
           <div style="width:300px;">
-            <h3>Structural Search and Replace</h3>
+            <h3>${strings.extensionTitle}</h3>
           </div>
 
           <div style = "width:auto;padding-left:5px;">
             <form class="btn-group">
               <div class="form-group row" style="padding-bottom:15px;">
                 <fieldset>
-                  <legend style="text-align:center;">Search</legend>
+                  <legend style="text-align:center;">${strings.searchPartLegendText}</legend>
                   <div>
-                    <vscode-text-area id = "searchBox" cols="150" rows="1" placeholder="Basic CSS Selector(s)">Search Text</vscode-text-area>
+                    <vscode-text-area id = "searchBox" cols="150" rows="1" placeholder="${strings.searchTextAreaPlaceholder}">${strings.searchTextAreaTitle}</vscode-text-area>
                   </div>
 
                   <div style="padding-top:10px;padding-bottom:10px;">
                     <fieldset style="width:175px;">
-                      <legend>Search&Replace Option</legend>
-                      <vscode-checkbox id="searchInAll" checked>Include all HTML files</vscode-checkbox>
+                      <legend>${strings.searchAndReplaceOptionLegendText}</legend>
+                      <vscode-checkbox id="searchInAll" checked>${strings.searchAndReplaceOptionCheckboxText}</vscode-checkbox>
                     </fieldset>
                   </div>
 
                   <div>
-                    <vscode-button id="searchBtn" appearance="primary" disabled>Search</vscode-button>
-                    <vscode-button id="cancelBtn" appearance="secondary" disabled>Cancel</vscode-button>
+                    <vscode-button id="searchBtn" appearance="primary" disabled>${strings.searchButtonText}</vscode-button>
+                    <vscode-button id="cancelBtn" appearance="secondary" disabled>${strings.cancelButtonText}</vscode-button>
                   </div>
                 </fieldset>
               </div>
               
               <div id="replacementPart" class="form-group row" style="display:none;">
                 <fieldset>
-                  <legend style="text-align:center;">Replace</legend>
+                  <legend style="text-align:center;">${strings.replacePartLegendText}</legend>
                   
                   <div>
-                    <vscode-tag style = "padding-bottom:3px;">Replacement Choice</vscode-tag>
+                    <vscode-tag style = "padding-bottom:3px;">${strings.replacementOperationSelectionTitle}</vscode-tag>
                     <div>
                       <vscode-dropdown id = "selection" position="below" style = "width:180px;text-align-last:center;">
-                        <vscode-option value = "Unselected">Unselected</vscode-option>
-                        <vscode-option value = "Set Class">Set Class</vscode-option>
-                        <vscode-option value = "Append to Class">Append to Class</vscode-option>
-                        <vscode-option value = "Remove from Class">Remove from Class</vscode-option>
-                        <vscode-option value = "Set Id">Set Id</vscode-option>
-                        <vscode-option value = "Set Attribute">Set Attribute</vscode-option>
-                        <vscode-option value = "Append to Attribute">Append to Attribute</vscode-option>
-                        <vscode-option value = "Remove from Attribute">Remove from Attribute</vscode-option>
-                        <vscode-option value = "Remove Attribute">Remove Attribute</vscode-option>
-                        <vscode-option value = "Set Style Property">Set Style Property</vscode-option>
-                        <vscode-option value = "Edit Style Property">Edit Style Property</vscode-option>
-                        <vscode-option value = "Change Tag Name">Change Tag Name</vscode-option>
-                        <vscode-option value = "Remove Tag">Remove Tag</vscode-option>
-                        <vscode-option value = "Add Upper Tag">Add Upper Tag</vscode-option>
-                        <vscode-option value = "Remove Upper Tag">Remove Upper Tag</vscode-option>
+                        <vscode-option value = "${strings.replacementOperationDefaultText}">${strings.replacementOperationDefaultText}</vscode-option>
+                        <vscode-option value = "${strings.setClassNameText}">${strings.setClassNameText}</vscode-option>
+                        <vscode-option value = "${strings.appendClassNameText}">${strings.appendClassNameText}</vscode-option>
+                        <vscode-option value = "${strings.removeClassNameText}">${strings.removeClassNameText}</vscode-option>
+                        <vscode-option value = "${strings.setIdValueText}">${strings.setIdValueText}</vscode-option>
+                        <vscode-option value = "${strings.setAttributeText}">${strings.setAttributeText}</vscode-option>
+                        <vscode-option value = "${strings.appendAttributeValueText}">${strings.appendAttributeValueText}</vscode-option>
+                        <vscode-option value = "${strings.removeAttributeValueText}">${strings.removeAttributeValueText}</vscode-option>
+                        <vscode-option value = "${strings.removeAttributeText}">${strings.removeAttributeText}</vscode-option>
+                        <vscode-option value = "${strings.setStylePropertyText}">${strings.setStylePropertyText}</vscode-option>
+                        <vscode-option value = "${strings.editStylePropertyText}">${strings.editStylePropertyText}</vscode-option>
+                        <vscode-option value = "${strings.editTagNameText}">${strings.editTagNameText}</vscode-option>
+                        <vscode-option value = "${strings.removeTagText}">${strings.removeTagText}</vscode-option>
+                        <vscode-option value = "${strings.addUpperTagText}">${strings.addUpperTagText}</vscode-option>
+                        <vscode-option value = "${strings.removeUpperTagText}">${strings.removeUpperTagText}</vscode-option>
                       </vscode-dropdown>
                     </div>
                   </div>
@@ -205,11 +220,11 @@ export class StructuralSearchAndReplacePanel {
                   <div id="replacementForm" class="form-group row" style="display:none;">
 
                     <div style="padding-top:10px;padding-bottom:10px;">
-                      <vscode-text-area id="replacementBox" cols="150" rows="1">Replacement Text</vscode-text-area>
+                      <vscode-text-area id="replacementBox" cols="150" rows="1">${strings.replaceTextAreaDefaultTitle}</vscode-text-area>
                     </div>
                     <div>
-                      <vscode-button id="replaceBtn" appearance="primary">Replace</vscode-button>
-                      <vscode-button id="revertBtn" appearance="secondary">Revert</vscode-button>
+                      <vscode-button id="replaceBtn" appearance="primary">${strings.replaceButtonDefaultText}</vscode-button>
+                      <vscode-button id="revertBtn" appearance="secondary">${strings.revertButtonText}</vscode-button>
                     </div>
 
                   </div>

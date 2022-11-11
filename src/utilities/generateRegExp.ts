@@ -11,6 +11,7 @@
 
     More information about the package can be found here https://github.com/m-yoshiro/Selector2Regexp
 */
+import strings from '../stringVariables.json';
 
 const s2r = require("selector-2-regexp");
 
@@ -104,7 +105,7 @@ export function generateRegExp(searchText: string) {
     }
 
     // Create the final RegExp by concatenating all generated RegExps with the OR(|) symbol
-    let finalRegex: string = regex.length ? regex.join('|') : "An error occured during the generation of RegExp";
+    const finalRegex: string = regex.length ? regex.join('|') : strings.regExpGenerationErrorMessage;
 
     return finalRegex;
 }

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { FileAndContent } from '../controllers/StructuralSearchAndReplaceController';
+import strings from '../stringVariables.json';
 
 export async function revertChanges(filesAndContents: FileAndContent[]) {
     let processResult: string;
@@ -7,7 +8,7 @@ export async function revertChanges(filesAndContents: FileAndContent[]) {
     try {
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
-            title: `Rollback process is under the progress`,
+            title: `${strings.revertProcessName} ${strings.processProgressMessage}`,
             cancellable: false
         }, async () => {
             for (let index = 0; index < filesAndContents.length; index++) {

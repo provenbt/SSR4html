@@ -107,7 +107,7 @@ export class StructuralSearchAndReplacePanel {
     // Handle outgoing message from webview to extension
     webview.onDidReceiveMessage(
       (message: any) => {
-        const { command, search, replace, choice } = message;
+        const { command, search, filesToExcludePath, replace, choice } = message;
 
         switch (command) {
           case strings.searchInFileWebviewCommand:
@@ -115,7 +115,7 @@ export class StructuralSearchAndReplacePanel {
             break;
 
           case strings.searchInFilesWebviewCommand:
-            vscode.commands.executeCommand(strings.searchInFilesCommand, search);
+            vscode.commands.executeCommand(strings.searchInFilesCommand, search, filesToExcludePath);
             break;
 
           case strings.cancelSearchWebviewCommand:
@@ -179,7 +179,8 @@ export class StructuralSearchAndReplacePanel {
                   <div style="padding-top:10px;padding-bottom:10px;">
                     <fieldset style="width:175px;">
                       <legend>${strings.searchAndReplaceOptionLegendText}</legend>
-                      <vscode-checkbox id="searchInAll" checked>${strings.searchAndReplaceOptionCheckboxText}</vscode-checkbox>
+                      <vscode-checkbox id="searchInAll">${strings.searchAndReplaceOptionCheckboxText}</vscode-checkbox>
+                      <vscode-text-field id="filesToExclude" placeholder="${strings.filesToExcludeTextAreaPlaceholder}" style="margin: 3px; display:none;">${strings.filesToExcludeTextAreaTitle}</vscode-text-field>
                     </fieldset>
                   </div>
 

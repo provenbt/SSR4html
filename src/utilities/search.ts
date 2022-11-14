@@ -1,11 +1,13 @@
 import * as vscode from 'vscode';
 
-export async function searchInWorkspace(searchQuery: string) {
+export async function searchInWorkspace(searchQuery: string, filesToExcludePath: string) {
     await vscode.commands.executeCommand("workbench.action.findInFiles", {
         // Send the generated regular expression to query
         query: searchQuery,
         // Search only in HTML files
         filesToInclude: "*.html",
+        // Exclude desired folders & files
+        filesToExclude: filesToExcludePath,
         triggerSearch: true,
         isRegex: true,
         matchWholeWord: true,
@@ -15,12 +17,14 @@ export async function searchInWorkspace(searchQuery: string) {
     return await isThereAnyMatch();
 }
 
-export async function searchInFile(searchQuery: string, filePath: string) {
+export async function searchInFile(searchQuery: string, filePath: string, filesToExcludePath: string) {
     await vscode.commands.executeCommand("workbench.action.findInFiles", {
         // Send the generated regular expression to query
         query: searchQuery,
         // Search only in the current file
         filesToInclude: `*${filePath}`,
+        // Exclude desired folders & files
+        filesToExclude: filesToExcludePath,
         triggerSearch: true,
         isRegex: true,
         matchWholeWord: true,

@@ -8,6 +8,7 @@ let SEARCH_BOX;
 let SEARCH_BUTTON;
 let CANCEL_BUTTON;
 let CHECKBOX;
+let FILES_TO_EXCLUDE_BOX;
 let REPLACEMENT_PART;
 let SELECTION;
 let REPLACEMENT_FORM;
@@ -20,6 +21,7 @@ function main() {
   SEARCH_BUTTON = document.getElementById("searchBtn");
   CANCEL_BUTTON = document.getElementById("cancelBtn");
   CHECKBOX = document.getElementById("searchInAll");
+  FILES_TO_EXCLUDE_BOX = document.getElementById("filesToExclude");
   REPLACEMENT_PART = document.getElementById("replacementPart");
   SELECTION = document.getElementById("selection");
   REPLACEMENT_FORM = document.getElementById("replacementForm");
@@ -28,6 +30,7 @@ function main() {
   REVERT_BUTTON = document.getElementById("revertBtn");
 
   SEARCH_BOX.addEventListener("keyup", enableSearchButton);
+  CHECKBOX.addEventListener("click", onClickCheckbox);
   SEARCH_BUTTON.addEventListener("click", onClickSearchButton);
   CANCEL_BUTTON.addEventListener("click", onClickCancelButton);
   SELECTION.addEventListener("change", showReplacementForm);
@@ -42,6 +45,7 @@ function main() {
       case strings.onFoundSearchResultWebviewCommand:
         SEARCH_BOX.readOnly = true;
         CHECKBOX.readOnly = true;
+        FILES_TO_EXCLUDE_BOX.readOnly = true;
         SEARCH_BUTTON.disabled = true;
         CANCEL_BUTTON.disabled = false;
         REPLACEMENT_PART.style.display = "inline";
@@ -52,6 +56,7 @@ function main() {
       case strings.lockUIComponentsWebviewCommand:
         SEARCH_BOX.readOnly = true;
         CHECKBOX.readOnly = true;
+        FILES_TO_EXCLUDE_BOX.readOnly = true;
         SEARCH_BUTTON.disabled = true;
         CANCEL_BUTTON.disabled = true;
         SELECTION.disabled = true;
@@ -62,13 +67,14 @@ function main() {
         break;
       // This part will unlock the necessary parts of the UI after the API progress
       case strings.unlockUIComponentsWebviewCommand:
-        // Unlock search button and search box if no result found for the current search query
+        // Unlock only the search part if no result found for the current search query
         if (REPLACEMENT_PART.style.display !== "inline") {
           SEARCH_BOX.readOnly = false;
           CHECKBOX.readOnly = false;
+          FILES_TO_EXCLUDE_BOX.readOnly = false;
           SEARCH_BUTTON.disabled = false;
         }
-        // Unlock the remain parts of the UI if a result found for the current search query
+        // Unlock the replacement part if a result found for the current search query
         else {
           CANCEL_BUTTON.disabled = false;
           SELECTION.disabled = false;
@@ -95,14 +101,16 @@ function main() {
 function onClickSearchButton() {
 
   vscode.postMessage({
-    command: CHECKBOX.checked ? strings.searchInFilesWebviewCommand : strings.searchInFilesWebviewCommand,
-    search: SEARCH_BOX.value
+    command: CHECKBOX.checked ? strings.searchInFilesWebviewCommand : strings.searchInFileWebviewCommand,
+    search: SEARCH_BOX.value,
+    filesToExcludePath: FILES_TO_EXCLUDE_BOX.value
   });
 }
 
 function onClickCancelButton() {
   SEARCH_BOX.readOnly = false;
   CHECKBOX.readOnly = false;
+  FILES_TO_EXCLUDE_BOX.readOnly = false;
   SEARCH_BUTTON.disabled = false;
   CANCEL_BUTTON.disabled = true;
   REPLACEMENT_PART.style.display = "none";
@@ -112,6 +120,16 @@ function onClickCancelButton() {
   vscode.postMessage({
     command: strings.cancelSearchWebviewCommand
   });
+}
+
+function onClickCheckbox() {
+
+  if (CHECKBOX.checked === true) {
+    FILES_TO_EXCLUDE_BOX.style.display = "block";
+  }
+  else {
+    FILES_TO_EXCLUDE_BOX.style.display = "none";
+  }
 }
 
 function onClickReplaceButton() {

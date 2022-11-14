@@ -32,6 +32,8 @@ export class StructuralSearchAndReplaceController {
 
     // To store all HTML files found in the workspace
     private files: vscode.Uri[];
+    // To exclude the desired files & folders in the workspace
+    private filesToExcludePath: string;
 
     // To store the information of the current document, vital to search&replace only within a file
     private currentDocument: vscode.TextDocument | undefined;
@@ -45,6 +47,7 @@ export class StructuralSearchAndReplaceController {
         this.choice = strings.replacementOperationDefaultText;
         this.replaceText = "";
         this.files = [];
+        this.filesToExcludePath = "";
         this.currentDocument = undefined;
         this.filesAndContents = [];
     }
@@ -71,6 +74,10 @@ export class StructuralSearchAndReplaceController {
 
     public setSearchText(searchText: string) {
         this.searchText = searchText.trim();
+    }
+
+    public setFilesToExcludePath(filesToExcludePath: string) {
+        this.filesToExcludePath = filesToExcludePath.trim();
     }
 
     public setChoice(choice: string) {
@@ -117,7 +124,7 @@ export class StructuralSearchAndReplaceController {
     }
 
     public async findHtmlFiles(): Promise<vscode.Uri[]> {
-        this.files = await vscode.workspace.findFiles('**/*.html');
+        this.files = await vscode.workspace.findFiles('**/*.html', this.filesToExcludePath);
 
         return this.files;
     }
@@ -129,14 +136,14 @@ export class StructuralSearchAndReplaceController {
     public async searchInWorkspace(): Promise<boolean> {
         const searchQuery = this.generateRegExp();
 
-        return searchInWorkspace(searchQuery);
+        return searchInWorkspace(searchQuery, this.filesToExcludePath);
     }
 
     public async searchInFile(): Promise<boolean> {
         const searchQuery = this.generateRegExp();
         const currentDocument = this.currentDocument?.fileName as string;
 
-        return searchInFile(searchQuery, currentDocument);
+        return searchInFile(searchQuery, currentDocument, this.filesToExcludePath);
     }
 
     public checkReplacementText(): string {

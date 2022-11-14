@@ -38,6 +38,8 @@
     "searchTextAreaPlaceholder": "Basic CSS Selector(s)",
     "searchAndReplaceOptionLegendText": "Search&Replace Option",
     "searchAndReplaceOptionCheckboxText": "Include all HTML files",
+    "filesToExcludeTextAreaTitle": "files to exclude",
+    "filesToExcludeTextAreaPlaceholder": "e.g. **/folder, **/file*",
     "searchButtonText": "Search",
     "cancelButtonText": "Cancel",
 

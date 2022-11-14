@@ -13,7 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
 	controller = StructuralSearchAndReplaceController.getInstance(context.workspaceState);
 
 	let disposableSearchPanel = vscode.commands.registerCommand(strings.launchOrCloseUIcommand, async () => {
-		const files = await controller.findHtmlFiles();;
+		const files = await controller.findHtmlFiles();
 		if (files.length === 0) {
 			vscode.window.showWarningMessage(strings.UIWarningMessage);
 			return;
@@ -33,8 +33,9 @@ export function activate(context: vscode.ExtensionContext) {
 		controller.formatHtmlFiles();
 	});
 
-	let disposableSearchInFiles = vscode.commands.registerCommand(strings.searchInFilesCommand, async (searchText) => {
+	let disposableSearchInFiles = vscode.commands.registerCommand(strings.searchInFilesCommand, async (searchText, filesToExcludePath) => {
 		controller.setSearchText(searchText);
+		controller.setFilesToExcludePath(filesToExcludePath);
 
 		const isCssSelectorValid = controller.checkSearchText();
 		if (isCssSelectorValid !== "Valid") {

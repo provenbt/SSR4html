@@ -13,6 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
 	controller = StructuralSearchAndReplaceController.getInstance(context.workspaceState);
 
 	let disposableSearchPanel = vscode.commands.registerCommand(strings.launchOrCloseUIcommand, async () => {
+		// If there is not any readable and writable HTML file, do not launch UI
 		const files = await controller.findHtmlFiles();
 		if (files.length === 0) {
 			vscode.window.showWarningMessage(strings.UIWarningMessage);
@@ -136,6 +137,12 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	let disposableReplaceInFile = vscode.commands.registerCommand(strings.replaceInFileCommand, async (replaceText, choice) => {
+		// Warn user if the current file does not have read and write permission
+		if (!controller.isFileReadableAndWritable(controller.getCurrentDocument()!.uri)) {
+			vscode.window.showWarningMessage(`${strings.notReadableOrWritableMessage} ${controller.getCurrentDocument()?.fileName}`);
+			return;
+		}
+
 		controller.setReplaceText(replaceText);
 		controller.setChoice(choice);
 

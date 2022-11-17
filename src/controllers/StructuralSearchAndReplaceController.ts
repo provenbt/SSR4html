@@ -7,6 +7,7 @@ import { replaceInFile } from '../utilities/replaceInFile';
 import { revertChanges } from '../utilities/revertChanges';
 import { generateRegExp } from "../utilities/generateRegExp";
 import strings from '../stringVariables.json';
+const fs = require('fs');
 const pretty = require('pretty');
 
 export interface UserInput {
@@ -30,7 +31,7 @@ export class StructuralSearchAndReplaceController {
     private choice: string;
     private replaceText: string;
 
-    // To store all HTML files found in the workspace
+    // To store all readable and writable HTML files found in the workspace
     private files: vscode.Uri[];
     // To exclude the desired files & folders in the workspace
     private filesToExcludePath: string;
@@ -124,9 +125,27 @@ export class StructuralSearchAndReplaceController {
     }
 
     public async findHtmlFiles(): Promise<vscode.Uri[]> {
-        this.files = await vscode.workspace.findFiles('**/*.html', this.filesToExcludePath);
+        const allHtmlFiles = await vscode.workspace.findFiles('**/*.html', this.filesToExcludePath);
+
+        // Get only the files with read and write permission
+        for (let file of allHtmlFiles) {
+            if (this.isFileReadableAndWritable(file)) {
+                this.files.push(file);
+            }
+        }
 
         return this.files;
+    }
+
+    public isFileReadableAndWritable(file: vscode.Uri): boolean {
+        try {
+            fs.accessSync(file.fsPath, fs.constants.R_OK | fs.constants.W_OK);
+            return true;
+        } 
+        catch (err) {
+            // File is not readable or writable
+            return false;
+        }
     }
 
     private generateRegExp() {
@@ -136,7 +155,7 @@ export class StructuralSearchAndReplaceController {
     public async searchInWorkspace(): Promise<boolean> {
         const searchQuery = this.generateRegExp();
 
-        return searchInWorkspace(searchQuery, this.filesToExcludePath);
+        return searchInWorkspace(searchQuery, this.files, this.filesToExcludePath);
     }
 
     public async searchInFile(): Promise<boolean> {

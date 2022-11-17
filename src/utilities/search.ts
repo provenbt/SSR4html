@@ -1,11 +1,10 @@
 import * as vscode from 'vscode';
 
-export async function searchInWorkspace(searchQuery: string, filesToExcludePath: string) {
+export async function searchInWorkspace(searchQuery: string, filesToInclude: vscode.Uri[], filesToExcludePath: string) {
     await vscode.commands.executeCommand("workbench.action.findInFiles", {
-        // Send the generated regular expression to query
         query: searchQuery,
-        // Search only in HTML files
-        filesToInclude: "*.html",
+        // Search only in HTML files that have read and write permission
+        filesToInclude: filesToInclude.map(file => file.fsPath.split(/\\|\//).slice(-1)).join(','),
         // Exclude desired folders & files
         filesToExclude: filesToExcludePath,
         triggerSearch: true,
@@ -17,12 +16,11 @@ export async function searchInWorkspace(searchQuery: string, filesToExcludePath:
     return await isThereAnyMatch();
 }
 
-export async function searchInFile(searchQuery: string, filePath: string, filesToExcludePath: string) {
+export async function searchInFile(searchQuery: string, currentDocumentFileName: string, filesToExcludePath: string) {
     await vscode.commands.executeCommand("workbench.action.findInFiles", {
-        // Send the generated regular expression to query
         query: searchQuery,
         // Search only in the current file
-        filesToInclude: `*${filePath}`,
+        filesToInclude: `*${currentDocumentFileName}`,
         // Exclude desired folders & files
         filesToExclude: filesToExcludePath,
         triggerSearch: true,

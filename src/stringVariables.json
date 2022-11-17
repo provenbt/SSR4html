@@ -25,6 +25,7 @@
     "UIWarningMessage": "UI is not launched since there is not any HTML file in the workspace",
     "nothingFoundToModifyInWorkspaceMessage": "Nothing found to modify in the workspace",
     "invalidDocumentIsOpenedMessage": "Ensure that an HTML file has been opened in the active text editor",
+    "notReadableOrWritableMessage": "File does not have read or write permission",
     "nothingFoundToModifyInFileMessage": "Nothing found to modify in",
     "nothingFoundToRevertMessage": "No changes found to revert",
 

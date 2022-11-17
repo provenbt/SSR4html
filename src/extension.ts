@@ -131,6 +131,12 @@ export function activate(context: vscode.ExtensionContext) {
 		setTimeout(() => {
 			extensionUI?.notifyUser(strings.replacementProcessName, processResult);
 
+			// Revert made changes on a faulty replacement process
+			if (processResult === "Error" && controller.isThereAnyFileToRevertChanges()) {
+				vscode.window.showInformationMessage(`${strings.onFaultyReplacementProcessMessage} ${strings.replacementProcessName.toLowerCase()}`);
+				vscode.commands.executeCommand(strings.revertChangesCommand);
+			}
+
 			// Enable interactive UI components after the API progress
 			extensionUI?.unlockUIComponents();
 		}, 1000);
@@ -171,6 +177,12 @@ export function activate(context: vscode.ExtensionContext) {
 
 		setTimeout(() => {
 			extensionUI?.notifyUser(strings.replacementProcessName, processResult);
+
+			// Revert made changes on a faulty replacement process
+			if (processResult === "Error" && controller.isThereAnyFileToRevertChanges()) {
+				vscode.window.showInformationMessage(`${strings.onFaultyReplacementProcessMessage} ${strings.replacementProcessName.toLowerCase()}`);
+				vscode.commands.executeCommand(strings.revertChangesCommand);
+			}
 
 			// Enable interactive UI components after the API progress
 			extensionUI?.unlockUIComponents();

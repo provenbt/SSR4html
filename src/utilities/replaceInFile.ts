@@ -79,14 +79,14 @@ export async function replaceInFile(file: vscode.Uri, replacementParameters: Use
         const newHtmlText = pretty(htmlDom.getDom().serialize(), { ocd: true });
 
         if (oldHtmlText !== newHtmlText) {
+            // Overwrite the manipulated version of the file
+            await vscode.workspace.fs.writeFile(file, new TextEncoder().encode(newHtmlText));
+
             // Store the old state of the file 
             filesAndContents.push({
                 file,
                 rawContent
             });
-
-            // Overwrite the manipulated version of the file
-            await vscode.workspace.fs.writeFile(file, new TextEncoder().encode(newHtmlText));
 
             processResult = "Success";
         }

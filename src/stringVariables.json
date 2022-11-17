@@ -27,6 +27,7 @@
     "invalidDocumentIsOpenedMessage": "Ensure that an HTML file has been opened in the active text editor",
     "notReadableOrWritableMessage": "File does not have read or write permission",
     "nothingFoundToModifyInFileMessage": "Nothing found to modify in",
+    "onFaultyReplacementProcessMessage": "Started to undo the effects of the faulty",
     "nothingFoundToRevertMessage": "No changes found to revert",
 
     "formatHtmlFilesQuestion": "Do you want to format all HTML files in the workspace for more accurate search results",

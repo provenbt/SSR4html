@@ -125,16 +125,17 @@ export class StructuralSearchAndReplaceController {
     }
 
     public async findHtmlFiles(): Promise<vscode.Uri[]> {
+        const fileList = [];
         const allHtmlFiles = await vscode.workspace.findFiles('**/*.html', this.filesToExcludePath);
 
-        // Get only the files with read and write permission
+        // Get only HTML files that have read and write permission
         for (let file of allHtmlFiles) {
             if (this.isFileReadableAndWritable(file)) {
-                this.files.push(file);
+                fileList.push(file);
             }
         }
 
-        return this.files;
+        return this.files = fileList;
     }
 
     public isFileReadableAndWritable(file: vscode.Uri): boolean {
@@ -188,8 +189,6 @@ export class StructuralSearchAndReplaceController {
     }
 
     public async replaceInFiles(): Promise<string[]> {
-        this.files = await this.findHtmlFiles();
-
         const replacementParameters: UserInput = {
             searchText: this.searchText,
             replaceText: this.replaceText,

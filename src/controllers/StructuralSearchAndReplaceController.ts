@@ -1,25 +1,15 @@
-import * as vscode from "vscode";
+import * as vscode from 'vscode';
 import { checkSearchText } from '../utilities/checkSearchText';
 import { searchInWorkspace, searchInFile } from '../utilities/search';
 import { checkReplacementText } from '../utilities/checkReplacementText';
 import { replaceInFiles } from '../utilities/replaceInFiles';
 import { replaceInFile } from '../utilities/replaceInFile';
 import { revertChanges } from '../utilities/revertChanges';
-import { generateRegExp } from "../utilities/generateRegExp";
+import { generateRegExp } from '../utilities/generateRegExp';
+import {UserInput, FileAndContent, ProcessResult} from '../interfaces';
 import strings from '../stringVariables.json';
 const fs = require('fs');
 const pretty = require('pretty');
-
-export interface UserInput {
-    searchText: string,
-    replaceText: string,
-    choice: string
-}
-
-export interface FileAndContent {
-    file: vscode.Uri,
-    rawContent: Uint8Array
-}
 
 export class StructuralSearchAndReplaceController {
     // Track the current controller. Only allow a single controller to exist at a time.
@@ -176,7 +166,7 @@ export class StructuralSearchAndReplaceController {
         return result;
     }
 
-    public async replaceInFile(): Promise<string> {
+    public async replaceInFile(): Promise<ProcessResult> {
         const currentDocument = this.currentDocument?.uri as vscode.Uri;
 
         const replacementParameters: UserInput = {
@@ -188,7 +178,7 @@ export class StructuralSearchAndReplaceController {
         return replaceInFile(currentDocument, replacementParameters, this.filesAndContents);
     }
 
-    public async replaceInFiles(): Promise<string[]> {
+    public async replaceInFiles(): Promise<ProcessResult[]> {
         const replacementParameters: UserInput = {
             searchText: this.searchText,
             replaceText: this.replaceText,
@@ -202,7 +192,7 @@ export class StructuralSearchAndReplaceController {
         return this.filesAndContents.length !== 0;
     }
 
-    public async revertChanges(): Promise<string> {
+    public async revertChanges(): Promise<ProcessResult> {
         return revertChanges(this.filesAndContents);
     }
 }

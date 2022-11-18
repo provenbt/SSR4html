@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
-import { UserInput, FileAndContent } from '../controllers/StructuralSearchAndReplaceController';
+import { UserInput, FileAndContent, ProcessResult } from '../interfaces';
 import { replaceInFile } from './replaceInFile';
 import strings from '../stringVariables.json';
 
 export async function replaceInFiles(files: vscode.Uri[], replacementParameters: UserInput, filesAndContents: FileAndContent[]) {
-    let processResults: string[] = [];
+    let processResults: ProcessResult[] = [];
 
     await vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
@@ -18,7 +18,7 @@ export async function replaceInFiles(files: vscode.Uri[], replacementParameters:
             const result = await replaceInFile(file, replacementParameters, filesAndContents);
             processResults.push(result);
 
-            if (result === "Error") {
+            if (result === ProcessResult.erroneous) {
                 break;
             }
 

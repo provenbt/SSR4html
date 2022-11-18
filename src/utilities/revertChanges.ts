@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
-import { FileAndContent } from '../controllers/StructuralSearchAndReplaceController';
+import { FileAndContent, ProcessResult } from '../interfaces';
 import strings from '../stringVariables.json';
 
 export async function revertChanges(filesAndContents: FileAndContent[]) {
-    let processResult: string;
+    let processResult: ProcessResult;
 
     try {
         await vscode.window.withProgress({
@@ -21,10 +21,10 @@ export async function revertChanges(filesAndContents: FileAndContent[]) {
         // clean up all information of the previosly changed files
         filesAndContents.splice(0, filesAndContents.length);
 
-        processResult = "Success";
+        processResult = ProcessResult.successful;
     } catch (error) {
         console.log(error);
-        processResult = "Error";
+        processResult = ProcessResult.erroneous;
     }
 
     return processResult;

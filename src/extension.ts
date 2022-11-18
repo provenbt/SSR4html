@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { StructuralSearchAndReplacePanel } from './panels/StructuralSearchAndReplacePanel';
 import { StructuralSearchAndReplaceController } from './controllers/StructuralSearchAndReplaceController';
+import {ProcessResult} from './interfaces';
 import strings from './stringVariables.json';
 
 // A controller will be created to manage the services of the extension
@@ -118,21 +119,21 @@ export function activate(context: vscode.ExtensionContext) {
 
 		const processResults = await controller.replaceInFiles();
 
-		let processResult: string;
-		if (processResults.includes("Error")) {
-			processResult = "Error";
-		} else if (processResults.includes("Success")) {
-			processResult = "Success";
+		let processResult: ProcessResult;
+		if (processResults.includes(ProcessResult.erroneous)) {
+			processResult = ProcessResult.erroneous;
+		} else if (processResults.includes(ProcessResult.successful)) {
+			processResult = ProcessResult.successful;
 		} else {
 			// Nothing changed in files
-			processResult = "NC";
+			processResult = ProcessResult.unperformed;
 		}
 
 		setTimeout(() => {
 			extensionUI?.notifyUser(strings.replacementProcessName, processResult);
 
 			// Revert made changes on a faulty replacement process
-			if (processResult === "Error" && controller.isThereAnyFileToRevertChanges()) {
+			if (processResult === ProcessResult.erroneous && controller.isThereAnyFileToRevertChanges()) {
 				vscode.window.showInformationMessage(`${strings.onFaultyReplacementProcessMessage} ${strings.replacementProcessName.toLowerCase()}`);
 				vscode.commands.executeCommand(strings.revertChangesCommand);
 			}
@@ -165,7 +166,7 @@ export function activate(context: vscode.ExtensionContext) {
 		// clean up all information of the previosly changed files before a new replacement process
 		controller.cleanUpInformationOfPreviouslyChangedFiles();
 
-		let processResult: string;
+		let processResult: ProcessResult;
 		// Show progress of the replacement process
 		await vscode.window.withProgress({
 			location: vscode.ProgressLocation.Notification,
@@ -179,7 +180,7 @@ export function activate(context: vscode.ExtensionContext) {
 			extensionUI?.notifyUser(strings.replacementProcessName, processResult);
 
 			// Revert made changes on a faulty replacement process
-			if (processResult === "Error" && controller.isThereAnyFileToRevertChanges()) {
+			if (processResult === ProcessResult.erroneous && controller.isThereAnyFileToRevertChanges()) {
 				vscode.window.showInformationMessage(`${strings.onFaultyReplacementProcessMessage} ${strings.replacementProcessName.toLowerCase()}`);
 				vscode.commands.executeCommand(strings.revertChangesCommand);
 			}

@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
-import { UserInput, FileAndContent } from '../controllers/StructuralSearchAndReplaceController';
+import { UserInput, FileAndContent, ProcessResult } from '../interfaces';
 import { HtmlDom } from './HtmlDom';
 import strings from '../stringVariables.json';
 const pretty = require('pretty');
 
 export async function replaceInFile(file: vscode.Uri, replacementParameters: UserInput, filesAndContents: FileAndContent[]) {
-    let processResult: string;
+    let processResult: ProcessResult;
 
     try {
         const { searchText, replaceText, choice } = replacementParameters;
@@ -88,16 +88,16 @@ export async function replaceInFile(file: vscode.Uri, replacementParameters: Use
                 rawContent
             });
 
-            processResult = "Success";
+            processResult = ProcessResult.successful;
         }
         else {
             // Nothing Changed
-            processResult = "NC";
+            processResult = ProcessResult.unperformed;
         }
     }
     catch (error) {
         console.log(error);
-        processResult = "Error";
+        processResult = ProcessResult.erroneous;
     }
 
     return processResult;

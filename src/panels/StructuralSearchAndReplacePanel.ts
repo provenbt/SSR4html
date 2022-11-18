@@ -1,6 +1,7 @@
-import * as vscode from "vscode";
-import { getUri } from "../utilities/getUri";
-import strings from "../stringVariables.json";
+import * as vscode from 'vscode';
+import { getUri } from '../utilities/getUri';
+import { ProcessResult } from '../interfaces';
+import strings from '../stringVariables.json';
 
 export class StructuralSearchAndReplacePanel {
   // Track the current panel. Only allow a single panel to exist at a time.
@@ -76,13 +77,13 @@ export class StructuralSearchAndReplacePanel {
     this.panel.webview.postMessage({ command: strings.onFoundSearchResultWebviewCommand });
   }
 
-  public notifyUser(processName: string, processResult: string) {
-    if (processResult === "Success") {
+  public notifyUser(processName: string, processResult: ProcessResult) {
+    if (processResult === ProcessResult.successful) {
         vscode.commands.executeCommand("search.action.refreshSearchResults").then(() => {
             vscode.window.showInformationMessage(`${processName} ${strings.successfulProcessMessage}`);
         });
     }
-    else if (processResult === "NC") {
+    else if (processResult === ProcessResult.unperformed) {
         vscode.window.showWarningMessage(strings.noChangeRequiredMessage);
     }
     else {

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { StructuralSearchAndReplacePanel } from './panels/StructuralSearchAndReplacePanel';
 import { StructuralSearchAndReplaceController } from './controllers/StructuralSearchAndReplaceController';
-import {ProcessResult} from './interfaces';
+import { ProcessResult } from './interfaces';
 import strings from './stringVariables.json';
 
 // A controller will be created to manage the services of the extension
@@ -121,26 +121,22 @@ export function activate(context: vscode.ExtensionContext) {
 
 		let processResult: ProcessResult;
 		if (processResults.includes(ProcessResult.erroneous)) {
+			// An error occured during the replacement process of a file
 			processResult = ProcessResult.erroneous;
-		} else if (processResults.includes(ProcessResult.successful)) {
+		}
+		else if (processResults.includes(ProcessResult.successful)) {
+			// The replacement is successful at least in one file
 			processResult = ProcessResult.successful;
-		} else {
-			// Nothing changed in files
+		}
+		else {
+			// Nothing changed in files (there is no need for the replacement)
 			processResult = ProcessResult.unperformed;
 		}
 
-		setTimeout(() => {
-			extensionUI?.notifyUser(strings.replacementProcessName, processResult);
+		await controller.notifyUser(strings.replacementProcessName, processResult);
 
-			// Revert made changes on a faulty replacement process
-			if (processResult === ProcessResult.erroneous && controller.isThereAnyFileToRevertChanges()) {
-				vscode.window.showInformationMessage(`${strings.onFaultyReplacementProcessMessage} ${strings.replacementProcessName.toLowerCase()}`);
-				vscode.commands.executeCommand(strings.revertChangesCommand);
-			}
-
-			// Enable interactive UI components after the API progress
-			extensionUI?.unlockUIComponents();
-		}, 1000);
+		// Enable interactive UI components after the API progress
+		extensionUI?.unlockUIComponents();
 	});
 
 	let disposableReplaceInFile = vscode.commands.registerCommand(strings.replaceInFileCommand, async (replaceText, choice) => {
@@ -166,28 +162,12 @@ export function activate(context: vscode.ExtensionContext) {
 		// clean up all information of the previosly changed files before a new replacement process
 		controller.cleanUpInformationOfPreviouslyChangedFiles();
 
-		let processResult: ProcessResult;
-		// Show progress of the replacement process
-		await vscode.window.withProgress({
-			location: vscode.ProgressLocation.Notification,
-			title: `${choice} ${strings.processProgressMessage}`,
-			cancellable: false
-		}, async () => {
-			processResult = await controller.replaceInFile();
-		});
+		const processResult = await controller.replaceInFile();
 
-		setTimeout(() => {
-			extensionUI?.notifyUser(strings.replacementProcessName, processResult);
+		await controller.notifyUser(strings.replacementProcessName, processResult);
 
-			// Revert made changes on a faulty replacement process
-			if (processResult === ProcessResult.erroneous && controller.isThereAnyFileToRevertChanges()) {
-				vscode.window.showInformationMessage(`${strings.onFaultyReplacementProcessMessage} ${strings.replacementProcessName.toLowerCase()}`);
-				vscode.commands.executeCommand(strings.revertChangesCommand);
-			}
-
-			// Enable interactive UI components after the API progress
-			extensionUI?.unlockUIComponents();
-		}, 1000);
+		// Enable interactive UI components after the API progress
+		extensionUI?.unlockUIComponents();
 	});
 
 	let disposableRevertChanges = vscode.commands.registerCommand(strings.revertChangesCommand, async () => {
@@ -199,14 +179,13 @@ export function activate(context: vscode.ExtensionContext) {
 
 		// Disable interactive UI components during the API progress
 		extensionUI?.lockUIComponents();
+
 		const processResult = await controller.revertChanges();
 
-		setTimeout(() => {
-			extensionUI?.notifyUser(strings.revertProcessName, processResult);
+		await controller.notifyUser(strings.revertProcessName, processResult);
 
-			// Enable interactive UI components after the API progress
-			extensionUI?.unlockUIComponents();
-		}, 1000);
+		// Enable interactive UI components after the API progress
+		extensionUI?.unlockUIComponents();
 	});
 
 	context.subscriptions.push(disposableSearchPanel);
@@ -223,5 +202,4 @@ export function deactivate() {
 	if (extensionUI) {
 		extensionUI.dispose();
 	}
-
 }

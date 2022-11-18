@@ -6,7 +6,7 @@ import { replaceInFiles } from '../utilities/replaceInFiles';
 import { replaceInFile } from '../utilities/replaceInFile';
 import { revertChanges } from '../utilities/revertChanges';
 import { generateRegExp } from '../utilities/generateRegExp';
-import {UserInput, FileAndContent, ProcessResult} from '../interfaces';
+import { UserInput, FileAndContent, ProcessResult } from '../interfaces';
 import strings from '../stringVariables.json';
 const fs = require('fs');
 const pretty = require('pretty');
@@ -132,7 +132,7 @@ export class StructuralSearchAndReplaceController {
         try {
             fs.accessSync(file.fsPath, fs.constants.R_OK | fs.constants.W_OK);
             return true;
-        } 
+        }
         catch (err) {
             // File is not readable or writable
             return false;
@@ -175,7 +175,13 @@ export class StructuralSearchAndReplaceController {
             choice: this.choice
         };
 
-        return replaceInFile(currentDocument, replacementParameters, this.filesAndContents);
+        return await vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: `${this.choice} ${strings.processProgressMessage}`,
+            cancellable: false
+        }, () => {
+            return replaceInFile(currentDocument, replacementParameters, this.filesAndContents);
+        });
     }
 
     public async replaceInFiles(): Promise<ProcessResult[]> {
@@ -194,5 +200,29 @@ export class StructuralSearchAndReplaceController {
 
     public async revertChanges(): Promise<ProcessResult> {
         return revertChanges(this.filesAndContents);
+    }
+
+    public async notifyUser(processName: string, processResult: ProcessResult) {
+        // Wait for a second to notify
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        if (processResult === ProcessResult.successful) {
+            vscode.commands.executeCommand("search.action.refreshSearchResults");
+            vscode.window.showInformationMessage(`${processName} ${strings.successfulProcessMessage}`);
+        }
+        else if (processResult === ProcessResult.unperformed) {
+            vscode.window.showWarningMessage(strings.noChangeRequiredMessage);
+        }
+        else {
+            vscode.window.showErrorMessage(`${strings.faultyProcessMessage} ${processName.toLowerCase()}`);
+
+            // Revert made changes on a faulty replacement process
+            if (processName === strings.replacementProcessName && this.isThereAnyFileToRevertChanges()) {
+                // Wait for a second to show the next notification
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                vscode.window.showInformationMessage(`${strings.onFaultyReplacementProcessMessage} ${strings.replacementProcessName.toLowerCase()}`);
+                vscode.commands.executeCommand(strings.revertChangesCommand);
+            }
+        }
     }
 }

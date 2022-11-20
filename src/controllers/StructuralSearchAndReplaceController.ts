@@ -46,9 +46,14 @@ export class StructuralSearchAndReplaceController {
     public static getInstance(workspaceState: vscode.Memento): StructuralSearchAndReplaceController {
         if (!StructuralSearchAndReplaceController.currentController) {
             StructuralSearchAndReplaceController.currentController = new StructuralSearchAndReplaceController(workspaceState);
+            this.currentController.init();
         }
 
         return StructuralSearchAndReplaceController.currentController;
+    }
+
+    private async init() {
+        this.files = await this.findHtmlFiles();
     }
 
     public async askToFormatHtmlFiles() {
@@ -114,8 +119,8 @@ export class StructuralSearchAndReplaceController {
         return checkSearchText(this.searchText);
     }
 
-    public async findHtmlFiles(): Promise<vscode.Uri[]> {
-        const fileList = [];
+    private async findHtmlFiles(): Promise<vscode.Uri[]> {
+        const fileList: vscode.Uri[] = [];
         const allHtmlFiles = await vscode.workspace.findFiles('**/*.html', this.filesToExcludePath);
 
         // Get only HTML files that have read and write permission
@@ -125,7 +130,7 @@ export class StructuralSearchAndReplaceController {
             }
         }
 
-        return this.files = fileList;
+        return fileList;
     }
 
     public isFileReadableAndWritable(file: vscode.Uri): boolean {
@@ -139,7 +144,7 @@ export class StructuralSearchAndReplaceController {
         }
     }
 
-    private generateRegExp() {
+    private generateRegExp(): string {
         return generateRegExp(this.searchText);
     }
 

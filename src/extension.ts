@@ -11,15 +11,15 @@ let controller: StructuralSearchAndReplaceController;
 let extensionUI: StructuralSearchAndReplacePanel | undefined;
 
 export function activate(context: vscode.ExtensionContext) {
-	controller = StructuralSearchAndReplaceController.getInstance(context.workspaceState);
 
-	let disposableSearchPanel = vscode.commands.registerCommand(strings.launchOrCloseUIcommand, async () => {
-		// If there is not any readable and writable HTML file, do not launch UI
-		const files = await controller.findHtmlFiles();
-		if (files.length === 0) {
+	let disposableSearchPanel = vscode.commands.registerCommand(strings.launchOrCloseUIcommand, () => {
+		// If there is not any workspace has been opened, do not launch UI
+		if (vscode.workspace.workspaceFolders === undefined) {
 			vscode.window.showWarningMessage(strings.UIWarningMessage);
 			return;
 		}
+
+		controller = StructuralSearchAndReplaceController.getInstance(context.workspaceState);
 
 		// If the UI is not shown, it will be launched (created); otherwise, it will be closed (disposed)
 		StructuralSearchAndReplacePanel.launchOrCloseUI(context.extensionUri);
@@ -171,7 +171,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	let disposableRevertChanges = vscode.commands.registerCommand(strings.revertChangesCommand, async () => {
-
+		// Warn user if there is not any file affected from the last replacement process
 		if (!controller.isThereAnyFileToRevertChanges()) {
 			vscode.window.showWarningMessage(strings.nothingFoundToRevertMessage);
 			return;

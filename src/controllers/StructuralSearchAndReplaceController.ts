@@ -25,6 +25,8 @@ export class StructuralSearchAndReplaceController {
     private files: vscode.Uri[];
     // To exclude the desired files & folders in the workspace
     private filesToExcludePath: string;
+    // To keep track of created and deleted files
+    private fileWatcher: vscode.FileSystemWatcher;
 
     // To store the information of the current document, vital to search&replace only within a file
     private currentDocument: vscode.TextDocument | undefined;
@@ -39,6 +41,7 @@ export class StructuralSearchAndReplaceController {
         this.replaceText = "";
         this.files = [];
         this.filesToExcludePath = "";
+        this.fileWatcher = vscode.workspace.createFileSystemWatcher('**/*.html');
         this.currentDocument = undefined;
         this.filesAndContents = [];
     }
@@ -53,7 +56,30 @@ export class StructuralSearchAndReplaceController {
     }
 
     private async init() {
+        // Load all HTML files that have read and write permission
         this.files = await this.findHtmlFiles();
+
+        // When a new readable and writable HTML file is created, add the file to the file list 
+        this.fileWatcher.onDidCreate(uri => {
+            if (this.isFileReadableAndWritable(uri)) {
+                this.files.push(uri);
+            }
+        });
+
+        // Remove deleted file from the list of files to be replaced in and to undo
+        this.fileWatcher.onDidDelete(uri => {
+            // Remove deleted file from the list of files to be replaced in
+            const fileIndex1 = this.files.findIndex(file => file.path === uri.path);
+            if (fileIndex1 > -1) {
+                this.files.splice(fileIndex1, 1);
+            }
+
+            // Remove deleted file from the list of files to undo
+            const fileIndex2 = this.filesAndContents.findIndex(fileAndContent => fileAndContent.file.path === uri.path);
+            if (fileIndex2 > -1) {
+                this.files.splice(fileIndex2, 1);
+            }
+        });
     }
 
     public async askToFormatHtmlFiles() {

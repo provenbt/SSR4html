@@ -56,7 +56,7 @@ export class StructuralSearchAndReplaceController {
     }
 
     private async init() {
-        // Load all HTML files that have read and write permission
+        // Find all HTML files that have read and write permission
         this.files = await this.findHtmlFiles();
 
         // When a new readable and writable HTML file is created, add the file to the file list 
@@ -255,5 +255,14 @@ export class StructuralSearchAndReplaceController {
                 vscode.commands.executeCommand(strings.revertChangesCommand);
             }
         }
+    }
+
+    public dispose() {
+        // Clean up HTML files found in the workspace
+        this.files.splice(0, this.files.length);
+        // Clean up all information of the previosly changed files
+        this.filesAndContents.splice(0, this.filesAndContents.length);
+        // Dispose the file system watcher
+        this.fileWatcher.dispose();
     }
 }

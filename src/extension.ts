@@ -198,6 +198,11 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {
+	// If the controller is still active when the extension is deactivated, dispose the controller
+	if (controller) {
+		controller.dispose();
+	}
+
 	// If the extension UI is still active when the extension is deactivated, dispose the extension UI
 	if (extensionUI) {
 		extensionUI.dispose();

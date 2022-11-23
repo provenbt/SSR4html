@@ -1,3 +1,5 @@
-/node_modules
-/out
-vsc-extension*
+out
+dist
+node_modules
+*.vsix
+vsc-extension-quickstart.md

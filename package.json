@@ -2,6 +2,7 @@
   "name": "ssr4html",
   "displayName": "SSR4HTML",
   "description": "Structural Search and Replace for HTML files",
+  "icon": "resources/icons/extension-icon.png",
   "version": "1.0.0",
   "engines": {
     "vscode": "^1.69.0"

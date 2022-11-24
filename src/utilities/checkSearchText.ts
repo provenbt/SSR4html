@@ -1,4 +1,4 @@
-import strings from '../stringVariables.json';
+import strings from '../../stringVariables.json';
 
 const jsdom = require("jsdom");
 
@@ -32,6 +32,7 @@ export function checkSearchText(searchText: string) {
         }
     } 
     catch (error: any) {
+        console.log(error);
         result = `'${searchText}' ${strings.invalidCssSelectorMessage}`;
     }
 

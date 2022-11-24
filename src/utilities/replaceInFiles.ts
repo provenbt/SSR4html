@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { UserInput, FileAndContent, ProcessResult } from '../interfaces';
 import { replaceInFile } from './replaceInFile';
-import strings from '../stringVariables.json';
+import strings from '../../stringVariables.json';
 
 export async function replaceInFiles(files: vscode.Uri[], replacementParameters: UserInput, filesAndContents: FileAndContent[]) {
     let processResults: ProcessResult[] = [];

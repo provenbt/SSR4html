@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { StructuralSearchAndReplacePanel } from './panels/StructuralSearchAndReplacePanel';
 import { StructuralSearchAndReplaceController } from './controllers/StructuralSearchAndReplaceController';
 import { ProcessResult } from './interfaces';
-import strings from './stringVariables.json';
+import strings from '../stringVariables.json';
 
 // A controller will be created to manage the services of the extension
 let controller: StructuralSearchAndReplaceController;

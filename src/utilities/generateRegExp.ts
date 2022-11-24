@@ -11,7 +11,7 @@
 
     More information about the package can be found here https://github.com/m-yoshiro/Selector2Regexp
 */
-import strings from '../stringVariables.json';
+import strings from '../../stringVariables.json';
 
 const s2r = require("selector-2-regexp");
 
@@ -93,7 +93,7 @@ export function generateRegExp(searchText: string) {
                 replaceAll('_-', "_\\-;").replaceAll(".*", ".*?").replace("\\s*>", ">");
 
             if (regex[index].includes('{')) {
-                regex[index] = regex[index].replace("\\s+.*?", "\\s+.*?(").replace(".*?{", ".*?){");;
+                regex[index] = regex[index].replace("\\s+.*?", "\\s+.*?(").replace(".*?{", ".*?){");
             }
 
             index++;

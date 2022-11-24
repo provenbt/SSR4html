@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { UserInput, FileAndContent, ProcessResult } from '../interfaces';
 import { HtmlDom } from './HtmlDom';
-import strings from '../stringVariables.json';
+import strings from '../../stringVariables.json';
 const pretty = require('pretty');
 
 export async function replaceInFile(file: vscode.Uri, replacementParameters: UserInput, filesAndContents: FileAndContent[]) {

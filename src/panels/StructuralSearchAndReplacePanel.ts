@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { getUri } from '../utilities/getUri';
-import strings from '../stringVariables.json';
+import strings from '../../stringVariables.json';
 
 export class StructuralSearchAndReplacePanel {
   // Track the current panel. Only allow a single panel to exist at a time.
@@ -135,7 +135,7 @@ export class StructuralSearchAndReplacePanel {
       "toolkit.js"
     ]);
 
-    const mainUri = getUri(webview, this.extensionUri, ["src", "webview-ui", "main.js"]);
+    const mainUri = getUri(webview, this.extensionUri, ["webview-ui", "main.js"]);
 
     return /*html*/ `
       <!DOCTYPE html>

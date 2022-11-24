@@ -7,7 +7,7 @@ import { replaceInFile } from '../utilities/replaceInFile';
 import { revertChanges } from '../utilities/revertChanges';
 import { generateRegExp } from '../utilities/generateRegExp';
 import { UserInput, FileAndContent, ProcessResult } from '../interfaces';
-import strings from '../stringVariables.json';
+import strings from '../../stringVariables.json';
 const fs = require('fs');
 const pretty = require('pretty');
 

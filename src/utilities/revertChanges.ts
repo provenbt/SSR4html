@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { FileAndContent, ProcessResult } from '../interfaces';
-import strings from '../stringVariables.json';
+import strings from '../../stringVariables.json';
 
 export async function revertChanges(filesAndContents: FileAndContent[]) {
     let processResult: ProcessResult;
@@ -8,7 +8,7 @@ export async function revertChanges(filesAndContents: FileAndContent[]) {
     try {
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
-            title: `${strings.revertProcessName} ${strings.processProgressMessage}`,
+            title: `${strings.revertProcessName.replace("process", "")} ${strings.processProgressMessage}`,
             cancellable: false
         }, async () => {
             for (let index = 0; index < filesAndContents.length; index++) {

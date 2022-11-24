@@ -1,6 +1,6 @@
-import { isAttributeNameValid } from "./validators/isAttributeNameValid";
-import { isCssValid } from "./validators/isCssValid";
-import strings from '../stringVariables.json';
+import { isAttributeNameValid } from './validators/isAttributeNameValid';
+import { isCssValid } from './validators/isCssValid';
+import strings from '../../stringVariables.json';
 
 export function checkReplacementText(choice: string, replaceText: string) {
     // Replace text is innocent until an error found in it

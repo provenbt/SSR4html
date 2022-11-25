@@ -25,13 +25,17 @@ export function activate(context: vscode.ExtensionContext) {
 		StructuralSearchAndReplacePanel.launchOrCloseUI(context.extensionUri);
 		extensionUI = StructuralSearchAndReplacePanel.currentPanel;
 
-		// If UI is shown, ask to format HTML files (only once for a workspace)
-		if (extensionUI && context.workspaceState.get("formatHtmlFiles") === undefined) {
+		// If UI is shown, ask to format HTML files (ask only once for a workspace)
+		if (extensionUI && context.workspaceState.get("askForOnce") === undefined) {
 			controller.askToFormatHtmlFiles();
 		}
 	});
 
 	let disposablesFormatFiles = vscode.commands.registerCommand(strings.formatFilesCommand, () => {
+		if (!controller.isThereAnyHtmlFile()) {
+            return;
+        }
+
 		controller.formatHtmlFiles();
 	});
 

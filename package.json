@@ -3,6 +3,7 @@
   "displayName": "SSR4HTML",
   "description": "Structural Search and Replace for HTML files",
   "icon": "resources/icons/extension-icon.png",
+  "publisher": "main",
   "version": "1.0.0",
   "engines": {
     "vscode": "^1.69.0"
@@ -80,6 +81,17 @@
           "when": "false"
         }
       ]
+    },
+    "configuration": {
+      "type": "object",
+      "title": "SSR4HTML",
+      "properties": {
+        "ssr4html.autoFormat": {
+          "type": "boolean",
+          "default": false,
+          "description": "Auto-format HTML files on the activation of the extension"
+        }
+      }
     }
   },
   "scripts": {

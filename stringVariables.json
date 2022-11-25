@@ -30,10 +30,10 @@
     "onFaultyReplacementProcessMessage": "Started to undo the effects of the faulty",
     "nothingFoundToRevertMessage": "No changes found to revert",
 
-    "formatHtmlFilesQuestion": "Do you want to format all HTML files in the workspace for more accurate search results",
+    "formatHtmlFilesQuestion": "Do you want HTML files to be automatically formatted at startup to provide more precise search results?",
     "formatHtmlFilesPositiveAnswer": "Format",
     "formatHtmlFilesNegativeAnswer": "Nevermind",
-    "onRejectFormatHtmlFilesMessage": "Execute 'Format HTML Files' command if you change your mind",
+    "onRejectFormatHtmlFilesMessage": "Run 'Format HTML Files' command to format files whenever you wish",
 
     "searchPartLegendText": "Search",
     "searchTextAreaTitle": "Search Text",

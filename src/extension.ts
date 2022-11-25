@@ -12,14 +12,15 @@ let extensionUI: StructuralSearchAndReplacePanel | undefined;
 
 export function activate(context: vscode.ExtensionContext) {
 
-	let disposableSearchPanel = vscode.commands.registerCommand(strings.launchOrCloseUIcommand, () => {
+	let disposableSearchPanel = vscode.commands.registerCommand(strings.launchOrCloseUIcommand, async () => {
 		// If there is not any workspace has been opened, do not launch UI
 		if (vscode.workspace.workspaceFolders === undefined) {
 			vscode.window.showWarningMessage(strings.UIWarningMessage);
 			return;
 		}
 
-		controller = StructuralSearchAndReplaceController.getInstance(context.workspaceState);
+		// Create the controller
+		controller = await StructuralSearchAndReplaceController.getInstance(context.workspaceState);
 
 		// If the UI is not shown, it will be launched (created); otherwise, it will be closed (disposed)
 		StructuralSearchAndReplacePanel.launchOrCloseUI(context.extensionUri);
@@ -31,12 +32,18 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	let disposablesFormatFiles = vscode.commands.registerCommand(strings.formatFilesCommand, () => {
-		if (!controller.isThereAnyHtmlFile()) {
-            return;
-        }
+	let disposablesFormatFiles = vscode.commands.registerCommand(strings.formatFilesCommand, async () => {
+		// If there is not any workspace has been opened, do not do anything
+		if (vscode.workspace.workspaceFolders === undefined) {
+			return;
+		}
 
-		controller.formatHtmlFiles();
+		// If the controller has not been created yet, create the controller
+		if (!controller) {
+			controller = await StructuralSearchAndReplaceController.getInstance(context.workspaceState);
+		}
+
+		await controller.formatHtmlFiles();
 	});
 
 	let disposableSearchInFiles = vscode.commands.registerCommand(strings.searchInFilesCommand, async (searchText, filesToExcludePath) => {

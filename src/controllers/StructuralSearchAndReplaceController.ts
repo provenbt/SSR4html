@@ -48,10 +48,10 @@ export class StructuralSearchAndReplaceController {
         this.filesAndContents = [];
     }
 
-    public static getInstance(workspaceState: vscode.Memento): StructuralSearchAndReplaceController {
+    public static async getInstance(workspaceState: vscode.Memento): Promise<StructuralSearchAndReplaceController> {
         if (!StructuralSearchAndReplaceController.currentController) {
             StructuralSearchAndReplaceController.currentController = new StructuralSearchAndReplaceController(workspaceState);
-            this.currentController.init();
+            await this.currentController.init();
         }
 
         return StructuralSearchAndReplaceController.currentController;
@@ -63,7 +63,7 @@ export class StructuralSearchAndReplaceController {
 
         // If auto format is enabled, format HTML files on the activation of the extension
         if (this.settings.get("autoFormat")) {
-            vscode.commands.executeCommand(strings.formatFilesCommand);
+            this.formatHtmlFiles();
         }
 
         // When a new readable and writable HTML file is created, add the file to the file list 
@@ -93,7 +93,7 @@ export class StructuralSearchAndReplaceController {
         const answer = await vscode.window.showInformationMessage(strings.formatHtmlFilesQuestion, strings.formatHtmlFilesPositiveAnswer, strings.formatHtmlFilesNegativeAnswer);
 
         if (answer === strings.formatHtmlFilesPositiveAnswer) {
-            vscode.commands.executeCommand(strings.formatFilesCommand);
+            this.formatHtmlFiles();
             this.settings.update("autoFormat", true, false);
         }
         else {
@@ -129,6 +129,10 @@ export class StructuralSearchAndReplaceController {
     }
 
     public async formatHtmlFiles() {
+        if (!this.isThereAnyHtmlFile()) {
+            return;
+        }
+
         const decoder = new TextDecoder();
         const encoder = new TextEncoder();
 

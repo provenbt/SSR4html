@@ -59,7 +59,8 @@ export function generateRegExp(searchText: string) {
                 */
                 for (let attribute of attributes) {
                     attribute = attribute.trim().replace(/[\^\$*\~\[\]\=]/g, '');
-                    regex[index] = regex[index].replace(new RegExp(`(?<!\\w)${attribute}(?!\\w)=?`, 'g'), `${attribute}\\s*=\\s*`);
+                    regex[index] = regex[index].replace(new RegExp(`\\((?<!\\w)${attribute}(?!\\w)=?`), `(${attribute}\\s*=\\s*`)
+                    .replace(new RegExp(`\\|(?<!\\w)${attribute}(?!\\w)=?`), `|${attribute}\\s*=\\s*`);
                 }
 
                 /*

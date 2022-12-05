@@ -14,3 +14,6 @@ vsc-extension-quickstart.md
 **/.eslintrc.json
 **/*.map
 **/*.ts
+playwright/.cache/**
+playwright-report/**
+test-results/**

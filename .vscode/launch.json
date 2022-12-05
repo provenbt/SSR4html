@@ -18,17 +18,15 @@
 			"preLaunchTask": "${defaultBuildTask}"
 		},
 		{
-			"name": "Extension Tests",
-			"type": "extensionHost",
+			"name": "Test Extension",
+			"type": "node",
 			"request": "launch",
-			"args": [
-				"--extensionDevelopmentPath=${workspaceFolder}",
-				"--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
+			"console": "integratedTerminal",
+			"skipFiles": [
+				"<node_internals>/**"
 			],
-			"outFiles": [
-				"${workspaceFolder}/out/test/**/*.js"
-			],
-			"preLaunchTask": "npm: test-compile"
+			"runtimeExecutable": "npm",
+			"runtimeArgs": ["run-script", "vscode-debug"],
 		}
 	]
 }

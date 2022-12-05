@@ -3,3 +3,6 @@ dist
 node_modules
 *.vsix
 vsc-extension-quickstart.md
+/test-results/
+/playwright-report/
+/playwright/.cache/

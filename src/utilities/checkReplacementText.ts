@@ -114,7 +114,7 @@ export function checkReplacementText(choice: string, replaceText: string) {
                 }
 
                 if (matches[5] && new RegExp(/[&<>]/, 'g').test(matches[5])) {
-                    throw new Error(`"${matches[5].trim()}" ${strings.invalidAttributeNameSingularMessage}`);
+                    throw new Error(`"${matches[5].trim()}" ${strings.invalidAttributeValueSingularMessage}`);
                 }
 
                 validatedReplaceText = parentInfo;

@@ -9,7 +9,7 @@ import { removeFromAttribute } from './replacement-operations/removeFromAttribut
 import { removeAttribute } from './replacement-operations/removeAttribute';
 import { setStyleProperty } from './replacement-operations/setStyleProperty';
 import { editStyleProperty } from './replacement-operations/editStyleProperty';
-import { changeTagName } from './replacement-operations/changeTagName';
+import { editTagName } from './replacement-operations/editTagName';
 import { removeTag } from './replacement-operations/removeTag';
 import { addUpperTag } from './replacement-operations/addUpperTag';
 import { removeUpperTag } from './replacement-operations/removeUpperTag';
@@ -70,8 +70,8 @@ export class HtmlDom {
         editStyleProperty(this.querySelectorResults, replaceText);
     }
 
-    public changeTagName(replaceText: string) {
-        changeTagName(this.querySelectorResults, replaceText);
+    public editTagName(replaceText: string) {
+        editTagName(this.querySelectorResults, replaceText);
     }
 
     public removeTag() {

@@ -1,6 +1,6 @@
 const jsdom = require('jsdom');
 
-export function changeTagName(querySelectorResults: any, replaceText: string) {
+export function editTagName(querySelectorResults: any, replaceText: string) {
     const newTagName: string = replaceText;
     const { document } = (new jsdom.JSDOM()).window;
 

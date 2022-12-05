@@ -57,7 +57,7 @@ export async function replaceInFile(file: vscode.Uri, replacementParameters: Use
                 break;
 
             case strings.editTagNameText:
-                htmlDom.changeTagName(replaceText);
+                htmlDom.editTagName(replaceText);
                 break;
 
             case strings.removeTagText:

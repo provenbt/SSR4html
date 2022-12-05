@@ -22,7 +22,7 @@ export function checkReplacementText(choice: string, replaceText: string) {
                 }
 
                 if (invalidClassValues.length > 0) {
-                    throw new Error(`${strings.İnvalidClassNamePluralMessage}: ${invalidClassValues.join(' , ')}`);
+                    throw new Error(`${strings.invalidClassNamePluralMessage}: ${invalidClassValues.join(' , ')}`);
                 }
 
                 validatedReplaceText = classValues.join(' ');
@@ -32,7 +32,7 @@ export function checkReplacementText(choice: string, replaceText: string) {
                 const id = replaceText;
 
                 if (!(new RegExp(/^[A-Za-z]+[\-:_.A-Za-z0-9]*$/, 'g').test(id))) {
-                    throw new Error(`"${id}" ${strings.İnvalidIdValueMessage}`);
+                    throw new Error(`"${id}" ${strings.invalidIdValueMessage}`);
                 }
 
                 validatedReplaceText = id;
@@ -98,11 +98,11 @@ export function checkReplacementText(choice: string, replaceText: string) {
                 }
 
                 if (matches[2] && !(new RegExp(/^[A-Za-z]+[\-:_.A-Za-z0-9]*$/, 'g').test(matches[2]))) {
-                    throw new Error(`"${matches[2]}" ${strings.İnvalidIdValueMessage}`);
+                    throw new Error(`"${matches[2]}" ${strings.invalidIdValueMessage}`);
                 }
 
                 if (matches[3] && !(new RegExp(/^[A-Za-z]+[\-:_.A-Za-z0-9]*$/, 'g').test(matches[3]))) {
-                    throw new Error(`"${matches[3]}" ${strings.İnvalidClassNameSingularMessage}`);
+                    throw new Error(`"${matches[3]}" ${strings.invalidClassNameSingularMessage}`);
                 }
 
                 if (matches[4] && matches[5] === undefined) {

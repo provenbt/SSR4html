@@ -1,11 +1,11 @@
 /*
     This section prepares the test environment to test whether the requirements are met.
-    The extension and test files must be already transferred to the locally installed ubuntu.  
+    The setup file of the extension and test files must be already transferred to where VS Code Server is run.  
 */
 
 import { type FrameLocator, type Page } from "@playwright/test";
 
-export async function prepareTestEnvironment(page: Page): Promise<FrameLocator> {
+export async function prepareTestEnvironment(page: Page, folderName: string): Promise<FrameLocator> {
     // Open VS code in the browser
     await page.goto('http://localhost:3000/?tkn=ssr4html');
     // Skip tutorial of the VS Code IDE
@@ -27,7 +27,7 @@ export async function prepareTestEnvironment(page: Page): Promise<FrameLocator> 
     await page.getByRole('button', { name: 'Open Folder' }).click();
     // Wait until VS Code resolves the files and folders in the current directory
     await page.waitForSelector('div.monaco-list-row[aria-label=".."]');
-    await page.getByRole('combobox', { name: 'Type to narrow down results. - Open Folder' }).fill('/home/main/files-to-test/');
+    await page.getByRole('combobox', { name: 'Type to narrow down results. - Open Folder' }).fill(`/home/main/${folderName}/`);
     page.keyboard.press('Enter');
 
     // Wait until the testHtmlFiles folder is loaded
@@ -52,10 +52,6 @@ export async function prepareTestEnvironment(page: Page): Promise<FrameLocator> 
 
     // Refuse to format HTML files since they are already well-shaped
     await page.getByRole('button', { name: 'Nevermind' }).click();
-
-    // Clear all notifications
-    await page.getByRole('button', { name: 'Notifications' }).click();
-    await page.getByRole('button', { name: 'Clear All Notifications' }).click();
 
     return webview;
 }

@@ -2,6 +2,9 @@ import { test, expect, type FrameLocator, type Page } from '@playwright/test';
 import strings from '../../stringVariables.json';
 import { prepareTestEnvironment } from './prepareTestEnvironment';
 
+let webview: FrameLocator;
+let page: Page;
+
 const validSearchQueries = [
   { title: 'Search with type selector', query: 'div' },
   { title: 'Search with class selector', query: '.form-group' },
@@ -13,16 +16,48 @@ const validSearchQueries = [
   { title: 'Search with multiple CSS selectors', query: 'div.form.group, img[src $= "svg"], #idal' },
 ];
 
-const replaceOptions = [
-  { title: 'Replace in the workspace', replaceInAll: true, folderName: 'test-files-for-replacement-in-workspace' },
-  { title: 'Replace in the current file', replaceInAll: false, folderName: 'test-files-for-replacement-in-file' }
+const invalidReplacementOperations = [
+  { title: 'Warn the user when invalid class-name(s) provided (Set Class)', replacementProcess: strings.setClassNameText, replacementText: 'İnvalid-class-name1 valid-class-name invalid-class-şçö', expectedWarningMessage: strings.invalidClassNamePluralMessage },
+  { title: 'Warn the user when an invalid id value is provided (Set Id)', replacementProcess: strings.setIdValueText, replacementText: 'id with whitespace char', expectedWarningMessage: strings.invalidIdValueMessage },
+  { title: 'Warn the user when no attribute value is provided (Append to Attribute)', replacementProcess: strings.appendAttributeValueText, replacementText: 'attribute-name', expectedWarningMessage: strings.missingAttributeValueMessage },
+  { title: 'Warn the user when an invalid attribute-name provided (Set Attribute)', replacementProcess: strings.setAttributeText, replacementText: 'invalidAtrName{} atr-value', expectedWarningMessage: strings.invalidAttributeNameSingularMessage },
+  { title: 'Warn the user when invalid attribute value(s) provided (Set Attribute)', replacementProcess: strings.setAttributeText, replacementText: 'alt <invalidValue1> validValue invalid&Value2', expectedWarningMessage: strings.invalidAttributeValuePluralMessage },
+  { title: 'Warn the user when invalid property-value structure(s) provided (Set Style Property)', replacementProcess: strings.setStylePropertyText, replacementText: 'display: inline, property= value, property: value', expectedWarningMessage: strings.invalidPropertyValueStructureMessage },
+  { title: 'Warn the user when invalid property-value pair(s) provided (Edit Style Property)', replacementProcess: strings.editStylePropertyText, replacementText: 'acx: 213, display: inline, width: abc', expectedWarningMessage: strings.invalidPropertyValuePairMessage },
+  { title: 'Warn the user when an invalid tag name is provided (Edit Tag Name)', replacementProcess: strings.editTagNameText, replacementText: 'invalid tag name', expectedWarningMessage: strings.invalidTagNameMessage },
+  { title: 'Warn the user when an invalid tag name is provided (Add Upper Tag)', replacementProcess: strings.addUpperTagText, replacementText: 'invalid tag name#id.class[atr="test"]', expectedWarningMessage: strings.invalidTagNameMessage },
+  { title: 'Warn the user when an invalid id value is provided (Add Upper Tag)', replacementProcess: strings.addUpperTagText, replacementText: 'newuppertag#İnvalidİdValue.class[atr="test"]', expectedWarningMessage: strings.invalidIdValueMessage },
+  { title: 'Warn the user when an invalid class-name is provided (Add Upper Tag)', replacementProcess: strings.addUpperTagText, replacementText: 'newuppertag#id.İnvalidClassName[atr="test"]', expectedWarningMessage: strings.invalidClassNameSingularMessage },
+  { title: 'Warn the user when an invalid attribute-value structure is provided (Add Upper Tag)', replacementProcess: strings.addUpperTagText, replacementText: 'newuppertag#id.class[atr=test]', expectedWarningMessage: strings.invalidAttributeValuePairStructureMessage },
+  { title: 'Warn the user when an invalid attribute name is provided (Add Upper Tag)', replacementProcess: strings.addUpperTagText, replacementText: 'newuppertag#id.class[{invalid-atr-name}="test"]', expectedWarningMessage: strings.invalidAttributeNameSingularMessage },
+  { title: 'Warn the user when an invalid attribute value is provided (Add Upper Tag)', replacementProcess: strings.addUpperTagText, replacementText: 'newuppertag#id.class[atr="<test>"]', expectedWarningMessage: strings.invalidAttributeValueSingularMessage }
+];
+
+const searchAndReplaceScope = [
+  { title: 'in the workspace', inWorkspace: true, folderName: 'test-files-for-replacement-in-workspace' },
+  { title: 'in the current file', inWorkspace: false, folderName: 'test-files-for-replacement-in-file' }
+];
+
+const validReplacementOperations = [
+  { title: 'Set Class', replacementProcess: strings.setClassNameText, replacementText: 'test-class-name1-to-set class-name-2' },
+  { title: 'Append to Class', replacementProcess: strings.appendClassNameText, replacementText: 'test-class-name1-to-append className2' },
+  { title: 'Remove from Class', replacementProcess: strings.removeClassNameText, replacementText: 'form-group' },
+  { title: 'Set Id', replacementProcess: strings.setIdValueText, replacementText: 'test-id' },
+  { title: 'Set Attribute', replacementProcess: strings.setAttributeText, replacementText: 'atr-name-to-set value-1 value-2' },
+  { title: 'Append to Attribute', replacementProcess: strings.appendAttributeValueText, replacementText: 'alt appendValue1 appendValue2' },
+  { title: 'Remove from Attribute', replacementProcess: strings.removeAttributeValueText, replacementText: 'alt I-have-alt-attribute' },
+  { title: 'Remove Attribute', replacementProcess: strings.removeAttributeText, replacementText: 'alt style' },
+  { title: 'Set Style Property', replacementProcess: strings.setStylePropertyText, replacementText: 'display: block, color: red' },
+  { title: 'Edit Style Property', replacementProcess: strings.editStylePropertyText, replacementText: 'display: null, color: blue, width: auto' },
+  { title: 'Edit Tag Name', replacementProcess: strings.editTagNameText, replacementText: 'newtagname' },
+  { title: 'Add Upper Tag', replacementProcess: strings.addUpperTagText, replacementText: 'uppertag#test.test[attribute="test-value"]' },
+  { title: 'Remove Upper Tag', replacementProcess: strings.removeUpperTagText, replacementText: null },
+  { title: 'Remove Tag', replacementProcess: strings.removeTagText, replacementText: null },
 ];
 
 test.describe.parallel('Extension Tests', () => {
-  let webview: FrameLocator;
-  let page: Page;
 
-  test.describe.serial('Structural Search Tests', () => {
+  test.describe.serial('Tests for Structural Search', () => {
 
     test.beforeAll(async ({ browser }) => {
       page = await browser.newPage();
@@ -67,14 +102,13 @@ test.describe.parallel('Extension Tests', () => {
     });
 
     for (let data of validSearchQueries) {
-
       test(data.title, async () => {
         await webview.getByRole('textbox', { name: strings.searchTextAreaTitle }).click();
         await webview.getByRole('textbox', { name: strings.searchTextAreaTitle }).fill(data.query);
         await webview.locator('#searchBox').dispatchEvent('keyup');
         await webview.locator('#searchInAll').check();
         await webview.locator('#searchBtn').getByRole('button').click();
-  
+
         await page.waitForSelector('div.messages.text-search-provider-messages > div.message');
         await expect(page.locator('div.messages.text-search-provider-messages > div.message')).toHaveText(/\d+ results in \d+ files/);
         await webview.locator('#cancelBtn').getByRole('button').click();
@@ -82,345 +116,132 @@ test.describe.parallel('Extension Tests', () => {
     }
   });
 
-  test.describe.parallel('Structural Replace Tests', () => {
+  test.describe.serial("Tests for Checking Replacement Text", () => {
 
-    replaceOptions.forEach(data => {
-      test.describe.serial(data.title, () => {
-        let webview: FrameLocator;
-        let page: Page;
+    test.beforeAll(async ({ browser }) => {
+      page = await browser.newPage();
+      // The test files that are used for search process can be also used here since the files are not modified
+      webview = await prepareTestEnvironment(page, 'test-files-for-search');
+
+      // Create a search query
+      await webview.getByRole('textbox', { name: strings.searchTextAreaTitle }).click();
+      await webview.getByRole('textbox', { name: strings.searchTextAreaTitle }).fill('div, img');
+      await webview.locator('#searchBox').dispatchEvent('keyup');
+
+      // Search in the whole workspace 
+      await webview.locator('#searchInAll').check();
+    });
+
+    test.afterAll(async () => {
+      await page.close();
+    });
+
+    for (let data of invalidReplacementOperations) {
+      test(data.title, async () => {
+        // Clear all notifications that block screen
+        await page.getByRole('button', { name: 'Notifications' }).click();
+        await page.getByRole('button', { name: 'Clear All Notifications' }).click();
+
+        // Search with the created search query
+        await webview.locator('#searchBtn').getByRole('button').click();
+
+        // Open the list of replacement operations
+        await webview.locator('#selection div').nth(1).click();
+
+        // Select a replacement process
+        await webview.getByRole('option', { name: data.replacementProcess }).click();
+
+        // Enter an invalid replacement text and trigger the replacement process
+        await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
+        await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill(data.replacementText);
+        await webview.locator('#replacementBox').dispatchEvent('keyup');
+        await webview.locator('#replaceBtn').getByRole('button').click();
+
+        // Validate that the user is warned according to the invalid replacement text
+        await expect(page.getByRole('dialog').locator('div').first()).toContainText(data.expectedWarningMessage);
+
+        // Clear all notifications that block screen
+        await page.getByRole('button', { name: 'Notifications' }).click();
+        await page.getByRole('button', { name: 'Clear All Notifications' }).click();
+
+        // Try to revert changes after each replacement trial
+        await webview.locator('#revertBtn').getByRole('button').click();
+        // Validate that nothing is changed since there is not any replacement process performed
+        await expect(page.getByRole('dialog').locator('div').first()).toHaveText(strings.nothingFoundToRevertMessage);
+
+        // Go back to the search part for a new replacement trial
+        await webview.locator('#cancelBtn').getByRole('button').click();
+      });
+    }
+  });
+
+  test.describe.parallel('Tests for Structural Replacement', () => {
+
+    searchAndReplaceScope.forEach(value => {
+
+      test.describe.serial(`Replace ${value.title}`, () => {
 
         test.beforeAll(async ({ browser }) => {
           page = await browser.newPage();
-          webview = await prepareTestEnvironment(page, data.folderName);
-
+          webview = await prepareTestEnvironment(page, value.folderName);
+          
           // Open an HTML document with at least one div element
           await page.getByRole('treeitem', { name: 'sample1.html' }).locator('a').click();
 
-          // Create a search query
+          // Create a search query to find div elements
           await webview.getByRole('textbox', { name: strings.searchTextAreaTitle }).click();
           await webview.getByRole('textbox', { name: strings.searchTextAreaTitle }).fill('div');
           await webview.locator('#searchBox').dispatchEvent('keyup');
 
-          // Test all replacements both in the current file and in the workspace.
-          data.replaceInAll ? await webview.locator('#searchInAll').check() : await webview.locator('#searchInAll').uncheck();
+          // Test each replacement operation in the workspace and in the current file
+          value.inWorkspace ? await webview.locator('#searchInAll').check() : await webview.locator('#searchInAll').uncheck();
         });
 
         test.afterAll(async () => {
           await page.close();
         });
 
-        test.beforeEach(async () => {
-          // Clear all notifications
-          await page.getByRole('button', { name: 'Notifications' }).click();
-          await page.getByRole('button', { name: 'Clear All Notifications' }).click();
+        for (let data of validReplacementOperations) {
+          test(`${data.title} ${value.title}`, async () => {
+            // Clear all notifications that block screen
+            await page.getByRole('button', { name: 'Notifications' }).click();
+            await page.getByRole('button', { name: 'Clear All Notifications' }).click();
 
-          // Start search query
-          await webview.locator('#searchBtn').getByRole('button').click();
+            // Start search query
+            await webview.locator('#searchBtn').getByRole('button').click();
 
-          // Open the list of replacement operations
-          await webview.locator('#selection div').nth(1).click();
+            // Open the list of replacement operations
+            await webview.locator('#selection div').nth(1).click();
 
-        });
+            // Select a replacement process
+            await webview.getByRole('option', { name: data.replacementProcess }).click();
 
-        test.afterEach(async () => {
-          // Clear all notifications
-          await page.getByRole('button', { name: 'Notifications' }).click();
-          await page.getByRole('button', { name: 'Clear All Notifications' }).click();
+            // If a replacement text is necessary to perform the replacement process, enter a valid replacement text 
+            if (data.replacementText !== null) {
+              await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
+              await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill(data.replacementText);
+              await webview.locator('#replacementBox').dispatchEvent('keyup');
+            }
 
-          // Revert changes after each replacement process (to preserve the structure of test files for other replacement tests)
-          await webview.locator('#revertBtn').getByRole('button').click();
-          // Validate that rollback process is successfull or nothing found to revert (if nothing changed)
-          await expect(page.getByRole('dialog').locator('div').first()).toHaveText(new RegExp(`${strings.revertProcessName} ${strings.successfulProcessMessage}\|${strings.nothingFoundToRevertMessage}`));
-
-          // Go back to the search part for a new replacement process
-          await webview.locator('#cancelBtn').getByRole('button').click();
-        });
-
-
-        test.describe.serial('Class Operations', async () => {
-
-          test('Warn the user when invalid class-name(s) provided', async () => {
-            await webview.getByRole('option', { name: strings.setClassNameText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('İnvalid-class-name1 valid-class-name invalid-class-şçö');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
+            // trigger the replacement process
             await webview.locator('#replaceBtn').getByRole('button').click();
 
-            await expect(page.getByRole('dialog').locator('div').first()).toContainText(`${strings.invalidClassNamePluralMessage}`);
-          });
-
-          test('Set Class', async () => {
-            await webview.getByRole('option', { name: strings.setClassNameText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('test-class-name1-to-set class-name-2');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
+            // Validate that the replacement process is successfull
             await expect(page.getByRole('dialog').locator('div').first()).toHaveText(`${strings.replacementProcessName} ${strings.successfulProcessMessage}`);
+
+            // Clear all notifications that block screen
+            await page.getByRole('button', { name: 'Notifications' }).click();
+            await page.getByRole('button', { name: 'Clear All Notifications' }).click();
+
+            // Revert changes after each replacement process (to preserve the structure of test files for other replacement tests)
+            await webview.locator('#revertBtn').getByRole('button').click();
+            // Validate that the rollback process is successfull
+            await expect(page.getByRole('dialog').locator('div').first()).toHaveText(`${strings.revertProcessName} ${strings.successfulProcessMessage}`);
+
+            // Go back to the search part for a new replacement process
+            await webview.locator('#cancelBtn').getByRole('button').click();
           });
-
-          test('Append to Class', async () => {
-            await webview.getByRole('option', { name: strings.appendClassNameText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('test-class-name1-to-append class-name-2');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toHaveText(`${strings.replacementProcessName} ${strings.successfulProcessMessage}`);
-          });
-
-          test('Remove from Class', async () => {
-            await webview.getByRole('option', { name: strings.removeClassNameText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('form-group');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toHaveText(`${strings.replacementProcessName} ${strings.successfulProcessMessage}`);
-          });
-        });
-
-        test.describe.serial('Id Operations', async () => {
-
-          test('Warn the user when an invalid id value is provided', async () => {
-            await webview.getByRole('option', { name: strings.setIdValueText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('id with whitespace char');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toContainText(`${strings.invalidIdValueMessage}`);
-          });
-
-          test('Set Id', async () => {
-            await webview.getByRole('option', { name: strings.setIdValueText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('test-id');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toHaveText(`${strings.replacementProcessName} ${strings.successfulProcessMessage}`);
-          });
-        });
-
-        test.describe.serial('Attribute Operations', async () => {
-
-          test('Warn the user when invalid attribute-name(s) provided', async () => {
-            await webview.getByRole('option', { name: strings.setAttributeText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('invalidAtrName{} atr-value');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toContainText(`${strings.invalidAttributeNameSingularMessage}`);
-          });
-
-          test('Warn the user when invalid attribute value(s) provided', async () => {
-            await webview.getByRole('option', { name: strings.appendAttributeValueText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('alt <invalidValue1> validValue invalid&Value2');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toContainText(`${strings.invalidAttributeValuePluralMessage}`);
-          });
-
-          test('Set Attribute', async () => {
-            await webview.getByRole('option', { name: strings.setAttributeText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('atr-name-to-set value1 value2');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toHaveText(`${strings.replacementProcessName} ${strings.successfulProcessMessage}`);
-          });
-
-          test('Append to Attribute', async () => {
-            await webview.getByRole('option', { name: strings.appendAttributeValueText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('alt value1-to-append value2-to-append');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toHaveText(`${strings.replacementProcessName} ${strings.successfulProcessMessage}`);
-          });
-
-          test('Remove from Attribute', async () => {
-            await webview.getByRole('option', { name: strings.removeAttributeValueText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('alt I-have-alt-attribute');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toHaveText(`${strings.replacementProcessName} ${strings.successfulProcessMessage}`);
-          });
-
-          test('Remove Attribute', async () => {
-            await webview.getByRole('option', { name: strings.removeAttributeText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('alt style');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toHaveText(`${strings.replacementProcessName} ${strings.successfulProcessMessage}`);
-          });
-        });
-
-        test.describe.serial('Style Operations', async () => {
-
-          test('Warn the user when invalid property-value structure(s) provided', async () => {
-            await webview.getByRole('option', { name: strings.setStylePropertyText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('invalid-property/invalid-value');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toContainText(`${strings.invalidPropertyValueStructureMessage}`);
-          });
-
-          test('Warn the user when invalid property-value pair(s) provided', async () => {
-            await webview.getByRole('option', { name: strings.editStylePropertyText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('acx: 213, display: inline, width: abc');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toContainText(`${strings.invalidPropertyValuePairMessage}`);
-          });
-
-          test('Set Style Property', async () => {
-            await webview.getByRole('option', { name: strings.setStylePropertyText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('display: block, color: red');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toHaveText(`${strings.replacementProcessName} ${strings.successfulProcessMessage}`);
-          });
-
-          test('Edit Style Property', async () => {
-            await webview.getByRole('option', { name: strings.editStylePropertyText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('display: null, color: blue');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toHaveText(`${strings.replacementProcessName} ${strings.successfulProcessMessage}`);
-          });
-        });
-
-        test.describe.serial('Edit Tag Name Operations', async () => {
-
-          test('Warn the user when an invalid tag name is provided', async () => {
-            await webview.getByRole('option', { name: strings.editTagNameText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('invalid tag name');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toHaveText(`${strings.invalidTagNameMessage}`);
-          });
-
-          test('Edit Tag Name', async () => {
-            await webview.getByRole('option', { name: strings.editTagNameText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('newtagname');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toHaveText(`${strings.replacementProcessName} ${strings.successfulProcessMessage}`);
-          });
-        });
-
-        test.describe.serial('Add Upper Tag Operations', async () => {
-
-          test('Warn the user when an invalid tag name is provided', async () => {
-            await webview.getByRole('option', { name: strings.addUpperTagText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('invalid tag name#id.class[atr="test"]');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toHaveText(`${strings.invalidTagNameMessage}`);
-          });
-
-          test('Warn the user when an invalid id is provided', async () => {
-            await webview.getByRole('option', { name: strings.addUpperTagText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('newuppertag#İnvalidİdValue.class[atr="test"]');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toContainText(`${strings.invalidIdValueMessage}`);
-          });
-
-          test('Warn the user when an invalid class-name is provided', async () => {
-            await webview.getByRole('option', { name: strings.addUpperTagText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('newuppertag#id.İnvalidClassName[atr="test"]');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toContainText(`${strings.invalidClassNameSingularMessage}`);
-          });
-
-          test('Warn the user when an invalid attribute-value structure is provided', async () => {
-            await webview.getByRole('option', { name: strings.addUpperTagText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('newuppertag#id.class[atr=test]');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toHaveText(`${strings.invalidAttributeValuePairStructureMessage}`);
-          });
-
-          test('Warn the user when an invalid attribute name is provided', async () => {
-            await webview.getByRole('option', { name: strings.addUpperTagText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('newuppertag#id.class[{invalid-atr-name}="test"]');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toContainText(`${strings.invalidAttributeNameSingularMessage}`);
-          });
-
-          test('Warn the user when an invalid attribute value is provided', async () => {
-            await webview.getByRole('option', { name: strings.addUpperTagText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('newuppertag#id.class[atr="<test>"]');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toContainText(`${strings.invalidAttributeValueSingularMessage}`);
-          });
-
-          test('Add Upper Tag', async () => {
-            await webview.getByRole('option', { name: strings.addUpperTagText }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).click();
-            await webview.getByRole('textbox', { name: strings.replaceTextAreaDefaultTitle }).fill('testtag#test.test[attribute="test-value"]');
-            await webview.locator('#replacementBox').dispatchEvent('keyup');
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toHaveText(`${strings.replacementProcessName} ${strings.successfulProcessMessage}`);
-          });
-        });
-
-        test.describe.serial('Remove Tag Operations', async () => {
-
-          test('Remove Upper Tag', async () => {
-            await webview.getByRole('option', { name: strings.removeUpperTagText }).click();
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toHaveText(`${strings.replacementProcessName} ${strings.successfulProcessMessage}`);
-          });
-
-          test('Remove Tag', async () => {
-            await webview.getByRole('option', { name: strings.removeTagText }).click();
-            await webview.locator('#replaceBtn').getByRole('button').click();
-
-            await expect(page.getByRole('dialog').locator('div').first()).toHaveText(`${strings.replacementProcessName} ${strings.successfulProcessMessage}`);
-          });
-        });
+        }
       });
     });
   });

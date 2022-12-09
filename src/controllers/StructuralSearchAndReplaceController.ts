@@ -109,7 +109,7 @@ export class StructuralSearchAndReplaceController {
     }
 
     public setFilesToExcludePath(filesToExcludePath: string) {
-        this.filesToExcludePath = filesToExcludePath.trim();
+        this.filesToExcludePath = filesToExcludePath.split(',').map(v => v.trim()).filter(e => e !== "").map(v => v.startsWith('**/') ? v : '**/' + v).join(',');
     }
 
     public setChoice(choice: string) {
@@ -155,7 +155,7 @@ export class StructuralSearchAndReplaceController {
 
     private async findHtmlFiles(): Promise<vscode.Uri[]> {
         const fileList: vscode.Uri[] = [];
-        const allHtmlFiles = await vscode.workspace.findFiles('**/*.html', this.filesToExcludePath);
+        const allHtmlFiles = await vscode.workspace.findFiles('**/*.html', `{${this.filesToExcludePath}}`);
 
         // Get only HTML files that have read and write permission
         for (let file of allHtmlFiles) {
@@ -185,14 +185,20 @@ export class StructuralSearchAndReplaceController {
     public async searchInWorkspace(): Promise<boolean> {
         const searchQuery = this.generateRegExp();
 
-        return searchInWorkspace(searchQuery, this.files, this.filesToExcludePath);
+        // Find Html Files again in case of excluded files
+        this.files = await this.findHtmlFiles();
+
+        return await searchInWorkspace(searchQuery, this.files, this.filesToExcludePath);
     }
 
     public async searchInFile(): Promise<boolean> {
         const searchQuery = this.generateRegExp();
         const currentDocument = this.currentDocument?.fileName as string;
 
-        return searchInFile(searchQuery, currentDocument, this.filesToExcludePath);
+        // Find Html Files again in case of excluded files
+        this.files = await this.findHtmlFiles();
+
+        return await searchInFile(searchQuery, currentDocument, this.filesToExcludePath);
     }
 
     public checkReplacementText(): string {
@@ -218,8 +224,8 @@ export class StructuralSearchAndReplaceController {
             location: vscode.ProgressLocation.Notification,
             title: `${this.choice} ${strings.processProgressMessage}`,
             cancellable: false
-        }, () => {
-            return replaceInFile(currentDocument, replacementParameters, this.filesAndContents);
+        }, async () => {
+            return await replaceInFile(currentDocument, replacementParameters, this.filesAndContents);
         });
     }
 
@@ -230,7 +236,7 @@ export class StructuralSearchAndReplaceController {
             choice: this.choice
         };
 
-        return replaceInFiles(this.files, replacementParameters, this.filesAndContents);
+        return await replaceInFiles(this.files, replacementParameters, this.filesAndContents);
     }
 
     public isThereAnyHtmlFile(): boolean {
@@ -242,7 +248,7 @@ export class StructuralSearchAndReplaceController {
     }
 
     public async revertChanges(): Promise<ProcessResult> {
-        return revertChanges(this.filesAndContents);
+        return await revertChanges(this.filesAndContents);
     }
 
     public async notifyUser(processName: string, processResult: ProcessResult) {

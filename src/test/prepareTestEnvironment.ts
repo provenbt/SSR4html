@@ -1,26 +1,16 @@
 /*
-    This section prepares the test environment to test whether the requirements are met.
-    The setup file of the extension and test files must be already transferred to where VS Code Server is run.  
+    This section satisfies the preconditions that are required to run each test.
+    The extension must be installed on the VS Code Server.
+    There must already be test files on the server where the VS Code Server is running. 
 */
 
 import { type FrameLocator, type Page } from "@playwright/test";
 
 export async function prepareTestEnvironment(page: Page, folderName: string): Promise<FrameLocator> {
-    // Open VS code in the browser
+    // Go to the link where the VS Code Server is up
     await page.goto('http://localhost:3000/?tkn=ssr4html');
     // Skip tutorial of the VS Code IDE
     await page.getByRole('button', { name: ' Mark Done' }).click();
-
-    // Install the extension
-    await page.getByRole('document', { name: 'Overview of how to get up to speed with your editor.' }).press('Control+Shift+P');
-    await page.getByPlaceholder('Type the name of a command to run.').fill('>Extensions: Install from VSIX...');
-    await page.keyboard.press('Enter');
-    // Wait until VS Code resolves the files and folders in the current directory
-    await page.waitForSelector('div.monaco-list-row[aria-label=".."]');
-    // Upload the correct version of the extension
-    await page.getByRole('combobox', { name: 'Type to narrow down results. - Install from VSIX' }).fill('/home/main/ssr4html-1.0.0.vsix');
-    await page.keyboard.press('Enter');
-    await page.reload();
 
     // Upload HTML files to be tested
     await page.getByRole('tab', { name: 'Explorer (Ctrl+Shift+E)' }).locator('a').click();
@@ -30,7 +20,7 @@ export async function prepareTestEnvironment(page: Page, folderName: string): Pr
     await page.getByRole('combobox', { name: 'Type to narrow down results. - Open Folder' }).fill(`/home/main/${folderName}/`);
     page.keyboard.press('Enter');
 
-    // Wait until the testHtmlFiles folder is loaded
+    // Wait until the test files are loaded
     await page.waitForSelector('div.monaco-list-row[aria-label$="html"]');
 
     // Focus on vs code
@@ -50,7 +40,8 @@ export async function prepareTestEnvironment(page: Page, folderName: string): Pr
     // Get webview
     const webview = page.frameLocator(`iframe[name="${webviewName}"]`).frameLocator('#active-frame');
 
-    // Refuse to format HTML files since they are already well-shaped
+    // Refuse to format HTML files after 3 seconds
+    await new Promise(resolve => setTimeout(resolve, 3000));
     await page.getByRole('button', { name: 'Nevermind' }).click();
 
     return webview;

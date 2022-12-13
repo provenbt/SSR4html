@@ -30,6 +30,10 @@ export class HtmlDom {
         return this.dom;
     }
 
+    public getQuerySelectorResults(): any {
+        return this.querySelectorResults;
+    }
+
     public setClass(replaceText: string) {
         setClass(this.querySelectorResults, replaceText);
     }

@@ -1,6 +1,6 @@
 {
     "extensionTitle": "Structural Search and Replace",
-    "extensionShortName": "SSR4HTML",
+    "extensionShortName": "SSR4html",
 
     "launchOrCloseUIcommand": "ssr4html.launchUI&closeUI",
     "formatFilesCommand": "ssr4html.formatFiles",

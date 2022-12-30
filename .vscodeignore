@@ -7,6 +7,7 @@ node_modules/**
 !node_modules/selector-2-regexp
 out/**
 src/**
+resources/images/**
 .gitignore
 .yarnrc
 vsc-extension-quickstart.md

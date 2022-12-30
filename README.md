@@ -1,73 +1,173 @@
-# README: Structural Search and Replace for HTML files (SSR4HTML)
+# README: SSR4html - Structural Search and Replace for HTML
 
-Today, HTML is at the core of every web project. Therefore, web projects (not small ones) generally include many html files since developers generally prefer 
-to create a different html file for each different tab of the web site/application for better maintainability and readability of the code. Despite the fact that 
-this technique makes the code easier to understand, it also makes it more challenging to modify common HTML elements in HTML files since a developer has to check 
-and modify each related file even for a small update. This project (visual studio code extension) allows developers to structurally search and replace in HTML 
-files of the project. In this way, developers can find all HTML elements that have specified tag name, class, id, attribute-value pair, or combination 
-of them and can modify all of them at once. Thanks to this extension, developers may save effort and time when editing the HTML files of the project.
+SSR4html is an extension for the Visual Studio Code IDE that enables developers to structurally search and replace text in HTML project files. By using SSR4html, developers can save effort and time while editing repetitive HTML elements in HTML files.
+
+In order to show search matches in HTML files, the regular expression, which is generated according to the typed CSS selector, is used. In order to parse and modify search results, a DOM is created for each file. After the DOM modification process, the DOM is converted into its text version and this text is formatted. Subsequently, each file is overwritten according to the text of the DOM. Finally, changes made to the files are automatically saved.
 
 ## Features
 
-This visual studio code extension allows you to structurally search and replace in HTML files located in the current workspace. In order to highlight 
-related HTML elements, the extension uses regular expression that is generated according to the CSS selector that is typed by the user and then it uses 
-the results of "querySelectorAll" to manipulate the related parts in the related HTML files. After the successful replacement process in DOMs of 
-the files, the extension overwrites the new contents on the related HTML files. Finally, it automatically saves the changes in the files. These changes include
-the manipulated and formated (well-shaped) version of the old HTML files.
+### Format HTML files
+* Open the Command Palette (Ctrl+Shift+P on Windows and Linux, Cmd+Shift+P on macOS) and select the `Format HTML Files` command.
+![](./resources/images/format-html-files.gif)
 
+### Launch UI
+* Open the Command Palette (Ctrl+Shift+P on Windows and Linux, Cmd+Shift+P on macOS) and select the `Structural Search and Replace` command.
 
->Focused animations for each feature will be added.
+* The UI is launched with an informational message that is asked only once for a workspace. For accurate search results, it is advised to use the `Format` option in this informational message. However, if you don't want the files to be formatted every time the extension is activated, you can select the `Nevermind` option. Then you can manually run the `Format HTML Files` command for more precise search results. Later, this automatic formatting setting can be adjusted under the [extension settings](https://github.com/mainIdal/SSR4html#extension-settings).
+![](./resources/images/launch-uı.gif)
 
-if there is an image subfolder under your extension project workspace:
-\!\[feature X\]\(images/feature-x.png\)
+### Structural Search
 
+#### Set Search & Replacement Scope
+* Search & Replace in File
+![](./resources/images/search-in-file.gif)
+
+* Search & Replace in Workspace
+![](./resources/images/search-in-workspace.gif)
+
+* Exclude Files
+![](./resources/images/exclude-files.gif)
+
+#### Search for a Tag Name
+* Type Selector (`tagName`)
+![](./resources/images/type-selector.gif)
+
+#### Search for Class Name(s)
+* Class Selector (`.className`)
+![](./resources/images/class-selector.gif)
+
+* Multiple Class Selector
+![](./resources/images/multiple-class-selector.gif)
+
+#### Search for an Id Value
+* Id Selector (`#idValue`)
+![](./resources/images/id-selector.gif)
+
+#### Search for attribute-value pair(s)
+* Has Attribute Selector (`[attributeName]`)
+![](./resources/images/has-attribute-selector.gif)
+
+* Attribute Equals Selector (`[attributeName=”value”]`)
+![](./resources/images/attribute-equals-selector.gif)
+
+* Attribute Starts With Selector (`[attributeName^=”value”]`)
+![](./resources/images/attribute-starts-with-selector.gif)
+
+* Attribute Contains Selector (`[attributeName*=”value”]`)
+![](./resources/images/attribute-contains-selector.gif)
+
+* Attribute Ends With Selector (`[attributeName$=”value”]`)
+![](./resources/images/attribute-ends-with-selector.gif)
+
+* Attribute Contains Word Selector (`[attributeName~=”value”]`)
+![](./resources/images/attribute-contains-word-selector.gif)
+
+* Multiple Attribute Selector
+![](./resources/images/multiple-attribute-selector.gif)
+
+#### Search for multiple features
+* Type, Id, Class, and Attribute Selector Together
+![](./resources/images/type-id-class-attribute-selector.gif)
+
+* Multiple Selector (`selector1, selector2`)
+![](./resources/images/multiple-selector.gif)
+
+### Structural Replace
+
+#### Class Operations
+**Only English letters may be used to start class names, and only colons, dots, English letters, digits, hyphens, and underscores may follow.**
+
+* Set Class (`className className2`)
+![](./resources/images/set-class.gif)
+
+* Append to Class (`className className2`)
+![](./resources/images/append-to-class.gif)
+
+* Remove from Class (`className className2`)
+![](./resources/images/remove-from-class.gif)
+
+#### Id Operation
+**Only English letters may be used to start an id value, and only colons, dots, English letters, digits, hyphens, and underscores may follow.**
+
+* Set Id (`idValue`)
+![](./resources/images/set-id.gif)
+
+#### Attribute Operations
+**Meta-characters such as `!"#$%&'()*+,./:;<=>?@[\]^{|}~` cannot be used for attribute names.**
+**All characters except these meta-characters `"`, `'`, `&`, `<`, and `>` may be used for attribute values.**
+**Use [style operations](https://github.com/mainIdal/SSR4html#Style-Operations) to modify the style attribute.**
+
+* Set Attribute (`attributeName value value2`)
+![](./resources/images/set-attribute.gif)
+
+* Append to Attribute (`attributeName value value2`)
+![](./resources/images/append-to-attribute.gif)
+
+* Remove from Attribute (`attributeName value value2`)
+![](./resources/images/remove-from-attribute.gif)
+
+* Remove Attribute (`attributeName attributeName2`)
+![](./resources/images/remove-from-attribute.gif)
+
+#### Style Operations
+**Property-value pairs must be valid.**
+
+* Set Style (`property: value, property2: value2`)
+![](./resources/images/set-style.gif)
+
+* Edit Style (`property: value, propertyToRemove: null, property2: value2`)
+![](./resources/images/edit-style.gif)
+
+#### Tag Operations
+**Only lowercase English letters can be used for a tag name.**
+
+* Edit Tag Name (`tagname`)
+![](./resources/images/edit-tag-name.gif)
+
+**Entering an upper tag name is mandatory but entering an id value, class name or attribute-value pair is optional.**
+
+* Add Upper Tag (`uppertagname#idValue.className[attributeName="value"]`)
+![](./resources/images/add-upper-tag.gif)
+
+* Remove Upper Tag
+![](./resources/images/remove-upper-tag.gif)
+
+* Remove Tag
+![](./resources/images/remove-tag.gif)
+
+#### One Step Rollback Operation
+**It is possible to revert the effects of the last replacement process.** 
+![](./resources/images/one-step-rollback.gif)
+
+#### Auto Rollback Operation
+**In case of an erroneous replacement process, SSR4html automatically reverts the last changes.**
 
 ## Used External Packages and Limitations
 
-I used selector-2-regexp package that is written by m-yoshiro to generate a regular expression from the valid CSS selectors. In order to search in HTML files in the 
-workspace, you can use all kind of type, class, id and attribute selectors that has showed above in the features part. This regular expression conversion is used to 
-higlight matched results in the documents of visual studio code. However, there is a limitation since search at primary sidebar in visual studio code does not support 
-regular expressions with look behind assertion due to "look behind assertion is not fixed length error". That is why, you cannot use combinator selectors such as 
-"parentTag childTag", "parentTag > childTag", "parentTag ~ childTag" and "parentTag + childTag" but I am currently working on generating regular expressions for them.
-Please note that the generated regular expressions differ from the ones provided by selector-2-regexp because they contain some missing components. For example, 
-the generated regular expressions captured style="any-value" but not style = "any-value" (spaces before and after the equality symbol) and "body" tag with "b" tag even 
-though the user only wanted to see the results with the "b" tag. For the purpose of more reliable searching, selector-2-regexp's regular expressions are modified by me.
+*selector-2-regexp* package, which is written by Yoshiro Matsumoto is used to generate regular expressions based on CSS selectors. In order to search in HTML files in the workspace, you can use all kind of type, class, id and attribute selectors that has showed above in the features part. However, there is a limitation since the sidebar search of the Visual Studio Code IDE does not support regular expressions with look behind assertion. Therefore, using combinator selectors for searching is blocked. Please also note that the generated regular expressions differ from the ones provided by *selector-2-regexp* because the regular expressions provided by *selector-2-regexp* are not fully correct. Therefore, the generated regular expressions are modified.
 
 * [More information about selector-2-regexp](https://github.com/m-yoshiro/Selector2Regexp)
 
-In order to manipulate the related parts of HTML source codes, I wanted to take benefit of "Query Selector". That is why, jsdom package is used to provide
-Document Object Model(DOM), which is necessary to find and replace the related parts. Therefore, this extension can be only used to manipulate HTML files. 
-Otherwise, it may break the structure of the files.
+In order to manipulate the related parts of HTML source codes, I wanted to take advantage of the *querySelectorAll()* method. That is why, the *jsdom* package is used to provide Document Object Model (DOM), which is necessary to find and replace the related parts. Therefore, this extension can be only used to replace in HTML files. Otherwise, it may break the structure of the files.
 
 * [More information about jsdom](https://github.com/jsdom/jsdom)
 
-As I have mentioned above, the manipulated DOMs of the HTML files are overwritten on old HTML files, which may result in unexpected changes in the format of
-the documents. Therefore, pretty package that helps beautifying HTML with js-beautify is used to prevent these side effects and make the source code more readable.
+As was mentioned above, the manipulated DOMs of the HTML files are overwritten on old HTML files, which may result in unexpected changes in the format of the documents. Therefore, *pretty* package that helps beautifying HTML with *js-beautify* is used to prevent these side effects and make the source code more readable.
 
-* [More information about pretty]( https://www.npmjs.com/package/pretty)
+* [More information about pretty](https://github.com/jonschlinkert/pretty)
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+SSR4html contributes the following setting for a workspace:
 
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
+* `ssr4html.autoFormat`: Enable/disable auto-formatting HTML files on the activation of the extension.
+![](./resources/images/disable-auto-format.gif)
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+Generated regular expressions do not capture multi-line HTML elements. Therefore, the [format HTML files](https://github.com/mainIdal/SSR4html#format-html-files) feature is implemented to convert multi-line elements into single-line elements.
 
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
+![](./resources/images/multi-line-element.gif)
 
 
 **Enjoy!**

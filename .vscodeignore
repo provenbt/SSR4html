@@ -2,9 +2,6 @@
 .vscode-test/**
 node_modules/**
 !node_modules/@vscode
-!node_modules/jsdom
-!node_modules/pretty
-!node_modules/selector-2-regexp
 out/**
 src/**
 resources/images/**

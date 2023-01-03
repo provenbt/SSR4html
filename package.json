@@ -3,9 +3,16 @@
   "displayName": "SSR4html",
   "description": "Structural Search and Replace for HTML files",
   "icon": "resources/icons/extension-icon.png",
+  "version": "1.1.0",
   "publisher": "proven-information-technologies",
   "license": "SEE LICENSE IN LICENSE.md",
-  "version": "1.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/provenbt/SSR4html"
+  },
+  "author": {
+    "name": "PROVEN Information Technologies"
+  },
   "engines": {
     "vscode": "^1.69.0"
   },
@@ -124,9 +131,5 @@
     "jsdom": "^20.0.0",
     "pretty": "^2.0.0",
     "selector-2-regexp": "^1.0.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/mainIdal/SSR4html"
   }
 }

@@ -18,8 +18,9 @@ jobs:
         node-version: 16.x
     - run: npm install
     - name: Publish
+      uses: lannonbr/vsce-action@3.0.0
       if: success() && startsWith(github.ref, 'refs/tags/') && matrix.os == 'ubuntu-latest'
-      run: npm run deploy
+      with:
+        args: "publish -p $VSCE_TOKEN"
       env:
-        VSCE_PAT: ${{ secrets.VSCE_PAT }}
-        VSCE_TOKEN: ${{ secrets.VSCE_PAT }}
+        VSCE_TOKEN: ${{ secrets.VSCE_TOKEN }}

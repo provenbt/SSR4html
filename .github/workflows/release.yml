@@ -22,3 +22,4 @@ jobs:
       run: npm run deploy
       env:
         VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        VSCE_TOKEN: ${{ secrets.VSCE_PAT }}

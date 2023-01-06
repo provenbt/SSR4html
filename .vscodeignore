@@ -1,8 +1,10 @@
+.github/**
 .vscode/**
 .vscode-test/**
 node_modules/**
 !node_modules/@vscode
 out/**
+patches/**
 src/**
 resources/images/**
 .gitignore

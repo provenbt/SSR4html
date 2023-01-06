@@ -103,6 +103,7 @@
     }
   },
   "scripts": {
+    "postinstall": "npx patch-package",
     "vscode:prepublish": "npm run esbuild-base -- --minify",
     "esbuild-base": "esbuild src/extension.ts --bundle --outdir=dist --external:vscode --external:canvas --format=cjs --platform=node",
     "esbuild": "npm run esbuild-base -- --sourcemap",

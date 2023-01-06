@@ -116,7 +116,7 @@
     "test:debug": "set PWDEBUG=1 && npm run test:chromium",
     "test:report": "playwright show-report",
     "vscode-debug": "playwright test --config ./playwright.config.ts",
-    "deploy": "vsce publish --yarn"
+    "deploy": "vsce publish"
   },
   "devDependencies": {
     "@playwright/test": "^1.28.1",

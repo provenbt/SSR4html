@@ -14,7 +14,7 @@ In order to show search matches in HTML files, the regular expression, which is 
 * Open the Command Palette (Ctrl+Shift+P on Windows and Linux, Cmd+Shift+P on macOS) and select the `Structural Search and Replace` command.
 
 * The UI is launched with an informational message that is asked only once for a workspace. For accurate search results, it is advised to use the `Format` option in this informational message. However, if you don't want the files to be formatted every time the extension is activated, you can select the `Nevermind` option. Then you can manually run the `Format HTML Files` command for more precise search results. Later, this automatic formatting setting can be adjusted under the [extension settings](#extension-settings).
-![](./resources/images/launch-uı.gif)
+![](./resources/images/launch-ui.gif)
 
 ### Structural Search
 
